@@ -2,6 +2,11 @@
 
 Go client for Qdrant vector search engine
 
+## Install
+
+```bash
+go get github.com/qdrant/go-client
+```
 
 ## Usage
 
@@ -64,3 +69,5 @@ func main() {
 	log.Printf("List of collections: %s", r.GetCollections())
 }
 ```
+
+A full example for uploading, searching and filtering can be found in the [`examples`](https://github.com/qdrant/go-client/tree/master/examples) directory.
