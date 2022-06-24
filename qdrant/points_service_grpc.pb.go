@@ -7,11 +7,11 @@
 package points_service
 
 import (
+	points "./points"
 	context "context"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	points "qdrant.tech/grpc/points"
 )
 
 // This is a compile-time assertion to ensure that this generated file

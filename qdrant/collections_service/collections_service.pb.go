@@ -7,9 +7,9 @@
 package collections_service
 
 import (
+	collections "./collections"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	collections "qdrant.tech/grpc/collections"
 	reflect "reflect"
 )
 

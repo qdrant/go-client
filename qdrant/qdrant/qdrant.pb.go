@@ -7,10 +7,10 @@
 package qdrant
 
 import (
+	_ "./collections_service"
+	_ "./points_service"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	_ "qdrant.tech/grpc/collections_service"
-	_ "qdrant.tech/grpc/points_service"
 	reflect "reflect"
 	sync "sync"
 )

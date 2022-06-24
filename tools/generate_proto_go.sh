@@ -10,13 +10,6 @@ QDRANT_PROTO_DIR='proto'
 # go install github.com/golang/protobuf/protoc-gen-go@v1.5.2
 
 
-# protoc --proto_path=${QDRANT_PROTO_DIR} \
-#     --go_opt="Mmilvus.proto=github.com/milvus-io/milvus-sdk-go/v2/internal/proto/server;server" \
-#     --go_opt=Mcommon.proto=github.com/milvus-io/milvus-sdk-go/v2/internal/proto/common \
-#     --go_opt=Mschema.proto=github.com/milvus-io/milvus-sdk-go/v2/internal/proto/schema \
-
-#     --go_out=plugins=grpc,paths=source_relative:${PROTO_DIR}/server ${QDRANT_PROTO_DIR}/qdrant.proto
-
 GOPATH=$(go env GOPATH)
 
 case ":$PATH:" in
@@ -26,135 +19,104 @@ esac
 
 
 protoc \
-  --go_out=qdrant_client \
-  --go_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant" \
-  --go_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
-  --go_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
-  --go_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
-  --go_opt="Mpoints.proto=qdrant.tech/grpc/points" \
-  --go_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
-  --go-grpc_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant;qdrant" \
-  --go-grpc_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
-  --go-grpc_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
-  --go-grpc_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
-  --go-grpc_opt="Mpoints.proto=qdrant.tech/grpc/points" \
-  --go-grpc_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
-  --go-grpc_out=paths=source_relative:qdrant_client \
+  --go_out=qdrant \
+  --go_opt="Mqdrant.proto=./qdrant" \
+  --go_opt="Mcollections.proto=./collections" \
+  --go_opt="Mcollections_service.proto=./collections_service" \
+  --go_opt="Mjson_with_int.proto=./json_with_int" \
+  --go_opt="Mpoints.proto=./points" \
+  --go_opt="Mpoints_service.proto=./points_service" \
+  --go-grpc_opt="Mqdrant.proto=./qdrant;qdrant" \
+  --go-grpc_opt="Mcollections.proto=./collections" \
+  --go-grpc_opt="Mcollections_service.proto=./collections_service" \
+  --go-grpc_opt="Mjson_with_int.proto=./json_with_int" \
+  --go-grpc_opt="Mpoints.proto=./points" \
+  --go-grpc_opt="Mpoints_service.proto=./points_service" \
+  --go-grpc_out=paths=source_relative:qdrant \
   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/qdrant.proto
 
 
 protoc \
-  --go_out=qdrant_client \
-  --go_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant" \
-  --go_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
-  --go_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
-  --go_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
-  --go_opt="Mpoints.proto=qdrant.tech/grpc/points" \
-  --go_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
-  --go-grpc_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant;qdrant" \
-  --go-grpc_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
-  --go-grpc_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
-  --go-grpc_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
-  --go-grpc_opt="Mpoints.proto=qdrant.tech/grpc/points" \
-  --go-grpc_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
-  --go-grpc_out=paths=source_relative:qdrant_client \
+  --go_out=qdrant \
+  --go_opt="Mqdrant.proto=./qdrant" \
+  --go_opt="Mcollections.proto=./collections" \
+  --go_opt="Mcollections_service.proto=./collections_service" \
+  --go_opt="Mjson_with_int.proto=./json_with_int" \
+  --go_opt="Mpoints.proto=./points" \
+  --go_opt="Mpoints_service.proto=./points_service" \
+  --go-grpc_opt="Mqdrant.proto=./qdrant;qdrant" \
+  --go-grpc_opt="Mcollections.proto=./collections" \
+  --go-grpc_opt="Mcollections_service.proto=./collections_service" \
+  --go-grpc_opt="Mjson_with_int.proto=./json_with_int" \
+  --go-grpc_opt="Mpoints.proto=./points" \
+  --go-grpc_opt="Mpoints_service.proto=./points_service" \
+  --go-grpc_out=paths=source_relative:qdrant \
   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/collections.proto
 
   protoc \
-  --go_out=qdrant_client \
-  --go_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant" \
-  --go_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
-  --go_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
-  --go_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
-  --go_opt="Mpoints.proto=qdrant.tech/grpc/points" \
-  --go_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
-  --go-grpc_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant;qdrant" \
-  --go-grpc_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
-  --go-grpc_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
-  --go-grpc_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
-  --go-grpc_opt="Mpoints.proto=qdrant.tech/grpc/points" \
-  --go-grpc_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
-  --go-grpc_out=paths=source_relative:qdrant_client \
+  --go_out=qdrant \
+  --go_opt="Mqdrant.proto=./qdrant" \
+  --go_opt="Mcollections.proto=./collections" \
+  --go_opt="Mcollections_service.proto=./collections_service" \
+  --go_opt="Mjson_with_int.proto=./json_with_int" \
+  --go_opt="Mpoints.proto=./points" \
+  --go_opt="Mpoints_service.proto=./points_service" \
+  --go-grpc_opt="Mqdrant.proto=./qdrant;qdrant" \
+  --go-grpc_opt="Mcollections.proto=./collections" \
+  --go-grpc_opt="Mcollections_service.proto=./collections_service" \
+  --go-grpc_opt="Mjson_with_int.proto=./json_with_int" \
+  --go-grpc_opt="Mpoints.proto=./points" \
+  --go-grpc_opt="Mpoints_service.proto=./points_service" \
+  --go-grpc_out=paths=source_relative:qdrant \
   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/collections_service.proto
 
   protoc \
-  --go_out=qdrant_client \
-  --go_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant" \
-  --go_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
-  --go_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
-  --go_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
-  --go_opt="Mpoints.proto=qdrant.tech/grpc/points" \
-  --go_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
-  --go-grpc_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant;qdrant" \
-  --go-grpc_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
-  --go-grpc_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
-  --go-grpc_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
-  --go-grpc_opt="Mpoints.proto=qdrant.tech/grpc/points" \
-  --go-grpc_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
-  --go-grpc_out=paths=source_relative:qdrant_client \
+  --go_out=qdrant \
+  --go_opt="Mqdrant.proto=./qdrant" \
+  --go_opt="Mcollections.proto=./collections" \
+  --go_opt="Mcollections_service.proto=./collections_service" \
+  --go_opt="Mjson_with_int.proto=./json_with_int" \
+  --go_opt="Mpoints.proto=./points" \
+  --go_opt="Mpoints_service.proto=./points_service" \
+  --go-grpc_opt="Mqdrant.proto=./qdrant;qdrant" \
+  --go-grpc_opt="Mcollections.proto=./collections" \
+  --go-grpc_opt="Mcollections_service.proto=./collections_service" \
+  --go-grpc_opt="Mjson_with_int.proto=./json_with_int" \
+  --go-grpc_opt="Mpoints.proto=./points" \
+  --go-grpc_opt="Mpoints_service.proto=./points_service" \
+  --go-grpc_out=paths=source_relative:qdrant \
   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/json_with_int.proto
 
   protoc \
-  --go_out=qdrant_client \
-  --go_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant" \
-  --go_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
-  --go_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
-  --go_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
-  --go_opt="Mpoints.proto=qdrant.tech/grpc/points" \
-  --go_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
-  --go-grpc_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant;qdrant" \
-  --go-grpc_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
-  --go-grpc_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
-  --go-grpc_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
-  --go-grpc_opt="Mpoints.proto=qdrant.tech/grpc/points" \
-  --go-grpc_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
-  --go-grpc_out=paths=source_relative:qdrant_client \
+  --go_out=qdrant \
+  --go_opt="Mqdrant.proto=./qdrant" \
+  --go_opt="Mcollections.proto=./collections" \
+  --go_opt="Mcollections_service.proto=./collections_service" \
+  --go_opt="Mjson_with_int.proto=./json_with_int" \
+  --go_opt="Mpoints.proto=./points" \
+  --go_opt="Mpoints_service.proto=./points_service" \
+  --go-grpc_opt="Mqdrant.proto=./qdrant;qdrant" \
+  --go-grpc_opt="Mcollections.proto=./collections" \
+  --go-grpc_opt="Mcollections_service.proto=./collections_service" \
+  --go-grpc_opt="Mjson_with_int.proto=./json_with_int" \
+  --go-grpc_opt="Mpoints.proto=./points" \
+  --go-grpc_opt="Mpoints_service.proto=./points_service" \
+  --go-grpc_out=paths=source_relative:qdrant \
   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/points.proto
 
   protoc \
-  --go_out=qdrant_client \
-  --go_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant" \
-  --go_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
-  --go_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
-  --go_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
-  --go_opt="Mpoints.proto=qdrant.tech/grpc/points" \
-  --go_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
-  --go-grpc_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant;qdrant" \
-  --go-grpc_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
-  --go-grpc_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
-  --go-grpc_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
-  --go-grpc_opt="Mpoints.proto=qdrant.tech/grpc/points" \
-  --go-grpc_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
-  --go-grpc_out=paths=source_relative:qdrant_client \
+  --go_out=qdrant \
+  --go_opt="Mqdrant.proto=./qdrant" \
+  --go_opt="Mcollections.proto=./collections" \
+  --go_opt="Mcollections_service.proto=./collections_service" \
+  --go_opt="Mjson_with_int.proto=./json_with_int" \
+  --go_opt="Mpoints.proto=./points" \
+  --go_opt="Mpoints_service.proto=./points_service" \
+  --go-grpc_opt="Mqdrant.proto=./qdrant;qdrant" \
+  --go-grpc_opt="Mcollections.proto=./collections" \
+  --go-grpc_opt="Mcollections_service.proto=./collections_service" \
+  --go-grpc_opt="Mjson_with_int.proto=./json_with_int" \
+  --go-grpc_opt="Mpoints.proto=./points" \
+  --go-grpc_opt="Mpoints_service.proto=./points_service" \
+  --go-grpc_out=paths=source_relative:qdrant \
   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/points_service.proto
-
-# protoc \
-#   --go_out=qdrant_client \
-#   --go_opt="Mqdrant.proto=/" \
-#   --go-grpc_out=paths=source_relative:qdrant_client \
-#   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/collections.proto
-
-# protoc \
-#   --go_out=qdrant_client \
-#   --go_opt="Mqdrant.proto=/" \
-#   --go-grpc_out=paths=source_relative:qdrant_client \
-#   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/points.proto
-
-# protoc \
-#   --go_out=qdrant_client \
-#   --go_opt="Mqdrant.proto=/" \
-#   --go-grpc_out=paths=source_relative:qdrant_client \
-#   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/collections_service.proto
-
-# protoc \
-#   --go_out=qdrant_client \
-#   --go_opt="Mqdrant.proto=/" \
-#   --go-grpc_out=paths=source_relative:qdrant_client \
-#   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/points_service.proto
-
-# protoc \
-#   --go_out=qdrant_client \
-#   --go_opt="Mqdrant.proto=/" \
-#   --go-grpc_out=paths=source_relative:qdrant_client \
-#   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/json_with_int.proto
-
