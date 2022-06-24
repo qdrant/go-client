@@ -93,7 +93,7 @@ func main() {
 		log.Println("Field index for field", fieldIndex1Name, "created")
 	}
 
-	// Create keyword field index
+	// Create integer field index
 	fieldIndex2Type := pb.FieldType_FieldTypeInteger
 	fieldIndex2Name := "count"
 	_, err = pointsClient.CreateFieldIndex(ctx, &pb.CreateFieldIndexCollection{
