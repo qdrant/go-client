@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-option go_package = "qdrant.tech/grpc/qdrant";
-
 import "collections_service.proto";
 import "points_service.proto";
 

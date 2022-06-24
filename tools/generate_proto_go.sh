@@ -27,37 +27,48 @@ esac
 
 protoc \
   --go_out=qdrant_client \
-  --go_opt="Mqdrant.proto=/" \
+  --go_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant" \
+  --go_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
+  --go_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
+  --go_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
+  --go_opt="Mpoints.proto=qdrant.tech/grpc/points" \
+  --go_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
+  --go-grpc_opt="Mqdrant.proto=qdrant.tech/grpc/qdrant;qdrant" \
+  --go-grpc_opt="Mcollections.proto=qdrant.tech/grpc/collections" \
+  --go-grpc_opt="Mcollections_service.proto=qdrant.tech/grpc/collections_service" \
+  --go-grpc_opt="Mjson_with_int.proto=qdrant.tech/grpc/json_with_int" \
+  --go-grpc_opt="Mpoints.proto=qdrant.tech/grpc/points" \
+  --go-grpc_opt="Mpoints_service.proto=qdrant.tech/grpc/points_service" \
   --go-grpc_out=paths=source_relative:qdrant_client \
   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/qdrant.proto
 
-protoc \
-  --go_out=qdrant_client \
-  --go_opt="Mqdrant.proto=/" \
-  --go-grpc_out=paths=source_relative:qdrant_client \
-  --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/collections.proto
+# protoc \
+#   --go_out=qdrant_client \
+#   --go_opt="Mqdrant.proto=/" \
+#   --go-grpc_out=paths=source_relative:qdrant_client \
+#   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/collections.proto
 
-protoc \
-  --go_out=qdrant_client \
-  --go_opt="Mqdrant.proto=/" \
-  --go-grpc_out=paths=source_relative:qdrant_client \
-  --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/points.proto
+# protoc \
+#   --go_out=qdrant_client \
+#   --go_opt="Mqdrant.proto=/" \
+#   --go-grpc_out=paths=source_relative:qdrant_client \
+#   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/points.proto
 
-protoc \
-  --go_out=qdrant_client \
-  --go_opt="Mqdrant.proto=/" \
-  --go-grpc_out=paths=source_relative:qdrant_client \
-  --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/collections_service.proto
+# protoc \
+#   --go_out=qdrant_client \
+#   --go_opt="Mqdrant.proto=/" \
+#   --go-grpc_out=paths=source_relative:qdrant_client \
+#   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/collections_service.proto
 
-protoc \
-  --go_out=qdrant_client \
-  --go_opt="Mqdrant.proto=/" \
-  --go-grpc_out=paths=source_relative:qdrant_client \
-  --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/points_service.proto
+# protoc \
+#   --go_out=qdrant_client \
+#   --go_opt="Mqdrant.proto=/" \
+#   --go-grpc_out=paths=source_relative:qdrant_client \
+#   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/points_service.proto
 
-protoc \
-  --go_out=qdrant_client \
-  --go_opt="Mqdrant.proto=/" \
-  --go-grpc_out=paths=source_relative:qdrant_client \
-  --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/json_with_int.proto
+# protoc \
+#   --go_out=qdrant_client \
+#   --go_opt="Mqdrant.proto=/" \
+#   --go-grpc_out=paths=source_relative:qdrant_client \
+#   --proto_path=${QDRANT_PROTO_DIR} ${QDRANT_PROTO_DIR}/json_with_int.proto
 

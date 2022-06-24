@@ -2,8 +2,6 @@
 
 syntax = "proto3";
 
-option go_package = "qdrant.tech/grpc/json_with_int";
-
 package qdrant;
 
 // `Struct` represents a structured data value, consisting of fields

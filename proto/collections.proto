@@ -1,8 +1,6 @@
 syntax = "proto3";
 package qdrant;
 
-option go_package = "qdrant.tech/grpc/collections";
-
 message GetCollectionInfoRequest {
   string collection_name = 1; // Name of the collection
 }

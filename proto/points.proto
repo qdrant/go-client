@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-option go_package = "qdrant.tech/grpc/points";
-
 package qdrant;
 
 import "json_with_int.proto";
