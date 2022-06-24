@@ -6,7 +6,7 @@
 // 	protoc        v3.12.4
 // source: json_with_int.proto
 
-package qdrant
+package go_client
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
