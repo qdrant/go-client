@@ -4,10 +4,9 @@
 // 	protoc        v3.12.4
 // source: points_service.proto
 
-package points_service
+package qdrant
 
 import (
-	points "./points"
 	_ "github.com/golang/protobuf/ptypes/struct"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -82,22 +81,22 @@ var file_points_service_proto_rawDesc = []byte{
 }
 
 var file_points_service_proto_goTypes = []interface{}{
-	(*points.UpsertPoints)(nil),               // 0: qdrant.UpsertPoints
-	(*points.DeletePoints)(nil),               // 1: qdrant.DeletePoints
-	(*points.GetPoints)(nil),                  // 2: qdrant.GetPoints
-	(*points.SetPayloadPoints)(nil),           // 3: qdrant.SetPayloadPoints
-	(*points.DeletePayloadPoints)(nil),        // 4: qdrant.DeletePayloadPoints
-	(*points.ClearPayloadPoints)(nil),         // 5: qdrant.ClearPayloadPoints
-	(*points.CreateFieldIndexCollection)(nil), // 6: qdrant.CreateFieldIndexCollection
-	(*points.DeleteFieldIndexCollection)(nil), // 7: qdrant.DeleteFieldIndexCollection
-	(*points.SearchPoints)(nil),               // 8: qdrant.SearchPoints
-	(*points.ScrollPoints)(nil),               // 9: qdrant.ScrollPoints
-	(*points.RecommendPoints)(nil),            // 10: qdrant.RecommendPoints
-	(*points.PointsOperationResponse)(nil),    // 11: qdrant.PointsOperationResponse
-	(*points.GetResponse)(nil),                // 12: qdrant.GetResponse
-	(*points.SearchResponse)(nil),             // 13: qdrant.SearchResponse
-	(*points.ScrollResponse)(nil),             // 14: qdrant.ScrollResponse
-	(*points.RecommendResponse)(nil),          // 15: qdrant.RecommendResponse
+	(*UpsertPoints)(nil),               // 0: qdrant.UpsertPoints
+	(*DeletePoints)(nil),               // 1: qdrant.DeletePoints
+	(*GetPoints)(nil),                  // 2: qdrant.GetPoints
+	(*SetPayloadPoints)(nil),           // 3: qdrant.SetPayloadPoints
+	(*DeletePayloadPoints)(nil),        // 4: qdrant.DeletePayloadPoints
+	(*ClearPayloadPoints)(nil),         // 5: qdrant.ClearPayloadPoints
+	(*CreateFieldIndexCollection)(nil), // 6: qdrant.CreateFieldIndexCollection
+	(*DeleteFieldIndexCollection)(nil), // 7: qdrant.DeleteFieldIndexCollection
+	(*SearchPoints)(nil),               // 8: qdrant.SearchPoints
+	(*ScrollPoints)(nil),               // 9: qdrant.ScrollPoints
+	(*RecommendPoints)(nil),            // 10: qdrant.RecommendPoints
+	(*PointsOperationResponse)(nil),    // 11: qdrant.PointsOperationResponse
+	(*GetResponse)(nil),                // 12: qdrant.GetResponse
+	(*SearchResponse)(nil),             // 13: qdrant.SearchResponse
+	(*ScrollResponse)(nil),             // 14: qdrant.ScrollResponse
+	(*RecommendResponse)(nil),          // 15: qdrant.RecommendResponse
 }
 var file_points_service_proto_depIdxs = []int32{
 	0,  // 0: qdrant.Points.Upsert:input_type -> qdrant.UpsertPoints
@@ -134,6 +133,7 @@ func file_points_service_proto_init() {
 	if File_points_service_proto != nil {
 		return
 	}
+	file_points_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

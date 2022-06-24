@@ -4,10 +4,9 @@
 // 	protoc        v3.12.4
 // source: collections_service.proto
 
-package collections_service
+package qdrant
 
 import (
-	collections "./collections"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -60,15 +59,15 @@ var file_collections_service_proto_rawDesc = []byte{
 }
 
 var file_collections_service_proto_goTypes = []interface{}{
-	(*collections.GetCollectionInfoRequest)(nil),    // 0: qdrant.GetCollectionInfoRequest
-	(*collections.ListCollectionsRequest)(nil),      // 1: qdrant.ListCollectionsRequest
-	(*collections.CreateCollection)(nil),            // 2: qdrant.CreateCollection
-	(*collections.UpdateCollection)(nil),            // 3: qdrant.UpdateCollection
-	(*collections.DeleteCollection)(nil),            // 4: qdrant.DeleteCollection
-	(*collections.ChangeAliases)(nil),               // 5: qdrant.ChangeAliases
-	(*collections.GetCollectionInfoResponse)(nil),   // 6: qdrant.GetCollectionInfoResponse
-	(*collections.ListCollectionsResponse)(nil),     // 7: qdrant.ListCollectionsResponse
-	(*collections.CollectionOperationResponse)(nil), // 8: qdrant.CollectionOperationResponse
+	(*GetCollectionInfoRequest)(nil),    // 0: qdrant.GetCollectionInfoRequest
+	(*ListCollectionsRequest)(nil),      // 1: qdrant.ListCollectionsRequest
+	(*CreateCollection)(nil),            // 2: qdrant.CreateCollection
+	(*UpdateCollection)(nil),            // 3: qdrant.UpdateCollection
+	(*DeleteCollection)(nil),            // 4: qdrant.DeleteCollection
+	(*ChangeAliases)(nil),               // 5: qdrant.ChangeAliases
+	(*GetCollectionInfoResponse)(nil),   // 6: qdrant.GetCollectionInfoResponse
+	(*ListCollectionsResponse)(nil),     // 7: qdrant.ListCollectionsResponse
+	(*CollectionOperationResponse)(nil), // 8: qdrant.CollectionOperationResponse
 }
 var file_collections_service_proto_depIdxs = []int32{
 	0, // 0: qdrant.Collections.Get:input_type -> qdrant.GetCollectionInfoRequest
@@ -95,6 +94,7 @@ func file_collections_service_proto_init() {
 	if File_collections_service_proto != nil {
 		return
 	}
+	file_collections_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

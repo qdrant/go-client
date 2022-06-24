@@ -4,10 +4,9 @@
 // - protoc             v3.12.4
 // source: points_service.proto
 
-package points_service
+package qdrant
 
 import (
-	points "./points"
 	context "context"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -25,37 +24,37 @@ const _ = grpc.SupportPackageIsVersion7
 type PointsClient interface {
 	//
 	//Perform insert + updates on points. If point with given ID already exists - it will be overwritten.
-	Upsert(ctx context.Context, in *points.UpsertPoints, opts ...grpc.CallOption) (*points.PointsOperationResponse, error)
+	Upsert(ctx context.Context, in *UpsertPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error)
 	//
 	//Delete points
-	Delete(ctx context.Context, in *points.DeletePoints, opts ...grpc.CallOption) (*points.PointsOperationResponse, error)
+	Delete(ctx context.Context, in *DeletePoints, opts ...grpc.CallOption) (*PointsOperationResponse, error)
 	//
 	//Retrieve points
-	Get(ctx context.Context, in *points.GetPoints, opts ...grpc.CallOption) (*points.GetResponse, error)
+	Get(ctx context.Context, in *GetPoints, opts ...grpc.CallOption) (*GetResponse, error)
 	//
 	//Set payload for points
-	SetPayload(ctx context.Context, in *points.SetPayloadPoints, opts ...grpc.CallOption) (*points.PointsOperationResponse, error)
+	SetPayload(ctx context.Context, in *SetPayloadPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error)
 	//
 	//Delete specified key payload for points
-	DeletePayload(ctx context.Context, in *points.DeletePayloadPoints, opts ...grpc.CallOption) (*points.PointsOperationResponse, error)
+	DeletePayload(ctx context.Context, in *DeletePayloadPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error)
 	//
 	//Remove all payload for specified points
-	ClearPayload(ctx context.Context, in *points.ClearPayloadPoints, opts ...grpc.CallOption) (*points.PointsOperationResponse, error)
+	ClearPayload(ctx context.Context, in *ClearPayloadPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error)
 	//
 	//Create index for field in collection
-	CreateFieldIndex(ctx context.Context, in *points.CreateFieldIndexCollection, opts ...grpc.CallOption) (*points.PointsOperationResponse, error)
+	CreateFieldIndex(ctx context.Context, in *CreateFieldIndexCollection, opts ...grpc.CallOption) (*PointsOperationResponse, error)
 	//
 	//Delete field index for collection
-	DeleteFieldIndex(ctx context.Context, in *points.DeleteFieldIndexCollection, opts ...grpc.CallOption) (*points.PointsOperationResponse, error)
+	DeleteFieldIndex(ctx context.Context, in *DeleteFieldIndexCollection, opts ...grpc.CallOption) (*PointsOperationResponse, error)
 	//
 	//Retrieve closest points based on vector similarity and given filtering conditions
-	Search(ctx context.Context, in *points.SearchPoints, opts ...grpc.CallOption) (*points.SearchResponse, error)
+	Search(ctx context.Context, in *SearchPoints, opts ...grpc.CallOption) (*SearchResponse, error)
 	//
 	//Iterate over all or filtered points points
-	Scroll(ctx context.Context, in *points.ScrollPoints, opts ...grpc.CallOption) (*points.ScrollResponse, error)
+	Scroll(ctx context.Context, in *ScrollPoints, opts ...grpc.CallOption) (*ScrollResponse, error)
 	//
 	//Look for the points which are closer to stored positive examples and at the same time further to negative examples.
-	Recommend(ctx context.Context, in *points.RecommendPoints, opts ...grpc.CallOption) (*points.RecommendResponse, error)
+	Recommend(ctx context.Context, in *RecommendPoints, opts ...grpc.CallOption) (*RecommendResponse, error)
 }
 
 type pointsClient struct {
@@ -66,8 +65,8 @@ func NewPointsClient(cc grpc.ClientConnInterface) PointsClient {
 	return &pointsClient{cc}
 }
 
-func (c *pointsClient) Upsert(ctx context.Context, in *points.UpsertPoints, opts ...grpc.CallOption) (*points.PointsOperationResponse, error) {
-	out := new(points.PointsOperationResponse)
+func (c *pointsClient) Upsert(ctx context.Context, in *UpsertPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error) {
+	out := new(PointsOperationResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/Upsert", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -75,8 +74,8 @@ func (c *pointsClient) Upsert(ctx context.Context, in *points.UpsertPoints, opts
 	return out, nil
 }
 
-func (c *pointsClient) Delete(ctx context.Context, in *points.DeletePoints, opts ...grpc.CallOption) (*points.PointsOperationResponse, error) {
-	out := new(points.PointsOperationResponse)
+func (c *pointsClient) Delete(ctx context.Context, in *DeletePoints, opts ...grpc.CallOption) (*PointsOperationResponse, error) {
+	out := new(PointsOperationResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -84,8 +83,8 @@ func (c *pointsClient) Delete(ctx context.Context, in *points.DeletePoints, opts
 	return out, nil
 }
 
-func (c *pointsClient) Get(ctx context.Context, in *points.GetPoints, opts ...grpc.CallOption) (*points.GetResponse, error) {
-	out := new(points.GetResponse)
+func (c *pointsClient) Get(ctx context.Context, in *GetPoints, opts ...grpc.CallOption) (*GetResponse, error) {
+	out := new(GetResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -93,8 +92,8 @@ func (c *pointsClient) Get(ctx context.Context, in *points.GetPoints, opts ...gr
 	return out, nil
 }
 
-func (c *pointsClient) SetPayload(ctx context.Context, in *points.SetPayloadPoints, opts ...grpc.CallOption) (*points.PointsOperationResponse, error) {
-	out := new(points.PointsOperationResponse)
+func (c *pointsClient) SetPayload(ctx context.Context, in *SetPayloadPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error) {
+	out := new(PointsOperationResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/SetPayload", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -102,8 +101,8 @@ func (c *pointsClient) SetPayload(ctx context.Context, in *points.SetPayloadPoin
 	return out, nil
 }
 
-func (c *pointsClient) DeletePayload(ctx context.Context, in *points.DeletePayloadPoints, opts ...grpc.CallOption) (*points.PointsOperationResponse, error) {
-	out := new(points.PointsOperationResponse)
+func (c *pointsClient) DeletePayload(ctx context.Context, in *DeletePayloadPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error) {
+	out := new(PointsOperationResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/DeletePayload", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -111,8 +110,8 @@ func (c *pointsClient) DeletePayload(ctx context.Context, in *points.DeletePaylo
 	return out, nil
 }
 
-func (c *pointsClient) ClearPayload(ctx context.Context, in *points.ClearPayloadPoints, opts ...grpc.CallOption) (*points.PointsOperationResponse, error) {
-	out := new(points.PointsOperationResponse)
+func (c *pointsClient) ClearPayload(ctx context.Context, in *ClearPayloadPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error) {
+	out := new(PointsOperationResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/ClearPayload", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -120,8 +119,8 @@ func (c *pointsClient) ClearPayload(ctx context.Context, in *points.ClearPayload
 	return out, nil
 }
 
-func (c *pointsClient) CreateFieldIndex(ctx context.Context, in *points.CreateFieldIndexCollection, opts ...grpc.CallOption) (*points.PointsOperationResponse, error) {
-	out := new(points.PointsOperationResponse)
+func (c *pointsClient) CreateFieldIndex(ctx context.Context, in *CreateFieldIndexCollection, opts ...grpc.CallOption) (*PointsOperationResponse, error) {
+	out := new(PointsOperationResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/CreateFieldIndex", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -129,8 +128,8 @@ func (c *pointsClient) CreateFieldIndex(ctx context.Context, in *points.CreateFi
 	return out, nil
 }
 
-func (c *pointsClient) DeleteFieldIndex(ctx context.Context, in *points.DeleteFieldIndexCollection, opts ...grpc.CallOption) (*points.PointsOperationResponse, error) {
-	out := new(points.PointsOperationResponse)
+func (c *pointsClient) DeleteFieldIndex(ctx context.Context, in *DeleteFieldIndexCollection, opts ...grpc.CallOption) (*PointsOperationResponse, error) {
+	out := new(PointsOperationResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/DeleteFieldIndex", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -138,8 +137,8 @@ func (c *pointsClient) DeleteFieldIndex(ctx context.Context, in *points.DeleteFi
 	return out, nil
 }
 
-func (c *pointsClient) Search(ctx context.Context, in *points.SearchPoints, opts ...grpc.CallOption) (*points.SearchResponse, error) {
-	out := new(points.SearchResponse)
+func (c *pointsClient) Search(ctx context.Context, in *SearchPoints, opts ...grpc.CallOption) (*SearchResponse, error) {
+	out := new(SearchResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/Search", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -147,8 +146,8 @@ func (c *pointsClient) Search(ctx context.Context, in *points.SearchPoints, opts
 	return out, nil
 }
 
-func (c *pointsClient) Scroll(ctx context.Context, in *points.ScrollPoints, opts ...grpc.CallOption) (*points.ScrollResponse, error) {
-	out := new(points.ScrollResponse)
+func (c *pointsClient) Scroll(ctx context.Context, in *ScrollPoints, opts ...grpc.CallOption) (*ScrollResponse, error) {
+	out := new(ScrollResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/Scroll", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -156,8 +155,8 @@ func (c *pointsClient) Scroll(ctx context.Context, in *points.ScrollPoints, opts
 	return out, nil
 }
 
-func (c *pointsClient) Recommend(ctx context.Context, in *points.RecommendPoints, opts ...grpc.CallOption) (*points.RecommendResponse, error) {
-	out := new(points.RecommendResponse)
+func (c *pointsClient) Recommend(ctx context.Context, in *RecommendPoints, opts ...grpc.CallOption) (*RecommendResponse, error) {
+	out := new(RecommendResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/Recommend", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -171,37 +170,37 @@ func (c *pointsClient) Recommend(ctx context.Context, in *points.RecommendPoints
 type PointsServer interface {
 	//
 	//Perform insert + updates on points. If point with given ID already exists - it will be overwritten.
-	Upsert(context.Context, *points.UpsertPoints) (*points.PointsOperationResponse, error)
+	Upsert(context.Context, *UpsertPoints) (*PointsOperationResponse, error)
 	//
 	//Delete points
-	Delete(context.Context, *points.DeletePoints) (*points.PointsOperationResponse, error)
+	Delete(context.Context, *DeletePoints) (*PointsOperationResponse, error)
 	//
 	//Retrieve points
-	Get(context.Context, *points.GetPoints) (*points.GetResponse, error)
+	Get(context.Context, *GetPoints) (*GetResponse, error)
 	//
 	//Set payload for points
-	SetPayload(context.Context, *points.SetPayloadPoints) (*points.PointsOperationResponse, error)
+	SetPayload(context.Context, *SetPayloadPoints) (*PointsOperationResponse, error)
 	//
 	//Delete specified key payload for points
-	DeletePayload(context.Context, *points.DeletePayloadPoints) (*points.PointsOperationResponse, error)
+	DeletePayload(context.Context, *DeletePayloadPoints) (*PointsOperationResponse, error)
 	//
 	//Remove all payload for specified points
-	ClearPayload(context.Context, *points.ClearPayloadPoints) (*points.PointsOperationResponse, error)
+	ClearPayload(context.Context, *ClearPayloadPoints) (*PointsOperationResponse, error)
 	//
 	//Create index for field in collection
-	CreateFieldIndex(context.Context, *points.CreateFieldIndexCollection) (*points.PointsOperationResponse, error)
+	CreateFieldIndex(context.Context, *CreateFieldIndexCollection) (*PointsOperationResponse, error)
 	//
 	//Delete field index for collection
-	DeleteFieldIndex(context.Context, *points.DeleteFieldIndexCollection) (*points.PointsOperationResponse, error)
+	DeleteFieldIndex(context.Context, *DeleteFieldIndexCollection) (*PointsOperationResponse, error)
 	//
 	//Retrieve closest points based on vector similarity and given filtering conditions
-	Search(context.Context, *points.SearchPoints) (*points.SearchResponse, error)
+	Search(context.Context, *SearchPoints) (*SearchResponse, error)
 	//
 	//Iterate over all or filtered points points
-	Scroll(context.Context, *points.ScrollPoints) (*points.ScrollResponse, error)
+	Scroll(context.Context, *ScrollPoints) (*ScrollResponse, error)
 	//
 	//Look for the points which are closer to stored positive examples and at the same time further to negative examples.
-	Recommend(context.Context, *points.RecommendPoints) (*points.RecommendResponse, error)
+	Recommend(context.Context, *RecommendPoints) (*RecommendResponse, error)
 	mustEmbedUnimplementedPointsServer()
 }
 
@@ -209,37 +208,37 @@ type PointsServer interface {
 type UnimplementedPointsServer struct {
 }
 
-func (UnimplementedPointsServer) Upsert(context.Context, *points.UpsertPoints) (*points.PointsOperationResponse, error) {
+func (UnimplementedPointsServer) Upsert(context.Context, *UpsertPoints) (*PointsOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Upsert not implemented")
 }
-func (UnimplementedPointsServer) Delete(context.Context, *points.DeletePoints) (*points.PointsOperationResponse, error) {
+func (UnimplementedPointsServer) Delete(context.Context, *DeletePoints) (*PointsOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedPointsServer) Get(context.Context, *points.GetPoints) (*points.GetResponse, error) {
+func (UnimplementedPointsServer) Get(context.Context, *GetPoints) (*GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedPointsServer) SetPayload(context.Context, *points.SetPayloadPoints) (*points.PointsOperationResponse, error) {
+func (UnimplementedPointsServer) SetPayload(context.Context, *SetPayloadPoints) (*PointsOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetPayload not implemented")
 }
-func (UnimplementedPointsServer) DeletePayload(context.Context, *points.DeletePayloadPoints) (*points.PointsOperationResponse, error) {
+func (UnimplementedPointsServer) DeletePayload(context.Context, *DeletePayloadPoints) (*PointsOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePayload not implemented")
 }
-func (UnimplementedPointsServer) ClearPayload(context.Context, *points.ClearPayloadPoints) (*points.PointsOperationResponse, error) {
+func (UnimplementedPointsServer) ClearPayload(context.Context, *ClearPayloadPoints) (*PointsOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClearPayload not implemented")
 }
-func (UnimplementedPointsServer) CreateFieldIndex(context.Context, *points.CreateFieldIndexCollection) (*points.PointsOperationResponse, error) {
+func (UnimplementedPointsServer) CreateFieldIndex(context.Context, *CreateFieldIndexCollection) (*PointsOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFieldIndex not implemented")
 }
-func (UnimplementedPointsServer) DeleteFieldIndex(context.Context, *points.DeleteFieldIndexCollection) (*points.PointsOperationResponse, error) {
+func (UnimplementedPointsServer) DeleteFieldIndex(context.Context, *DeleteFieldIndexCollection) (*PointsOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFieldIndex not implemented")
 }
-func (UnimplementedPointsServer) Search(context.Context, *points.SearchPoints) (*points.SearchResponse, error) {
+func (UnimplementedPointsServer) Search(context.Context, *SearchPoints) (*SearchResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented")
 }
-func (UnimplementedPointsServer) Scroll(context.Context, *points.ScrollPoints) (*points.ScrollResponse, error) {
+func (UnimplementedPointsServer) Scroll(context.Context, *ScrollPoints) (*ScrollResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Scroll not implemented")
 }
-func (UnimplementedPointsServer) Recommend(context.Context, *points.RecommendPoints) (*points.RecommendResponse, error) {
+func (UnimplementedPointsServer) Recommend(context.Context, *RecommendPoints) (*RecommendResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Recommend not implemented")
 }
 func (UnimplementedPointsServer) mustEmbedUnimplementedPointsServer() {}
@@ -256,7 +255,7 @@ func RegisterPointsServer(s grpc.ServiceRegistrar, srv PointsServer) {
 }
 
 func _Points_Upsert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(points.UpsertPoints)
+	in := new(UpsertPoints)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -268,13 +267,13 @@ func _Points_Upsert_Handler(srv interface{}, ctx context.Context, dec func(inter
 		FullMethod: "/qdrant.Points/Upsert",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PointsServer).Upsert(ctx, req.(*points.UpsertPoints))
+		return srv.(PointsServer).Upsert(ctx, req.(*UpsertPoints))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Points_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(points.DeletePoints)
+	in := new(DeletePoints)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -286,13 +285,13 @@ func _Points_Delete_Handler(srv interface{}, ctx context.Context, dec func(inter
 		FullMethod: "/qdrant.Points/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PointsServer).Delete(ctx, req.(*points.DeletePoints))
+		return srv.(PointsServer).Delete(ctx, req.(*DeletePoints))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Points_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(points.GetPoints)
+	in := new(GetPoints)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -304,13 +303,13 @@ func _Points_Get_Handler(srv interface{}, ctx context.Context, dec func(interfac
 		FullMethod: "/qdrant.Points/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PointsServer).Get(ctx, req.(*points.GetPoints))
+		return srv.(PointsServer).Get(ctx, req.(*GetPoints))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Points_SetPayload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(points.SetPayloadPoints)
+	in := new(SetPayloadPoints)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -322,13 +321,13 @@ func _Points_SetPayload_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/qdrant.Points/SetPayload",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PointsServer).SetPayload(ctx, req.(*points.SetPayloadPoints))
+		return srv.(PointsServer).SetPayload(ctx, req.(*SetPayloadPoints))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Points_DeletePayload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(points.DeletePayloadPoints)
+	in := new(DeletePayloadPoints)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -340,13 +339,13 @@ func _Points_DeletePayload_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: "/qdrant.Points/DeletePayload",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PointsServer).DeletePayload(ctx, req.(*points.DeletePayloadPoints))
+		return srv.(PointsServer).DeletePayload(ctx, req.(*DeletePayloadPoints))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Points_ClearPayload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(points.ClearPayloadPoints)
+	in := new(ClearPayloadPoints)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -358,13 +357,13 @@ func _Points_ClearPayload_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/qdrant.Points/ClearPayload",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PointsServer).ClearPayload(ctx, req.(*points.ClearPayloadPoints))
+		return srv.(PointsServer).ClearPayload(ctx, req.(*ClearPayloadPoints))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Points_CreateFieldIndex_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(points.CreateFieldIndexCollection)
+	in := new(CreateFieldIndexCollection)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -376,13 +375,13 @@ func _Points_CreateFieldIndex_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: "/qdrant.Points/CreateFieldIndex",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PointsServer).CreateFieldIndex(ctx, req.(*points.CreateFieldIndexCollection))
+		return srv.(PointsServer).CreateFieldIndex(ctx, req.(*CreateFieldIndexCollection))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Points_DeleteFieldIndex_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(points.DeleteFieldIndexCollection)
+	in := new(DeleteFieldIndexCollection)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -394,13 +393,13 @@ func _Points_DeleteFieldIndex_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: "/qdrant.Points/DeleteFieldIndex",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PointsServer).DeleteFieldIndex(ctx, req.(*points.DeleteFieldIndexCollection))
+		return srv.(PointsServer).DeleteFieldIndex(ctx, req.(*DeleteFieldIndexCollection))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Points_Search_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(points.SearchPoints)
+	in := new(SearchPoints)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -412,13 +411,13 @@ func _Points_Search_Handler(srv interface{}, ctx context.Context, dec func(inter
 		FullMethod: "/qdrant.Points/Search",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PointsServer).Search(ctx, req.(*points.SearchPoints))
+		return srv.(PointsServer).Search(ctx, req.(*SearchPoints))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Points_Scroll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(points.ScrollPoints)
+	in := new(ScrollPoints)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -430,13 +429,13 @@ func _Points_Scroll_Handler(srv interface{}, ctx context.Context, dec func(inter
 		FullMethod: "/qdrant.Points/Scroll",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PointsServer).Scroll(ctx, req.(*points.ScrollPoints))
+		return srv.(PointsServer).Scroll(ctx, req.(*ScrollPoints))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Points_Recommend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(points.RecommendPoints)
+	in := new(RecommendPoints)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -448,7 +447,7 @@ func _Points_Recommend_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: "/qdrant.Points/Recommend",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PointsServer).Recommend(ctx, req.(*points.RecommendPoints))
+		return srv.(PointsServer).Recommend(ctx, req.(*RecommendPoints))
 	}
 	return interceptor(ctx, in, info, handler)
 }

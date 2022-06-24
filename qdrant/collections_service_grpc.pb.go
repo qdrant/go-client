@@ -4,10 +4,9 @@
 // - protoc             v3.12.4
 // source: collections_service.proto
 
-package collections_service
+package qdrant
 
 import (
-	collections "./collections"
 	context "context"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -25,22 +24,22 @@ const _ = grpc.SupportPackageIsVersion7
 type CollectionsClient interface {
 	//
 	//Get detailed information about specified existing collection
-	Get(ctx context.Context, in *collections.GetCollectionInfoRequest, opts ...grpc.CallOption) (*collections.GetCollectionInfoResponse, error)
+	Get(ctx context.Context, in *GetCollectionInfoRequest, opts ...grpc.CallOption) (*GetCollectionInfoResponse, error)
 	//
 	//Get list name of all existing collections
-	List(ctx context.Context, in *collections.ListCollectionsRequest, opts ...grpc.CallOption) (*collections.ListCollectionsResponse, error)
+	List(ctx context.Context, in *ListCollectionsRequest, opts ...grpc.CallOption) (*ListCollectionsResponse, error)
 	//
 	//Create new collection with given parameters
-	Create(ctx context.Context, in *collections.CreateCollection, opts ...grpc.CallOption) (*collections.CollectionOperationResponse, error)
+	Create(ctx context.Context, in *CreateCollection, opts ...grpc.CallOption) (*CollectionOperationResponse, error)
 	//
 	//Update parameters of the existing collection
-	Update(ctx context.Context, in *collections.UpdateCollection, opts ...grpc.CallOption) (*collections.CollectionOperationResponse, error)
+	Update(ctx context.Context, in *UpdateCollection, opts ...grpc.CallOption) (*CollectionOperationResponse, error)
 	//
 	//Drop collection and all associated data
-	Delete(ctx context.Context, in *collections.DeleteCollection, opts ...grpc.CallOption) (*collections.CollectionOperationResponse, error)
+	Delete(ctx context.Context, in *DeleteCollection, opts ...grpc.CallOption) (*CollectionOperationResponse, error)
 	//
 	//Update Aliases of the existing collection
-	UpdateAliases(ctx context.Context, in *collections.ChangeAliases, opts ...grpc.CallOption) (*collections.CollectionOperationResponse, error)
+	UpdateAliases(ctx context.Context, in *ChangeAliases, opts ...grpc.CallOption) (*CollectionOperationResponse, error)
 }
 
 type collectionsClient struct {
@@ -51,8 +50,8 @@ func NewCollectionsClient(cc grpc.ClientConnInterface) CollectionsClient {
 	return &collectionsClient{cc}
 }
 
-func (c *collectionsClient) Get(ctx context.Context, in *collections.GetCollectionInfoRequest, opts ...grpc.CallOption) (*collections.GetCollectionInfoResponse, error) {
-	out := new(collections.GetCollectionInfoResponse)
+func (c *collectionsClient) Get(ctx context.Context, in *GetCollectionInfoRequest, opts ...grpc.CallOption) (*GetCollectionInfoResponse, error) {
+	out := new(GetCollectionInfoResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Collections/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -60,8 +59,8 @@ func (c *collectionsClient) Get(ctx context.Context, in *collections.GetCollecti
 	return out, nil
 }
 
-func (c *collectionsClient) List(ctx context.Context, in *collections.ListCollectionsRequest, opts ...grpc.CallOption) (*collections.ListCollectionsResponse, error) {
-	out := new(collections.ListCollectionsResponse)
+func (c *collectionsClient) List(ctx context.Context, in *ListCollectionsRequest, opts ...grpc.CallOption) (*ListCollectionsResponse, error) {
+	out := new(ListCollectionsResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Collections/List", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -69,8 +68,8 @@ func (c *collectionsClient) List(ctx context.Context, in *collections.ListCollec
 	return out, nil
 }
 
-func (c *collectionsClient) Create(ctx context.Context, in *collections.CreateCollection, opts ...grpc.CallOption) (*collections.CollectionOperationResponse, error) {
-	out := new(collections.CollectionOperationResponse)
+func (c *collectionsClient) Create(ctx context.Context, in *CreateCollection, opts ...grpc.CallOption) (*CollectionOperationResponse, error) {
+	out := new(CollectionOperationResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Collections/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -78,8 +77,8 @@ func (c *collectionsClient) Create(ctx context.Context, in *collections.CreateCo
 	return out, nil
 }
 
-func (c *collectionsClient) Update(ctx context.Context, in *collections.UpdateCollection, opts ...grpc.CallOption) (*collections.CollectionOperationResponse, error) {
-	out := new(collections.CollectionOperationResponse)
+func (c *collectionsClient) Update(ctx context.Context, in *UpdateCollection, opts ...grpc.CallOption) (*CollectionOperationResponse, error) {
+	out := new(CollectionOperationResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Collections/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -87,8 +86,8 @@ func (c *collectionsClient) Update(ctx context.Context, in *collections.UpdateCo
 	return out, nil
 }
 
-func (c *collectionsClient) Delete(ctx context.Context, in *collections.DeleteCollection, opts ...grpc.CallOption) (*collections.CollectionOperationResponse, error) {
-	out := new(collections.CollectionOperationResponse)
+func (c *collectionsClient) Delete(ctx context.Context, in *DeleteCollection, opts ...grpc.CallOption) (*CollectionOperationResponse, error) {
+	out := new(CollectionOperationResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Collections/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -96,8 +95,8 @@ func (c *collectionsClient) Delete(ctx context.Context, in *collections.DeleteCo
 	return out, nil
 }
 
-func (c *collectionsClient) UpdateAliases(ctx context.Context, in *collections.ChangeAliases, opts ...grpc.CallOption) (*collections.CollectionOperationResponse, error) {
-	out := new(collections.CollectionOperationResponse)
+func (c *collectionsClient) UpdateAliases(ctx context.Context, in *ChangeAliases, opts ...grpc.CallOption) (*CollectionOperationResponse, error) {
+	out := new(CollectionOperationResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Collections/UpdateAliases", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -111,22 +110,22 @@ func (c *collectionsClient) UpdateAliases(ctx context.Context, in *collections.C
 type CollectionsServer interface {
 	//
 	//Get detailed information about specified existing collection
-	Get(context.Context, *collections.GetCollectionInfoRequest) (*collections.GetCollectionInfoResponse, error)
+	Get(context.Context, *GetCollectionInfoRequest) (*GetCollectionInfoResponse, error)
 	//
 	//Get list name of all existing collections
-	List(context.Context, *collections.ListCollectionsRequest) (*collections.ListCollectionsResponse, error)
+	List(context.Context, *ListCollectionsRequest) (*ListCollectionsResponse, error)
 	//
 	//Create new collection with given parameters
-	Create(context.Context, *collections.CreateCollection) (*collections.CollectionOperationResponse, error)
+	Create(context.Context, *CreateCollection) (*CollectionOperationResponse, error)
 	//
 	//Update parameters of the existing collection
-	Update(context.Context, *collections.UpdateCollection) (*collections.CollectionOperationResponse, error)
+	Update(context.Context, *UpdateCollection) (*CollectionOperationResponse, error)
 	//
 	//Drop collection and all associated data
-	Delete(context.Context, *collections.DeleteCollection) (*collections.CollectionOperationResponse, error)
+	Delete(context.Context, *DeleteCollection) (*CollectionOperationResponse, error)
 	//
 	//Update Aliases of the existing collection
-	UpdateAliases(context.Context, *collections.ChangeAliases) (*collections.CollectionOperationResponse, error)
+	UpdateAliases(context.Context, *ChangeAliases) (*CollectionOperationResponse, error)
 	mustEmbedUnimplementedCollectionsServer()
 }
 
@@ -134,22 +133,22 @@ type CollectionsServer interface {
 type UnimplementedCollectionsServer struct {
 }
 
-func (UnimplementedCollectionsServer) Get(context.Context, *collections.GetCollectionInfoRequest) (*collections.GetCollectionInfoResponse, error) {
+func (UnimplementedCollectionsServer) Get(context.Context, *GetCollectionInfoRequest) (*GetCollectionInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedCollectionsServer) List(context.Context, *collections.ListCollectionsRequest) (*collections.ListCollectionsResponse, error) {
+func (UnimplementedCollectionsServer) List(context.Context, *ListCollectionsRequest) (*ListCollectionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedCollectionsServer) Create(context.Context, *collections.CreateCollection) (*collections.CollectionOperationResponse, error) {
+func (UnimplementedCollectionsServer) Create(context.Context, *CreateCollection) (*CollectionOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedCollectionsServer) Update(context.Context, *collections.UpdateCollection) (*collections.CollectionOperationResponse, error) {
+func (UnimplementedCollectionsServer) Update(context.Context, *UpdateCollection) (*CollectionOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedCollectionsServer) Delete(context.Context, *collections.DeleteCollection) (*collections.CollectionOperationResponse, error) {
+func (UnimplementedCollectionsServer) Delete(context.Context, *DeleteCollection) (*CollectionOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedCollectionsServer) UpdateAliases(context.Context, *collections.ChangeAliases) (*collections.CollectionOperationResponse, error) {
+func (UnimplementedCollectionsServer) UpdateAliases(context.Context, *ChangeAliases) (*CollectionOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateAliases not implemented")
 }
 func (UnimplementedCollectionsServer) mustEmbedUnimplementedCollectionsServer() {}
@@ -166,7 +165,7 @@ func RegisterCollectionsServer(s grpc.ServiceRegistrar, srv CollectionsServer) {
 }
 
 func _Collections_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(collections.GetCollectionInfoRequest)
+	in := new(GetCollectionInfoRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -178,13 +177,13 @@ func _Collections_Get_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/qdrant.Collections/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CollectionsServer).Get(ctx, req.(*collections.GetCollectionInfoRequest))
+		return srv.(CollectionsServer).Get(ctx, req.(*GetCollectionInfoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Collections_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(collections.ListCollectionsRequest)
+	in := new(ListCollectionsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -196,13 +195,13 @@ func _Collections_List_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: "/qdrant.Collections/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CollectionsServer).List(ctx, req.(*collections.ListCollectionsRequest))
+		return srv.(CollectionsServer).List(ctx, req.(*ListCollectionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Collections_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(collections.CreateCollection)
+	in := new(CreateCollection)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -214,13 +213,13 @@ func _Collections_Create_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: "/qdrant.Collections/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CollectionsServer).Create(ctx, req.(*collections.CreateCollection))
+		return srv.(CollectionsServer).Create(ctx, req.(*CreateCollection))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Collections_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(collections.UpdateCollection)
+	in := new(UpdateCollection)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -232,13 +231,13 @@ func _Collections_Update_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: "/qdrant.Collections/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CollectionsServer).Update(ctx, req.(*collections.UpdateCollection))
+		return srv.(CollectionsServer).Update(ctx, req.(*UpdateCollection))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Collections_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(collections.DeleteCollection)
+	in := new(DeleteCollection)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -250,13 +249,13 @@ func _Collections_Delete_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: "/qdrant.Collections/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CollectionsServer).Delete(ctx, req.(*collections.DeleteCollection))
+		return srv.(CollectionsServer).Delete(ctx, req.(*DeleteCollection))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Collections_UpdateAliases_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(collections.ChangeAliases)
+	in := new(ChangeAliases)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -268,7 +267,7 @@ func _Collections_UpdateAliases_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/qdrant.Collections/UpdateAliases",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CollectionsServer).UpdateAliases(ctx, req.(*collections.ChangeAliases))
+		return srv.(CollectionsServer).UpdateAliases(ctx, req.(*ChangeAliases))
 	}
 	return interceptor(ctx, in, info, handler)
 }

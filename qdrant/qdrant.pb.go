@@ -7,8 +7,6 @@
 package qdrant
 
 import (
-	_ "./collections_service"
-	_ "./points_service"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -168,6 +166,8 @@ func file_qdrant_proto_init() {
 	if File_qdrant_proto != nil {
 		return
 	}
+	file_collections_service_proto_init()
+	file_points_service_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_qdrant_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*HealthCheckRequest); i {
