@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	addr = flag.String("addr", "localhost:6334", "the address to connect to")
+	addr           = flag.String("addr", "localhost:6334", "the address to connect to")
+	collectionName = "test_collection"
 )
 
 func main() {
@@ -39,8 +40,6 @@ func main() {
 	} else {
 		log.Printf("Qdrant version: %s", healthCheckResult.GetVersion())
 	}
-
-	collectionName := "test_collection"
 
 	// Delete collection
 	_, err = collections_client.Delete(ctx, &pb.DeleteCollection{
