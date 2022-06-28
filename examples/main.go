@@ -252,7 +252,7 @@ func main() {
 	unfilteredSearchResult, err := pointsClient.Search(ctx, &pb.SearchPoints{
 		CollectionName: collectionName,
 		Vector:         []float32{0.2, 0.1, 0.9, 0.7},
-		Top:            3,
+		Limit:          3,
 	})
 	if err != nil {
 		log.Fatalf("Could not search points: %v", err)
@@ -264,7 +264,7 @@ func main() {
 	filteredSearchResult, err := pointsClient.Search(ctx, &pb.SearchPoints{
 		CollectionName: collectionName,
 		Vector:         []float32{0.2, 0.1, 0.9, 0.7},
-		Top:            3,
+		Limit:          3,
 		Filter: &pb.Filter{
 			Should: []*pb.Condition{
 				{
