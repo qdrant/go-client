@@ -35,6 +35,7 @@ protoc \
     --go_opt=Mjson_with_int.proto=$PACKAGE_NAME \
     --go_opt=Mpoints_service.proto=$PACKAGE_NAME \
     --go_opt=Mpoints.proto=$PACKAGE_NAME \
+    --go_opt=Msnapshots_service.proto=$PACKAGE_NAME \
     --go_opt=Mqdrant.proto=$PACKAGE_NAME \
     \
     --go-grpc_opt=Mcollections_service.proto=$PACKAGE_NAME \
@@ -42,6 +43,7 @@ protoc \
     --go-grpc_opt=Mjson_with_int.proto=$PACKAGE_NAME \
     --go-grpc_opt=Mpoints_service.proto=$PACKAGE_NAME \
     --go-grpc_opt=Mpoints.proto=$PACKAGE_NAME \
+    --go-grpc_opt=Msnapshots_service.proto=$PACKAGE_NAME \
     --go-grpc_opt=Mqdrant.proto=$PACKAGE_NAME \
     \
     $PROTO_DIR/collections_service.proto \
@@ -49,4 +51,5 @@ protoc \
     $PROTO_DIR/json_with_int.proto \
     $PROTO_DIR/points_service.proto \
     $PROTO_DIR/points.proto \
+    $PROTO_DIR/snapshots_service.proto \
     $PROTO_DIR/qdrant.proto \

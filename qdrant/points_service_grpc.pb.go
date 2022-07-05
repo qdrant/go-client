@@ -55,6 +55,9 @@ type PointsClient interface {
 	//
 	//Look for the points which are closer to stored positive examples and at the same time further to negative examples.
 	Recommend(ctx context.Context, in *RecommendPoints, opts ...grpc.CallOption) (*RecommendResponse, error)
+	//
+	//Count points in collection with given filtering conditions
+	Count(ctx context.Context, in *CountPoints, opts ...grpc.CallOption) (*CountResponse, error)
 }
 
 type pointsClient struct {
@@ -164,6 +167,15 @@ func (c *pointsClient) Recommend(ctx context.Context, in *RecommendPoints, opts 
 	return out, nil
 }
 
+func (c *pointsClient) Count(ctx context.Context, in *CountPoints, opts ...grpc.CallOption) (*CountResponse, error) {
+	out := new(CountResponse)
+	err := c.cc.Invoke(ctx, "/qdrant.Points/Count", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PointsServer is the server API for Points service.
 // All implementations must embed UnimplementedPointsServer
 // for forward compatibility
@@ -201,6 +213,9 @@ type PointsServer interface {
 	//
 	//Look for the points which are closer to stored positive examples and at the same time further to negative examples.
 	Recommend(context.Context, *RecommendPoints) (*RecommendResponse, error)
+	//
+	//Count points in collection with given filtering conditions
+	Count(context.Context, *CountPoints) (*CountResponse, error)
 	mustEmbedUnimplementedPointsServer()
 }
 
@@ -240,6 +255,9 @@ func (UnimplementedPointsServer) Scroll(context.Context, *ScrollPoints) (*Scroll
 }
 func (UnimplementedPointsServer) Recommend(context.Context, *RecommendPoints) (*RecommendResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Recommend not implemented")
+}
+func (UnimplementedPointsServer) Count(context.Context, *CountPoints) (*CountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Count not implemented")
 }
 func (UnimplementedPointsServer) mustEmbedUnimplementedPointsServer() {}
 
@@ -452,6 +470,24 @@ func _Points_Recommend_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Points_Count_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CountPoints)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PointsServer).Count(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/qdrant.Points/Count",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PointsServer).Count(ctx, req.(*CountPoints))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Points_ServiceDesc is the grpc.ServiceDesc for Points service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -502,6 +538,10 @@ var Points_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Recommend",
 			Handler:    _Points_Recommend_Handler,
+		},
+		{
+			MethodName: "Count",
+			Handler:    _Points_Count_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
