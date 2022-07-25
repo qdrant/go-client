@@ -23,11 +23,17 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SnapshotsClient interface {
 	//
-	//Create snapshot
+	//Create collection snapshot
 	Create(ctx context.Context, in *CreateSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error)
 	//
-	//List snapshots
+	//List collection snapshots
 	List(ctx context.Context, in *ListSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error)
+	//
+	//Create full storage snapshot
+	CreateFull(ctx context.Context, in *CreateFullSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error)
+	//
+	//List full storage snapshots
+	ListFull(ctx context.Context, in *ListFullSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error)
 }
 
 type snapshotsClient struct {
@@ -56,16 +62,40 @@ func (c *snapshotsClient) List(ctx context.Context, in *ListSnapshotsRequest, op
 	return out, nil
 }
 
+func (c *snapshotsClient) CreateFull(ctx context.Context, in *CreateFullSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error) {
+	out := new(CreateSnapshotResponse)
+	err := c.cc.Invoke(ctx, "/qdrant.Snapshots/CreateFull", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *snapshotsClient) ListFull(ctx context.Context, in *ListFullSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error) {
+	out := new(ListSnapshotsResponse)
+	err := c.cc.Invoke(ctx, "/qdrant.Snapshots/ListFull", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SnapshotsServer is the server API for Snapshots service.
 // All implementations must embed UnimplementedSnapshotsServer
 // for forward compatibility
 type SnapshotsServer interface {
 	//
-	//Create snapshot
+	//Create collection snapshot
 	Create(context.Context, *CreateSnapshotRequest) (*CreateSnapshotResponse, error)
 	//
-	//List snapshots
+	//List collection snapshots
 	List(context.Context, *ListSnapshotsRequest) (*ListSnapshotsResponse, error)
+	//
+	//Create full storage snapshot
+	CreateFull(context.Context, *CreateFullSnapshotRequest) (*CreateSnapshotResponse, error)
+	//
+	//List full storage snapshots
+	ListFull(context.Context, *ListFullSnapshotsRequest) (*ListSnapshotsResponse, error)
 	mustEmbedUnimplementedSnapshotsServer()
 }
 
@@ -78,6 +108,12 @@ func (UnimplementedSnapshotsServer) Create(context.Context, *CreateSnapshotReque
 }
 func (UnimplementedSnapshotsServer) List(context.Context, *ListSnapshotsRequest) (*ListSnapshotsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+}
+func (UnimplementedSnapshotsServer) CreateFull(context.Context, *CreateFullSnapshotRequest) (*CreateSnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateFull not implemented")
+}
+func (UnimplementedSnapshotsServer) ListFull(context.Context, *ListFullSnapshotsRequest) (*ListSnapshotsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListFull not implemented")
 }
 func (UnimplementedSnapshotsServer) mustEmbedUnimplementedSnapshotsServer() {}
 
@@ -128,6 +164,42 @@ func _Snapshots_List_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Snapshots_CreateFull_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateFullSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SnapshotsServer).CreateFull(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/qdrant.Snapshots/CreateFull",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SnapshotsServer).CreateFull(ctx, req.(*CreateFullSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Snapshots_ListFull_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListFullSnapshotsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SnapshotsServer).ListFull(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/qdrant.Snapshots/ListFull",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SnapshotsServer).ListFull(ctx, req.(*ListFullSnapshotsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Snapshots_ServiceDesc is the grpc.ServiceDesc for Snapshots service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -142,6 +214,14 @@ var Snapshots_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "List",
 			Handler:    _Snapshots_List_Handler,
+		},
+		{
+			MethodName: "CreateFull",
+			Handler:    _Snapshots_CreateFull_Handler,
+		},
+		{
+			MethodName: "ListFull",
+			Handler:    _Snapshots_ListFull_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
