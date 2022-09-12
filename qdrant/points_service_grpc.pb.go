@@ -50,11 +50,17 @@ type PointsClient interface {
 	//Retrieve closest points based on vector similarity and given filtering conditions
 	Search(ctx context.Context, in *SearchPoints, opts ...grpc.CallOption) (*SearchResponse, error)
 	//
+	//Retrieve closest points based on vector similarity and given filtering conditions
+	SearchBatch(ctx context.Context, in *SearchBatchPoints, opts ...grpc.CallOption) (*SearchBatchResponse, error)
+	//
 	//Iterate over all or filtered points points
 	Scroll(ctx context.Context, in *ScrollPoints, opts ...grpc.CallOption) (*ScrollResponse, error)
 	//
 	//Look for the points which are closer to stored positive examples and at the same time further to negative examples.
 	Recommend(ctx context.Context, in *RecommendPoints, opts ...grpc.CallOption) (*RecommendResponse, error)
+	//
+	//Look for the points which are closer to stored positive examples and at the same time further to negative examples.
+	RecommendBatch(ctx context.Context, in *RecommendBatchPoints, opts ...grpc.CallOption) (*RecommendBatchResponse, error)
 	//
 	//Count points in collection with given filtering conditions
 	Count(ctx context.Context, in *CountPoints, opts ...grpc.CallOption) (*CountResponse, error)
@@ -149,6 +155,15 @@ func (c *pointsClient) Search(ctx context.Context, in *SearchPoints, opts ...grp
 	return out, nil
 }
 
+func (c *pointsClient) SearchBatch(ctx context.Context, in *SearchBatchPoints, opts ...grpc.CallOption) (*SearchBatchResponse, error) {
+	out := new(SearchBatchResponse)
+	err := c.cc.Invoke(ctx, "/qdrant.Points/SearchBatch", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *pointsClient) Scroll(ctx context.Context, in *ScrollPoints, opts ...grpc.CallOption) (*ScrollResponse, error) {
 	out := new(ScrollResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/Scroll", in, out, opts...)
@@ -161,6 +176,15 @@ func (c *pointsClient) Scroll(ctx context.Context, in *ScrollPoints, opts ...grp
 func (c *pointsClient) Recommend(ctx context.Context, in *RecommendPoints, opts ...grpc.CallOption) (*RecommendResponse, error) {
 	out := new(RecommendResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/Recommend", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *pointsClient) RecommendBatch(ctx context.Context, in *RecommendBatchPoints, opts ...grpc.CallOption) (*RecommendBatchResponse, error) {
+	out := new(RecommendBatchResponse)
+	err := c.cc.Invoke(ctx, "/qdrant.Points/RecommendBatch", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -208,11 +232,17 @@ type PointsServer interface {
 	//Retrieve closest points based on vector similarity and given filtering conditions
 	Search(context.Context, *SearchPoints) (*SearchResponse, error)
 	//
+	//Retrieve closest points based on vector similarity and given filtering conditions
+	SearchBatch(context.Context, *SearchBatchPoints) (*SearchBatchResponse, error)
+	//
 	//Iterate over all or filtered points points
 	Scroll(context.Context, *ScrollPoints) (*ScrollResponse, error)
 	//
 	//Look for the points which are closer to stored positive examples and at the same time further to negative examples.
 	Recommend(context.Context, *RecommendPoints) (*RecommendResponse, error)
+	//
+	//Look for the points which are closer to stored positive examples and at the same time further to negative examples.
+	RecommendBatch(context.Context, *RecommendBatchPoints) (*RecommendBatchResponse, error)
 	//
 	//Count points in collection with given filtering conditions
 	Count(context.Context, *CountPoints) (*CountResponse, error)
@@ -250,11 +280,17 @@ func (UnimplementedPointsServer) DeleteFieldIndex(context.Context, *DeleteFieldI
 func (UnimplementedPointsServer) Search(context.Context, *SearchPoints) (*SearchResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented")
 }
+func (UnimplementedPointsServer) SearchBatch(context.Context, *SearchBatchPoints) (*SearchBatchResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchBatch not implemented")
+}
 func (UnimplementedPointsServer) Scroll(context.Context, *ScrollPoints) (*ScrollResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Scroll not implemented")
 }
 func (UnimplementedPointsServer) Recommend(context.Context, *RecommendPoints) (*RecommendResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Recommend not implemented")
+}
+func (UnimplementedPointsServer) RecommendBatch(context.Context, *RecommendBatchPoints) (*RecommendBatchResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RecommendBatch not implemented")
 }
 func (UnimplementedPointsServer) Count(context.Context, *CountPoints) (*CountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Count not implemented")
@@ -434,6 +470,24 @@ func _Points_Search_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Points_SearchBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchBatchPoints)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PointsServer).SearchBatch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/qdrant.Points/SearchBatch",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PointsServer).SearchBatch(ctx, req.(*SearchBatchPoints))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Points_Scroll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ScrollPoints)
 	if err := dec(in); err != nil {
@@ -466,6 +520,24 @@ func _Points_Recommend_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PointsServer).Recommend(ctx, req.(*RecommendPoints))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Points_RecommendBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecommendBatchPoints)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PointsServer).RecommendBatch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/qdrant.Points/RecommendBatch",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PointsServer).RecommendBatch(ctx, req.(*RecommendBatchPoints))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -532,12 +604,20 @@ var Points_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Points_Search_Handler,
 		},
 		{
+			MethodName: "SearchBatch",
+			Handler:    _Points_SearchBatch_Handler,
+		},
+		{
 			MethodName: "Scroll",
 			Handler:    _Points_Scroll_Handler,
 		},
 		{
 			MethodName: "Recommend",
 			Handler:    _Points_Recommend_Handler,
+		},
+		{
+			MethodName: "RecommendBatch",
+			Handler:    _Points_RecommendBatch_Handler,
 		},
 		{
 			MethodName: "Count",
