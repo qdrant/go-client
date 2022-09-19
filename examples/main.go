@@ -12,10 +12,10 @@ import (
 )
 
 var (
-	addr           = flag.String("addr", "localhost:6334", "the address to connect to")
-	collectionName = "test_collection"
-	vectorSize uint64 = 4
-	distance = pb.Distance_Dot
+	addr                  = flag.String("addr", "localhost:6334", "the address to connect to")
+	collectionName        = "test_collection"
+	vectorSize     uint64 = 4
+	distance              = pb.Distance_Dot
 )
 
 func main() {
@@ -57,8 +57,12 @@ func main() {
 	var defaultSegmentNumber uint64 = 2
 	_, err = collections_client.Create(ctx, &pb.CreateCollection{
 		CollectionName: collectionName,
-		VectorSize:     &vectorSize,
-		Distance:       &distance,
+		VectorsConfig: &pb.VectorsConfig{Config: &pb.VectorsConfig_Params{
+			Params: &pb.VectorParams{
+				Size:     vectorSize,
+				Distance: distance,
+			},
+		}},
 		OptimizersConfig: &pb.OptimizersConfigDiff{
 			DefaultSegmentNumber: &defaultSegmentNumber,
 		},
@@ -116,7 +120,7 @@ func main() {
 			Id: &pb.PointId{
 				PointIdOptions: &pb.PointId_Num{Num: 1},
 			},
-			Vector: []float32{0.05, 0.61, 0.76, 0.74},
+			Vectors: &pb.Vectors{VectorsOptions: &pb.Vectors_Vector{Vector: &pb.Vector{Data: []float32{0.05, 0.61, 0.76, 0.74}}}},
 			Payload: map[string]*pb.Value{
 				"city": {
 					Kind: &pb.Value_StringValue{StringValue: "Berlin"},
@@ -136,7 +140,7 @@ func main() {
 			Id: &pb.PointId{
 				PointIdOptions: &pb.PointId_Num{Num: 2},
 			},
-			Vector: []float32{0.19, 0.81, 0.75, 0.11},
+			Vectors: &pb.Vectors{VectorsOptions: &pb.Vectors_Vector{Vector: &pb.Vector{Data: []float32{0.19, 0.81, 0.75, 0.11}}}},
 			Payload: map[string]*pb.Value{
 				"city": {
 					Kind: &pb.Value_ListValue{
@@ -158,7 +162,7 @@ func main() {
 			Id: &pb.PointId{
 				PointIdOptions: &pb.PointId_Num{Num: 3},
 			},
-			Vector: []float32{0.36, 0.55, 0.47, 0.94},
+			Vectors: &pb.Vectors{VectorsOptions: &pb.Vectors_Vector{Vector: &pb.Vector{Data: []float32{0.36, 0.55, 0.47, 0.94}}}},
 			Payload: map[string]*pb.Value{
 				"city": {
 					Kind: &pb.Value_ListValue{
@@ -180,7 +184,7 @@ func main() {
 			Id: &pb.PointId{
 				PointIdOptions: &pb.PointId_Num{Num: 4},
 			},
-			Vector: []float32{0.18, 0.01, 0.85, 0.80},
+			Vectors: &pb.Vectors{VectorsOptions: &pb.Vectors_Vector{Vector: &pb.Vector{Data: []float32{0.18, 0.01, 0.85, 0.80}}}},
 			Payload: map[string]*pb.Value{
 				"city": {
 					Kind: &pb.Value_ListValue{
@@ -202,7 +206,7 @@ func main() {
 			Id: &pb.PointId{
 				PointIdOptions: &pb.PointId_Num{Num: 5},
 			},
-			Vector: []float32{0.24, 0.18, 0.22, 0.44},
+			Vectors: &pb.Vectors{VectorsOptions: &pb.Vectors_Vector{Vector: &pb.Vector{Data: []float32{0.24, 0.18, 0.22, 0.44}}}},
 			Payload: map[string]*pb.Value{
 				"count": {
 					Kind: &pb.Value_ListValue{
@@ -221,7 +225,7 @@ func main() {
 			Id: &pb.PointId{
 				PointIdOptions: &pb.PointId_Num{Num: 6},
 			},
-			Vector:  []float32{0.35, 0.08, 0.11, 0.44},
+			Vectors: &pb.Vectors{VectorsOptions: &pb.Vectors_Vector{Vector: &pb.Vector{Data: []float32{0.35, 0.08, 0.11, 0.44}}}},
 			Payload: map[string]*pb.Value{},
 		},
 	}
