@@ -14,6 +14,8 @@ import (
 var (
 	addr           = flag.String("addr", "localhost:6334", "the address to connect to")
 	collectionName = "test_collection"
+	vectorSize uint64 = 4
+	distance = pb.Distance_Dot
 )
 
 func main() {
@@ -55,8 +57,8 @@ func main() {
 	var defaultSegmentNumber uint64 = 2
 	_, err = collections_client.Create(ctx, &pb.CreateCollection{
 		CollectionName: collectionName,
-		VectorSize:     4,
-		Distance:       pb.Distance_Dot,
+		VectorSize:     &vectorSize,
+		Distance:       &distance,
 		OptimizersConfig: &pb.OptimizersConfigDiff{
 			DefaultSegmentNumber: &defaultSegmentNumber,
 		},
