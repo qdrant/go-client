@@ -21,7 +21,6 @@ func main() {
 	flag.Parse()
 	// Set up a connection to the server.
 	config := &tls.Config{}
-
 	conn, err := grpc.Dial(*addr, grpc.WithTransportCredentials(credentials.NewTLS(config)))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
