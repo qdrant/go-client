@@ -35,6 +35,9 @@ type PointsClient interface {
 	//Set payload for points
 	SetPayload(ctx context.Context, in *SetPayloadPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error)
 	//
+	//Overwrite payload for points
+	OverwritePayload(ctx context.Context, in *SetPayloadPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error)
+	//
 	//Delete specified key payload for points
 	DeletePayload(ctx context.Context, in *DeletePayloadPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error)
 	//
@@ -104,6 +107,15 @@ func (c *pointsClient) Get(ctx context.Context, in *GetPoints, opts ...grpc.Call
 func (c *pointsClient) SetPayload(ctx context.Context, in *SetPayloadPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error) {
 	out := new(PointsOperationResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Points/SetPayload", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *pointsClient) OverwritePayload(ctx context.Context, in *SetPayloadPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error) {
+	out := new(PointsOperationResponse)
+	err := c.cc.Invoke(ctx, "/qdrant.Points/OverwritePayload", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -217,6 +229,9 @@ type PointsServer interface {
 	//Set payload for points
 	SetPayload(context.Context, *SetPayloadPoints) (*PointsOperationResponse, error)
 	//
+	//Overwrite payload for points
+	OverwritePayload(context.Context, *SetPayloadPoints) (*PointsOperationResponse, error)
+	//
 	//Delete specified key payload for points
 	DeletePayload(context.Context, *DeletePayloadPoints) (*PointsOperationResponse, error)
 	//
@@ -264,6 +279,9 @@ func (UnimplementedPointsServer) Get(context.Context, *GetPoints) (*GetResponse,
 }
 func (UnimplementedPointsServer) SetPayload(context.Context, *SetPayloadPoints) (*PointsOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetPayload not implemented")
+}
+func (UnimplementedPointsServer) OverwritePayload(context.Context, *SetPayloadPoints) (*PointsOperationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OverwritePayload not implemented")
 }
 func (UnimplementedPointsServer) DeletePayload(context.Context, *DeletePayloadPoints) (*PointsOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePayload not implemented")
@@ -376,6 +394,24 @@ func _Points_SetPayload_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PointsServer).SetPayload(ctx, req.(*SetPayloadPoints))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Points_OverwritePayload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetPayloadPoints)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PointsServer).OverwritePayload(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/qdrant.Points/OverwritePayload",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PointsServer).OverwritePayload(ctx, req.(*SetPayloadPoints))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -582,6 +618,10 @@ var Points_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetPayload",
 			Handler:    _Points_SetPayload_Handler,
+		},
+		{
+			MethodName: "OverwritePayload",
+			Handler:    _Points_OverwritePayload_Handler,
 		},
 		{
 			MethodName: "DeletePayload",
