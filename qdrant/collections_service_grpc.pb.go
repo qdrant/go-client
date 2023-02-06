@@ -40,6 +40,12 @@ type CollectionsClient interface {
 	//
 	//Update Aliases of the existing collection
 	UpdateAliases(ctx context.Context, in *ChangeAliases, opts ...grpc.CallOption) (*CollectionOperationResponse, error)
+	//
+	//Get list of all aliases for a collection
+	ListCollectionAliases(ctx context.Context, in *ListCollectionAliasesRequest, opts ...grpc.CallOption) (*ListAliasesResponse, error)
+	//
+	//Get list of all aliases for all existing collections
+	ListAliases(ctx context.Context, in *ListAliasesRequest, opts ...grpc.CallOption) (*ListAliasesResponse, error)
 }
 
 type collectionsClient struct {
@@ -104,6 +110,24 @@ func (c *collectionsClient) UpdateAliases(ctx context.Context, in *ChangeAliases
 	return out, nil
 }
 
+func (c *collectionsClient) ListCollectionAliases(ctx context.Context, in *ListCollectionAliasesRequest, opts ...grpc.CallOption) (*ListAliasesResponse, error) {
+	out := new(ListAliasesResponse)
+	err := c.cc.Invoke(ctx, "/qdrant.Collections/ListCollectionAliases", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *collectionsClient) ListAliases(ctx context.Context, in *ListAliasesRequest, opts ...grpc.CallOption) (*ListAliasesResponse, error) {
+	out := new(ListAliasesResponse)
+	err := c.cc.Invoke(ctx, "/qdrant.Collections/ListAliases", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CollectionsServer is the server API for Collections service.
 // All implementations must embed UnimplementedCollectionsServer
 // for forward compatibility
@@ -126,6 +150,12 @@ type CollectionsServer interface {
 	//
 	//Update Aliases of the existing collection
 	UpdateAliases(context.Context, *ChangeAliases) (*CollectionOperationResponse, error)
+	//
+	//Get list of all aliases for a collection
+	ListCollectionAliases(context.Context, *ListCollectionAliasesRequest) (*ListAliasesResponse, error)
+	//
+	//Get list of all aliases for all existing collections
+	ListAliases(context.Context, *ListAliasesRequest) (*ListAliasesResponse, error)
 	mustEmbedUnimplementedCollectionsServer()
 }
 
@@ -150,6 +180,12 @@ func (UnimplementedCollectionsServer) Delete(context.Context, *DeleteCollection)
 }
 func (UnimplementedCollectionsServer) UpdateAliases(context.Context, *ChangeAliases) (*CollectionOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateAliases not implemented")
+}
+func (UnimplementedCollectionsServer) ListCollectionAliases(context.Context, *ListCollectionAliasesRequest) (*ListAliasesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListCollectionAliases not implemented")
+}
+func (UnimplementedCollectionsServer) ListAliases(context.Context, *ListAliasesRequest) (*ListAliasesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAliases not implemented")
 }
 func (UnimplementedCollectionsServer) mustEmbedUnimplementedCollectionsServer() {}
 
@@ -272,6 +308,42 @@ func _Collections_UpdateAliases_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Collections_ListCollectionAliases_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCollectionAliasesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CollectionsServer).ListCollectionAliases(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/qdrant.Collections/ListCollectionAliases",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CollectionsServer).ListCollectionAliases(ctx, req.(*ListCollectionAliasesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Collections_ListAliases_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAliasesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CollectionsServer).ListAliases(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/qdrant.Collections/ListAliases",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CollectionsServer).ListAliases(ctx, req.(*ListAliasesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Collections_ServiceDesc is the grpc.ServiceDesc for Collections service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -302,6 +374,14 @@ var Collections_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateAliases",
 			Handler:    _Collections_UpdateAliases_Handler,
+		},
+		{
+			MethodName: "ListCollectionAliases",
+			Handler:    _Collections_ListCollectionAliases_Handler,
+		},
+		{
+			MethodName: "ListAliases",
+			Handler:    _Collections_ListAliases_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
