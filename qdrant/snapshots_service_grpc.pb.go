@@ -29,11 +29,17 @@ type SnapshotsClient interface {
 	//List collection snapshots
 	List(ctx context.Context, in *ListSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error)
 	//
+	//Delete collection snapshots
+	Delete(ctx context.Context, in *DeleteSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error)
+	//
 	//Create full storage snapshot
 	CreateFull(ctx context.Context, in *CreateFullSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error)
 	//
 	//List full storage snapshots
 	ListFull(ctx context.Context, in *ListFullSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error)
+	//
+	//List full storage snapshots
+	DeleteFull(ctx context.Context, in *DeleteFullSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error)
 }
 
 type snapshotsClient struct {
@@ -62,6 +68,15 @@ func (c *snapshotsClient) List(ctx context.Context, in *ListSnapshotsRequest, op
 	return out, nil
 }
 
+func (c *snapshotsClient) Delete(ctx context.Context, in *DeleteSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error) {
+	out := new(DeleteSnapshotResponse)
+	err := c.cc.Invoke(ctx, "/qdrant.Snapshots/Delete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *snapshotsClient) CreateFull(ctx context.Context, in *CreateFullSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error) {
 	out := new(CreateSnapshotResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Snapshots/CreateFull", in, out, opts...)
@@ -80,6 +95,15 @@ func (c *snapshotsClient) ListFull(ctx context.Context, in *ListFullSnapshotsReq
 	return out, nil
 }
 
+func (c *snapshotsClient) DeleteFull(ctx context.Context, in *DeleteFullSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error) {
+	out := new(DeleteSnapshotResponse)
+	err := c.cc.Invoke(ctx, "/qdrant.Snapshots/DeleteFull", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SnapshotsServer is the server API for Snapshots service.
 // All implementations must embed UnimplementedSnapshotsServer
 // for forward compatibility
@@ -91,11 +115,17 @@ type SnapshotsServer interface {
 	//List collection snapshots
 	List(context.Context, *ListSnapshotsRequest) (*ListSnapshotsResponse, error)
 	//
+	//Delete collection snapshots
+	Delete(context.Context, *DeleteSnapshotRequest) (*DeleteSnapshotResponse, error)
+	//
 	//Create full storage snapshot
 	CreateFull(context.Context, *CreateFullSnapshotRequest) (*CreateSnapshotResponse, error)
 	//
 	//List full storage snapshots
 	ListFull(context.Context, *ListFullSnapshotsRequest) (*ListSnapshotsResponse, error)
+	//
+	//List full storage snapshots
+	DeleteFull(context.Context, *DeleteFullSnapshotRequest) (*DeleteSnapshotResponse, error)
 	mustEmbedUnimplementedSnapshotsServer()
 }
 
@@ -109,11 +139,17 @@ func (UnimplementedSnapshotsServer) Create(context.Context, *CreateSnapshotReque
 func (UnimplementedSnapshotsServer) List(context.Context, *ListSnapshotsRequest) (*ListSnapshotsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
+func (UnimplementedSnapshotsServer) Delete(context.Context, *DeleteSnapshotRequest) (*DeleteSnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
 func (UnimplementedSnapshotsServer) CreateFull(context.Context, *CreateFullSnapshotRequest) (*CreateSnapshotResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFull not implemented")
 }
 func (UnimplementedSnapshotsServer) ListFull(context.Context, *ListFullSnapshotsRequest) (*ListSnapshotsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListFull not implemented")
+}
+func (UnimplementedSnapshotsServer) DeleteFull(context.Context, *DeleteFullSnapshotRequest) (*DeleteSnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFull not implemented")
 }
 func (UnimplementedSnapshotsServer) mustEmbedUnimplementedSnapshotsServer() {}
 
@@ -164,6 +200,24 @@ func _Snapshots_List_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Snapshots_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SnapshotsServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/qdrant.Snapshots/Delete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SnapshotsServer).Delete(ctx, req.(*DeleteSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Snapshots_CreateFull_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateFullSnapshotRequest)
 	if err := dec(in); err != nil {
@@ -200,6 +254,24 @@ func _Snapshots_ListFull_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Snapshots_DeleteFull_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFullSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SnapshotsServer).DeleteFull(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/qdrant.Snapshots/DeleteFull",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SnapshotsServer).DeleteFull(ctx, req.(*DeleteFullSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Snapshots_ServiceDesc is the grpc.ServiceDesc for Snapshots service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -216,12 +288,20 @@ var Snapshots_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Snapshots_List_Handler,
 		},
 		{
+			MethodName: "Delete",
+			Handler:    _Snapshots_Delete_Handler,
+		},
+		{
 			MethodName: "CreateFull",
 			Handler:    _Snapshots_CreateFull_Handler,
 		},
 		{
 			MethodName: "ListFull",
 			Handler:    _Snapshots_ListFull_Handler,
+		},
+		{
+			MethodName: "DeleteFull",
+			Handler:    _Snapshots_DeleteFull_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
