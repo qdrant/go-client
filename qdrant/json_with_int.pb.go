@@ -77,7 +77,7 @@ func (NullValue) EnumDescriptor() ([]byte, []int) {
 // object. The details of that representation are described together
 // with the proto support for the language.
 //
-// The JSON representation for `Struct` is JSON object.
+// The JSON representation for `Struct` is a JSON object.
 type Struct struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -128,10 +128,10 @@ func (x *Struct) GetFields() map[string]*Value {
 
 // `Value` represents a dynamically typed value which can be either
 // null, a number, a string, a boolean, a recursive struct value, or a
-// list of values. A producer of value is expected to set one of that
+// list of values. A producer of value is expected to set one of those
 // variants, absence of any variant indicates an error.
 //
-// The JSON representation for `Value` is JSON value.
+// The JSON representation for `Value` is a JSON value.
 type Value struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -293,7 +293,7 @@ func (*Value_ListValue) isValue_Kind() {}
 
 // `ListValue` is a wrapper around a repeated field of values.
 //
-// The JSON representation for `ListValue` is JSON array.
+// The JSON representation for `ListValue` is a JSON array.
 type ListValue struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

@@ -23,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PointsClient interface {
 	//
-	//Perform insert + updates on points. If point with given ID already exists - it will be overwritten.
+	//Perform insert + updates on points. If a point with a given ID already exists - it will be overwritten.
 	Upsert(ctx context.Context, in *UpsertPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error)
 	//
 	//Delete points
@@ -217,7 +217,7 @@ func (c *pointsClient) Count(ctx context.Context, in *CountPoints, opts ...grpc.
 // for forward compatibility
 type PointsServer interface {
 	//
-	//Perform insert + updates on points. If point with given ID already exists - it will be overwritten.
+	//Perform insert + updates on points. If a point with a given ID already exists - it will be overwritten.
 	Upsert(context.Context, *UpsertPoints) (*PointsOperationResponse, error)
 	//
 	//Delete points
