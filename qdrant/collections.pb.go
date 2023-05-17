@@ -522,6 +522,7 @@ type VectorsConfig struct {
 	unknownFields protoimpl.UnknownFields
 
 	// Types that are assignable to Config:
+	//
 	//	*VectorsConfig_Params
 	//	*VectorsConfig_ParamsMap
 	Config isVectorsConfig_Config `protobuf_oneof:"config"`
@@ -898,26 +899,20 @@ type HnswConfigDiff struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	//
-	//Number of edges per node in the index graph. Larger the value - more accurate the search, more space required.
+	// Number of edges per node in the index graph. Larger the value - more accurate the search, more space required.
 	M *uint64 `protobuf:"varint,1,opt,name=m,proto3,oneof" json:"m,omitempty"`
-	//
-	//Number of neighbours to consider during the index building. Larger the value - more accurate the search, more time required to build the index.
+	// Number of neighbours to consider during the index building. Larger the value - more accurate the search, more time required to build the index.
 	EfConstruct *uint64 `protobuf:"varint,2,opt,name=ef_construct,json=efConstruct,proto3,oneof" json:"ef_construct,omitempty"`
-	//
-	//Minimal size (in KiloBytes) of vectors for additional payload-based indexing.
-	//If the payload chunk is smaller than `full_scan_threshold` additional indexing won't be used -
-	//in this case full-scan search should be preferred by query planner and additional indexing is not required.
-	//Note: 1 Kb = 1 vector of size 256
+	// Minimal size (in KiloBytes) of vectors for additional payload-based indexing.
+	// If the payload chunk is smaller than `full_scan_threshold` additional indexing won't be used -
+	// in this case full-scan search should be preferred by query planner and additional indexing is not required.
+	// Note: 1 Kb = 1 vector of size 256
 	FullScanThreshold *uint64 `protobuf:"varint,3,opt,name=full_scan_threshold,json=fullScanThreshold,proto3,oneof" json:"full_scan_threshold,omitempty"`
-	//
-	//Number of parallel threads used for background index building. If 0 - auto selection.
+	// Number of parallel threads used for background index building. If 0 - auto selection.
 	MaxIndexingThreads *uint64 `protobuf:"varint,4,opt,name=max_indexing_threads,json=maxIndexingThreads,proto3,oneof" json:"max_indexing_threads,omitempty"`
-	//
-	//Store HNSW index on disk. If set to false, the index will be stored in RAM.
+	// Store HNSW index on disk. If set to false, the index will be stored in RAM.
 	OnDisk *bool `protobuf:"varint,5,opt,name=on_disk,json=onDisk,proto3,oneof" json:"on_disk,omitempty"`
-	//
-	//Number of additional payload-aware links per node in the index graph. If not set - regular M parameter will be used.
+	// Number of additional payload-aware links per node in the index graph. If not set - regular M parameter will be used.
 	PayloadM *uint64 `protobuf:"varint,6,opt,name=payload_m,json=payloadM,proto3,oneof" json:"payload_m,omitempty"`
 }
 
@@ -1055,56 +1050,48 @@ type OptimizersConfigDiff struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	//
-	//The minimal fraction of deleted vectors in a segment, required to perform segment optimization
+	// The minimal fraction of deleted vectors in a segment, required to perform segment optimization
 	DeletedThreshold *float64 `protobuf:"fixed64,1,opt,name=deleted_threshold,json=deletedThreshold,proto3,oneof" json:"deleted_threshold,omitempty"`
-	//
-	//The minimal number of vectors in a segment, required to perform segment optimization
+	// The minimal number of vectors in a segment, required to perform segment optimization
 	VacuumMinVectorNumber *uint64 `protobuf:"varint,2,opt,name=vacuum_min_vector_number,json=vacuumMinVectorNumber,proto3,oneof" json:"vacuum_min_vector_number,omitempty"`
+	// Target amount of segments the optimizer will try to keep.
+	// Real amount of segments may vary depending on multiple parameters:
 	//
-	//Target amount of segments the optimizer will try to keep.
-	//Real amount of segments may vary depending on multiple parameters:
+	// - Amount of stored points.
+	// - Current write RPS.
 	//
-	//- Amount of stored points.
-	//- Current write RPS.
-	//
-	//It is recommended to select the default number of segments as a factor of the number of search threads,
-	//so that each segment would be handled evenly by one of the threads.
+	// It is recommended to select the default number of segments as a factor of the number of search threads,
+	// so that each segment would be handled evenly by one of the threads.
 	DefaultSegmentNumber *uint64 `protobuf:"varint,3,opt,name=default_segment_number,json=defaultSegmentNumber,proto3,oneof" json:"default_segment_number,omitempty"`
+	// Do not create segments larger this size (in kilobytes).
+	// Large segments might require disproportionately long indexation times,
+	// therefore it makes sense to limit the size of segments.
 	//
-	//Do not create segments larger this size (in kilobytes).
-	//Large segments might require disproportionately long indexation times,
-	//therefore it makes sense to limit the size of segments.
-	//
-	//If indexing speed is more important - make this parameter lower.
-	//If search speed is more important - make this parameter higher.
-	//Note: 1Kb = 1 vector of size 256
-	//If not set, will be automatically selected considering the number of available CPUs.
+	// If indexing speed is more important - make this parameter lower.
+	// If search speed is more important - make this parameter higher.
+	// Note: 1Kb = 1 vector of size 256
+	// If not set, will be automatically selected considering the number of available CPUs.
 	MaxSegmentSize *uint64 `protobuf:"varint,4,opt,name=max_segment_size,json=maxSegmentSize,proto3,oneof" json:"max_segment_size,omitempty"`
+	// Maximum size (in kilobytes) of vectors to store in-memory per segment.
+	// Segments larger than this threshold will be stored as read-only memmaped file.
 	//
-	//Maximum size (in kilobytes) of vectors to store in-memory per segment.
-	//Segments larger than this threshold will be stored as read-only memmaped file.
+	// Memmap storage is disabled by default, to enable it, set this threshold to a reasonable value.
 	//
-	//Memmap storage is disabled by default, to enable it, set this threshold to a reasonable value.
+	// To disable memmap storage, set this to `0`.
 	//
-	//To disable memmap storage, set this to `0`.
-	//
-	//Note: 1Kb = 1 vector of size 256
+	// Note: 1Kb = 1 vector of size 256
 	MemmapThreshold *uint64 `protobuf:"varint,5,opt,name=memmap_threshold,json=memmapThreshold,proto3,oneof" json:"memmap_threshold,omitempty"`
+	// Maximum size (in kilobytes) of vectors allowed for plain index, exceeding this threshold will enable vector indexing
 	//
-	//Maximum size (in kilobytes) of vectors allowed for plain index, exceeding this threshold will enable vector indexing
+	// Default value is 20,000, based on <https://github.com/google-research/google-research/blob/master/scann/docs/algorithms.md>.
 	//
-	//Default value is 20,000, based on <https://github.com/google-research/google-research/blob/master/scann/docs/algorithms.md>.
+	// To disable vector indexing, set to `0`.
 	//
-	//To disable vector indexing, set to `0`.
-	//
-	//Note: 1kB = 1 vector of size 256.
+	// Note: 1kB = 1 vector of size 256.
 	IndexingThreshold *uint64 `protobuf:"varint,6,opt,name=indexing_threshold,json=indexingThreshold,proto3,oneof" json:"indexing_threshold,omitempty"`
-	//
-	//Interval between forced flushes.
+	// Interval between forced flushes.
 	FlushIntervalSec *uint64 `protobuf:"varint,7,opt,name=flush_interval_sec,json=flushIntervalSec,proto3,oneof" json:"flush_interval_sec,omitempty"`
-	//
-	//Max number of threads, which can be used for optimization. If 0 - `NUM_CPU - 1` will be used
+	// Max number of threads, which can be used for optimization. If 0 - `NUM_CPU - 1` will be used
 	MaxOptimizationThreads *uint64 `protobuf:"varint,8,opt,name=max_optimization_threads,json=maxOptimizationThreads,proto3,oneof" json:"max_optimization_threads,omitempty"`
 }
 
@@ -1320,6 +1307,7 @@ type QuantizationConfig struct {
 	unknownFields protoimpl.UnknownFields
 
 	// Types that are assignable to Quantization:
+	//
 	//	*QuantizationConfig_Scalar
 	//	*QuantizationConfig_Product
 	Quantization isQuantizationConfig_Quantization `protobuf_oneof:"quantization"`
@@ -2000,6 +1988,7 @@ type PayloadIndexParams struct {
 	unknownFields protoimpl.UnknownFields
 
 	// Types that are assignable to IndexParams:
+	//
 	//	*PayloadIndexParams_TextIndexParams
 	IndexParams isPayloadIndexParams_IndexParams `protobuf_oneof:"index_params"`
 }
@@ -2287,6 +2276,7 @@ type AliasOperations struct {
 	unknownFields protoimpl.UnknownFields
 
 	// Types that are assignable to Action:
+	//
 	//	*AliasOperations_CreateAlias
 	//	*AliasOperations_RenameAlias
 	//	*AliasOperations_DeleteAlias
@@ -3175,6 +3165,7 @@ type UpdateCollectionClusterSetupRequest struct {
 
 	CollectionName string `protobuf:"bytes,1,opt,name=collection_name,json=collectionName,proto3" json:"collection_name,omitempty"` // Name of the collection
 	// Types that are assignable to Operation:
+	//
 	//	*UpdateCollectionClusterSetupRequest_MoveShard
 	//	*UpdateCollectionClusterSetupRequest_ReplicateShard
 	//	*UpdateCollectionClusterSetupRequest_AbortTransfer
