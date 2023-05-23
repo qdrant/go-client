@@ -22,25 +22,35 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CollectionsClient interface {
-	// Get detailed information about specified existing collection
+	//
+	//Get detailed information about specified existing collection
 	Get(ctx context.Context, in *GetCollectionInfoRequest, opts ...grpc.CallOption) (*GetCollectionInfoResponse, error)
-	// Get list name of all existing collections
+	//
+	//Get list name of all existing collections
 	List(ctx context.Context, in *ListCollectionsRequest, opts ...grpc.CallOption) (*ListCollectionsResponse, error)
-	// Create new collection with given parameters
+	//
+	//Create new collection with given parameters
 	Create(ctx context.Context, in *CreateCollection, opts ...grpc.CallOption) (*CollectionOperationResponse, error)
-	// Update parameters of the existing collection
+	//
+	//Update parameters of the existing collection
 	Update(ctx context.Context, in *UpdateCollection, opts ...grpc.CallOption) (*CollectionOperationResponse, error)
-	// Drop collection and all associated data
+	//
+	//Drop collection and all associated data
 	Delete(ctx context.Context, in *DeleteCollection, opts ...grpc.CallOption) (*CollectionOperationResponse, error)
-	// Update Aliases of the existing collection
+	//
+	//Update Aliases of the existing collection
 	UpdateAliases(ctx context.Context, in *ChangeAliases, opts ...grpc.CallOption) (*CollectionOperationResponse, error)
-	// Get list of all aliases for a collection
+	//
+	//Get list of all aliases for a collection
 	ListCollectionAliases(ctx context.Context, in *ListCollectionAliasesRequest, opts ...grpc.CallOption) (*ListAliasesResponse, error)
-	// Get list of all aliases for all existing collections
+	//
+	//Get list of all aliases for all existing collections
 	ListAliases(ctx context.Context, in *ListAliasesRequest, opts ...grpc.CallOption) (*ListAliasesResponse, error)
-	// Get cluster information for a collection
+	//
+	//Get cluster information for a collection
 	CollectionClusterInfo(ctx context.Context, in *CollectionClusterInfoRequest, opts ...grpc.CallOption) (*CollectionClusterInfoResponse, error)
-	// Update cluster setup for a collection
+	//
+	//Update cluster setup for a collection
 	UpdateCollectionClusterSetup(ctx context.Context, in *UpdateCollectionClusterSetupRequest, opts ...grpc.CallOption) (*UpdateCollectionClusterSetupResponse, error)
 }
 
@@ -146,25 +156,35 @@ func (c *collectionsClient) UpdateCollectionClusterSetup(ctx context.Context, in
 // All implementations must embed UnimplementedCollectionsServer
 // for forward compatibility
 type CollectionsServer interface {
-	// Get detailed information about specified existing collection
+	//
+	//Get detailed information about specified existing collection
 	Get(context.Context, *GetCollectionInfoRequest) (*GetCollectionInfoResponse, error)
-	// Get list name of all existing collections
+	//
+	//Get list name of all existing collections
 	List(context.Context, *ListCollectionsRequest) (*ListCollectionsResponse, error)
-	// Create new collection with given parameters
+	//
+	//Create new collection with given parameters
 	Create(context.Context, *CreateCollection) (*CollectionOperationResponse, error)
-	// Update parameters of the existing collection
+	//
+	//Update parameters of the existing collection
 	Update(context.Context, *UpdateCollection) (*CollectionOperationResponse, error)
-	// Drop collection and all associated data
+	//
+	//Drop collection and all associated data
 	Delete(context.Context, *DeleteCollection) (*CollectionOperationResponse, error)
-	// Update Aliases of the existing collection
+	//
+	//Update Aliases of the existing collection
 	UpdateAliases(context.Context, *ChangeAliases) (*CollectionOperationResponse, error)
-	// Get list of all aliases for a collection
+	//
+	//Get list of all aliases for a collection
 	ListCollectionAliases(context.Context, *ListCollectionAliasesRequest) (*ListAliasesResponse, error)
-	// Get list of all aliases for all existing collections
+	//
+	//Get list of all aliases for all existing collections
 	ListAliases(context.Context, *ListAliasesRequest) (*ListAliasesResponse, error)
-	// Get cluster information for a collection
+	//
+	//Get cluster information for a collection
 	CollectionClusterInfo(context.Context, *CollectionClusterInfoRequest) (*CollectionClusterInfoResponse, error)
-	// Update cluster setup for a collection
+	//
+	//Update cluster setup for a collection
 	UpdateCollectionClusterSetup(context.Context, *UpdateCollectionClusterSetupRequest) (*UpdateCollectionClusterSetupResponse, error)
 	mustEmbedUnimplementedCollectionsServer()
 }

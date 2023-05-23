@@ -22,17 +22,23 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SnapshotsClient interface {
-	// Create collection snapshot
+	//
+	//Create collection snapshot
 	Create(ctx context.Context, in *CreateSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error)
-	// List collection snapshots
+	//
+	//List collection snapshots
 	List(ctx context.Context, in *ListSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error)
-	// Delete collection snapshots
+	//
+	//Delete collection snapshots
 	Delete(ctx context.Context, in *DeleteSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error)
-	// Create full storage snapshot
+	//
+	//Create full storage snapshot
 	CreateFull(ctx context.Context, in *CreateFullSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error)
-	// List full storage snapshots
+	//
+	//List full storage snapshots
 	ListFull(ctx context.Context, in *ListFullSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error)
-	// List full storage snapshots
+	//
+	//List full storage snapshots
 	DeleteFull(ctx context.Context, in *DeleteFullSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error)
 }
 
@@ -102,17 +108,23 @@ func (c *snapshotsClient) DeleteFull(ctx context.Context, in *DeleteFullSnapshot
 // All implementations must embed UnimplementedSnapshotsServer
 // for forward compatibility
 type SnapshotsServer interface {
-	// Create collection snapshot
+	//
+	//Create collection snapshot
 	Create(context.Context, *CreateSnapshotRequest) (*CreateSnapshotResponse, error)
-	// List collection snapshots
+	//
+	//List collection snapshots
 	List(context.Context, *ListSnapshotsRequest) (*ListSnapshotsResponse, error)
-	// Delete collection snapshots
+	//
+	//Delete collection snapshots
 	Delete(context.Context, *DeleteSnapshotRequest) (*DeleteSnapshotResponse, error)
-	// Create full storage snapshot
+	//
+	//Create full storage snapshot
 	CreateFull(context.Context, *CreateFullSnapshotRequest) (*CreateSnapshotResponse, error)
-	// List full storage snapshots
+	//
+	//List full storage snapshots
 	ListFull(context.Context, *ListFullSnapshotsRequest) (*ListSnapshotsResponse, error)
-	// List full storage snapshots
+	//
+	//List full storage snapshots
 	DeleteFull(context.Context, *DeleteFullSnapshotRequest) (*DeleteSnapshotResponse, error)
 	mustEmbedUnimplementedSnapshotsServer()
 }
