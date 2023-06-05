@@ -259,6 +259,9 @@ func main() {
 		CollectionName: collectionName,
 		Vector:         []float32{0.2, 0.1, 0.9, 0.7},
 		Limit:          3,
+		// Include all payload and vectors in the search result
+		WithVectors: &pb.WithVectorsSelector{SelectorOptions: &pb.WithVectorsSelector_Enable{Enable: true}},
+		WithPayload: &pb.WithPayloadSelector{SelectorOptions: &pb.WithPayloadSelector_Enable{Enable: true}},
 	})
 	if err != nil {
 		log.Fatalf("Could not search points: %v", err)
