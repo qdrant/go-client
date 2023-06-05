@@ -18,6 +18,7 @@ docker run -p 6333:6333 -p 6334:6334 \
     -e QDRANT__SERVICE__GRPC_PORT="6334" \
     qdrant/qdrant
 ```
+
 Or by updating the configuration file:
 
 ```yaml
@@ -26,7 +27,6 @@ service:
 ```
 
 More info about gRPC in [documentation](https://qdrant.tech/documentation/quick_start/#grpc).
-
 
 ### Making requests
 
@@ -69,5 +69,7 @@ func main() {
 	log.Printf("List of collections: %s", r.GetCollections())
 }
 ```
+
+> For authenticated request (using API KEY and TLS) to Qdrant Cloud, please refer to the [authenticated](https://github.com/qdrant/go-client/tree/master/examples/authentication/main.go) example.
 
 A full example for uploading, searching and filtering can be found in the [`examples`](https://github.com/qdrant/go-client/tree/master/examples) directory.
