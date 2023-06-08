@@ -26,7 +26,7 @@ service:
   grpc_port: 6334
 ```
 
-More info about gRPC in [documentation](https://qdrant.tech/documentation/quick_start/#grpc).
+More info about gRPC in [documentation](https://qdrant.tech/documentation/quick-start/#grpc).
 
 ### Making requests
 
