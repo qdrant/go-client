@@ -228,6 +228,13 @@ func main() {
 			Vectors: &pb.Vectors{VectorsOptions: &pb.Vectors_Vector{Vector: &pb.Vector{Data: []float32{0.35, 0.08, 0.11, 0.44}}}},
 			Payload: map[string]*pb.Value{},
 		},
+		{
+			Id: &pb.PointId{
+				PointIdOptions: &pb.PointId_Uuid{Uuid: "58384991-3295-4e21-b711-fd3b94fa73e3"},
+			},
+			Vectors: &pb.Vectors{VectorsOptions: &pb.Vectors_Vector{Vector: &pb.Vector{Data: []float32{0.35, 0.08, 0.11, 0.44}}}},
+			Payload: map[string]*pb.Value{},
+		},
 	}
 	_, err = pointsClient.Upsert(ctx, &pb.UpsertPoints{
 		CollectionName: collectionName,

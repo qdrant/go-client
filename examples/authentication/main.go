@@ -4,10 +4,11 @@ import (
 	"context"
 	"crypto/tls"
 	"flag"
-	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/metadata"
 	"log"
 	"time"
+
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 
 	pb "github.com/qdrant/go-client/qdrant"
 	"google.golang.org/grpc"
