@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	ShardSnapshots_CreateShard_FullMethodName  = "/qdrant.ShardSnapshots/CreateShard"
-	ShardSnapshots_ListShard_FullMethodName    = "/qdrant.ShardSnapshots/ListShard"
-	ShardSnapshots_DeleteShard_FullMethodName  = "/qdrant.ShardSnapshots/DeleteShard"
-	ShardSnapshots_RecoverShard_FullMethodName = "/qdrant.ShardSnapshots/RecoverShard"
+	ShardSnapshots_Create_FullMethodName  = "/qdrant.ShardSnapshots/Create"
+	ShardSnapshots_List_FullMethodName    = "/qdrant.ShardSnapshots/List"
+	ShardSnapshots_Delete_FullMethodName  = "/qdrant.ShardSnapshots/Delete"
+	ShardSnapshots_Recover_FullMethodName = "/qdrant.ShardSnapshots/Recover"
 )
 
 // ShardSnapshotsClient is the client API for ShardSnapshots service.
@@ -30,13 +30,13 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ShardSnapshotsClient interface {
 	// Create shard snapshot
-	CreateShard(ctx context.Context, in *CreateShardSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error)
+	Create(ctx context.Context, in *CreateShardSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error)
 	// List shard snapshots
-	ListShard(ctx context.Context, in *ListShardSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error)
+	List(ctx context.Context, in *ListShardSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error)
 	// Delete shard snapshot
-	DeleteShard(ctx context.Context, in *DeleteShardSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error)
+	Delete(ctx context.Context, in *DeleteShardSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error)
 	// Recover shard snapshot
-	RecoverShard(ctx context.Context, in *RecoverShardSnapshotRequest, opts ...grpc.CallOption) (*RecoverSnapshotResponse, error)
+	Recover(ctx context.Context, in *RecoverShardSnapshotRequest, opts ...grpc.CallOption) (*RecoverSnapshotResponse, error)
 }
 
 type shardSnapshotsClient struct {
@@ -47,36 +47,36 @@ func NewShardSnapshotsClient(cc grpc.ClientConnInterface) ShardSnapshotsClient {
 	return &shardSnapshotsClient{cc}
 }
 
-func (c *shardSnapshotsClient) CreateShard(ctx context.Context, in *CreateShardSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error) {
+func (c *shardSnapshotsClient) Create(ctx context.Context, in *CreateShardSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error) {
 	out := new(CreateSnapshotResponse)
-	err := c.cc.Invoke(ctx, ShardSnapshots_CreateShard_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ShardSnapshots_Create_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *shardSnapshotsClient) ListShard(ctx context.Context, in *ListShardSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error) {
+func (c *shardSnapshotsClient) List(ctx context.Context, in *ListShardSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error) {
 	out := new(ListSnapshotsResponse)
-	err := c.cc.Invoke(ctx, ShardSnapshots_ListShard_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ShardSnapshots_List_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *shardSnapshotsClient) DeleteShard(ctx context.Context, in *DeleteShardSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error) {
+func (c *shardSnapshotsClient) Delete(ctx context.Context, in *DeleteShardSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error) {
 	out := new(DeleteSnapshotResponse)
-	err := c.cc.Invoke(ctx, ShardSnapshots_DeleteShard_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ShardSnapshots_Delete_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *shardSnapshotsClient) RecoverShard(ctx context.Context, in *RecoverShardSnapshotRequest, opts ...grpc.CallOption) (*RecoverSnapshotResponse, error) {
+func (c *shardSnapshotsClient) Recover(ctx context.Context, in *RecoverShardSnapshotRequest, opts ...grpc.CallOption) (*RecoverSnapshotResponse, error) {
 	out := new(RecoverSnapshotResponse)
-	err := c.cc.Invoke(ctx, ShardSnapshots_RecoverShard_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ShardSnapshots_Recover_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,13 +88,13 @@ func (c *shardSnapshotsClient) RecoverShard(ctx context.Context, in *RecoverShar
 // for forward compatibility
 type ShardSnapshotsServer interface {
 	// Create shard snapshot
-	CreateShard(context.Context, *CreateShardSnapshotRequest) (*CreateSnapshotResponse, error)
+	Create(context.Context, *CreateShardSnapshotRequest) (*CreateSnapshotResponse, error)
 	// List shard snapshots
-	ListShard(context.Context, *ListShardSnapshotsRequest) (*ListSnapshotsResponse, error)
+	List(context.Context, *ListShardSnapshotsRequest) (*ListSnapshotsResponse, error)
 	// Delete shard snapshot
-	DeleteShard(context.Context, *DeleteShardSnapshotRequest) (*DeleteSnapshotResponse, error)
+	Delete(context.Context, *DeleteShardSnapshotRequest) (*DeleteSnapshotResponse, error)
 	// Recover shard snapshot
-	RecoverShard(context.Context, *RecoverShardSnapshotRequest) (*RecoverSnapshotResponse, error)
+	Recover(context.Context, *RecoverShardSnapshotRequest) (*RecoverSnapshotResponse, error)
 	mustEmbedUnimplementedShardSnapshotsServer()
 }
 
@@ -102,17 +102,17 @@ type ShardSnapshotsServer interface {
 type UnimplementedShardSnapshotsServer struct {
 }
 
-func (UnimplementedShardSnapshotsServer) CreateShard(context.Context, *CreateShardSnapshotRequest) (*CreateSnapshotResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateShard not implemented")
+func (UnimplementedShardSnapshotsServer) Create(context.Context, *CreateShardSnapshotRequest) (*CreateSnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedShardSnapshotsServer) ListShard(context.Context, *ListShardSnapshotsRequest) (*ListSnapshotsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListShard not implemented")
+func (UnimplementedShardSnapshotsServer) List(context.Context, *ListShardSnapshotsRequest) (*ListSnapshotsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedShardSnapshotsServer) DeleteShard(context.Context, *DeleteShardSnapshotRequest) (*DeleteSnapshotResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteShard not implemented")
+func (UnimplementedShardSnapshotsServer) Delete(context.Context, *DeleteShardSnapshotRequest) (*DeleteSnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedShardSnapshotsServer) RecoverShard(context.Context, *RecoverShardSnapshotRequest) (*RecoverSnapshotResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RecoverShard not implemented")
+func (UnimplementedShardSnapshotsServer) Recover(context.Context, *RecoverShardSnapshotRequest) (*RecoverSnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Recover not implemented")
 }
 func (UnimplementedShardSnapshotsServer) mustEmbedUnimplementedShardSnapshotsServer() {}
 
@@ -127,74 +127,74 @@ func RegisterShardSnapshotsServer(s grpc.ServiceRegistrar, srv ShardSnapshotsSer
 	s.RegisterService(&ShardSnapshots_ServiceDesc, srv)
 }
 
-func _ShardSnapshots_CreateShard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ShardSnapshots_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateShardSnapshotRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ShardSnapshotsServer).CreateShard(ctx, in)
+		return srv.(ShardSnapshotsServer).Create(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ShardSnapshots_CreateShard_FullMethodName,
+		FullMethod: ShardSnapshots_Create_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShardSnapshotsServer).CreateShard(ctx, req.(*CreateShardSnapshotRequest))
+		return srv.(ShardSnapshotsServer).Create(ctx, req.(*CreateShardSnapshotRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ShardSnapshots_ListShard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ShardSnapshots_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListShardSnapshotsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ShardSnapshotsServer).ListShard(ctx, in)
+		return srv.(ShardSnapshotsServer).List(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ShardSnapshots_ListShard_FullMethodName,
+		FullMethod: ShardSnapshots_List_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShardSnapshotsServer).ListShard(ctx, req.(*ListShardSnapshotsRequest))
+		return srv.(ShardSnapshotsServer).List(ctx, req.(*ListShardSnapshotsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ShardSnapshots_DeleteShard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ShardSnapshots_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteShardSnapshotRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ShardSnapshotsServer).DeleteShard(ctx, in)
+		return srv.(ShardSnapshotsServer).Delete(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ShardSnapshots_DeleteShard_FullMethodName,
+		FullMethod: ShardSnapshots_Delete_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShardSnapshotsServer).DeleteShard(ctx, req.(*DeleteShardSnapshotRequest))
+		return srv.(ShardSnapshotsServer).Delete(ctx, req.(*DeleteShardSnapshotRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ShardSnapshots_RecoverShard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ShardSnapshots_Recover_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RecoverShardSnapshotRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ShardSnapshotsServer).RecoverShard(ctx, in)
+		return srv.(ShardSnapshotsServer).Recover(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ShardSnapshots_RecoverShard_FullMethodName,
+		FullMethod: ShardSnapshots_Recover_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShardSnapshotsServer).RecoverShard(ctx, req.(*RecoverShardSnapshotRequest))
+		return srv.(ShardSnapshotsServer).Recover(ctx, req.(*RecoverShardSnapshotRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -207,20 +207,20 @@ var ShardSnapshots_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ShardSnapshotsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateShard",
-			Handler:    _ShardSnapshots_CreateShard_Handler,
+			MethodName: "Create",
+			Handler:    _ShardSnapshots_Create_Handler,
 		},
 		{
-			MethodName: "ListShard",
-			Handler:    _ShardSnapshots_ListShard_Handler,
+			MethodName: "List",
+			Handler:    _ShardSnapshots_List_Handler,
 		},
 		{
-			MethodName: "DeleteShard",
-			Handler:    _ShardSnapshots_DeleteShard_Handler,
+			MethodName: "Delete",
+			Handler:    _ShardSnapshots_Delete_Handler,
 		},
 		{
-			MethodName: "RecoverShard",
-			Handler:    _ShardSnapshots_RecoverShard_Handler,
+			MethodName: "Recover",
+			Handler:    _ShardSnapshots_Recover_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
