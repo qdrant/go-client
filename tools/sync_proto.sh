@@ -36,4 +36,5 @@ cat $CLIENT_DIR/qdrant.proto \
 
 mv $CLIENT_DIR/qdrant_tmp.proto $CLIENT_DIR/qdrant.proto
 
-
+# Remove csharp option from proto files
+sed -i '/option csharp_namespace = .*/d' $CLIENT_DIR/*.proto
