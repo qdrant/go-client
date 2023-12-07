@@ -25,12 +25,14 @@ rm $CLIENT_DIR/points_internal_service.proto
 rm $CLIENT_DIR/qdrant_internal_service.proto
 rm $CLIENT_DIR/raft_service.proto
 rm $CLIENT_DIR/health_check.proto
+rm $CLIENT_DIR/shard_snapshots_service.proto
 sed -i '
     /collections_internal_service.proto/d;
     /points_internal_service.proto/d;
     /qdrant_internal_service.proto/d;
     /raft_service.proto/d;
     /health_check.proto/d;
+    /shard_snapshots_service.proto/d;
     ' $CLIENT_DIR/qdrant.proto
 
 # Remove csharp option from proto files
