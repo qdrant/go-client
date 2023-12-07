@@ -19,21 +19,21 @@ CLIENT_DIR="proto"
 
 cp $PROTO_DIR/*.proto $CLIENT_DIR/
 
-# Remove internal services *.proto
+# Remove internal service proto files and their imports
 rm $CLIENT_DIR/collections_internal_service.proto
 rm $CLIENT_DIR/points_internal_service.proto
 rm $CLIENT_DIR/qdrant_internal_service.proto
 rm $CLIENT_DIR/raft_service.proto
 rm $CLIENT_DIR/health_check.proto
+rm $CLIENT_DIR/shard_snapshots_service.proto
+sed -i '
+    /collections_internal_service.proto/d;
+    /points_internal_service.proto/d;
+    /qdrant_internal_service.proto/d;
+    /raft_service.proto/d;
+    /health_check.proto/d;
+    /shard_snapshots_service.proto/d;
+    ' $CLIENT_DIR/qdrant.proto
 
-cat $CLIENT_DIR/qdrant.proto \
- | grep -v 'collections_internal_service.proto' \
- | grep -v 'points_internal_service.proto' \
- | grep -v 'qdrant_internal_service.proto' \
- | grep -v 'raft_service.proto' \
- | grep -v 'health_check.proto' \
-  > $CLIENT_DIR/qdrant_tmp.proto
-
-mv $CLIENT_DIR/qdrant_tmp.proto $CLIENT_DIR/qdrant.proto
-
-
+# Remove csharp option from proto files
+sed -i '/option csharp_namespace = .*/d' $CLIENT_DIR/*.proto
