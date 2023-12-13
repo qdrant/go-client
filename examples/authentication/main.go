@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 
-	pb "github.com/qdrant/go-client/qdrant"
+	"github.com/qdrant/go-client/qdrant"
 	"google.golang.org/grpc"
 )
 
@@ -28,14 +28,14 @@ func main() {
 	}
 	defer conn.Close()
 
-	collections_client := pb.NewCollectionsClient(conn)
+	collections_client := qdrant.NewCollectionsClient(conn)
 
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	md := metadata.New(map[string]string{"api-key": "secret-key-*******"})
 	ctx = metadata.NewOutgoingContext(ctx, md)
 	defer cancel()
-	r, err := collections_client.List(ctx, &pb.ListCollectionsRequest{})
+	r, err := collections_client.List(ctx, &qdrant.ListCollectionsRequest{})
 	if err != nil {
 		log.Fatalf("could not get collections: %v", err)
 	}
