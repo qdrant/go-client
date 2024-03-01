@@ -40,6 +40,8 @@ type CollectionsClient interface {
 	ListAliases(ctx context.Context, in *ListAliasesRequest, opts ...grpc.CallOption) (*ListAliasesResponse, error)
 	// Get cluster information for a collection
 	CollectionClusterInfo(ctx context.Context, in *CollectionClusterInfoRequest, opts ...grpc.CallOption) (*CollectionClusterInfoResponse, error)
+	// Check the existence of a collection
+	CollectionExists(ctx context.Context, in *CollectionExistsRequest, opts ...grpc.CallOption) (*CollectionExistsResponse, error)
 	// Update cluster setup for a collection
 	UpdateCollectionClusterSetup(ctx context.Context, in *UpdateCollectionClusterSetupRequest, opts ...grpc.CallOption) (*UpdateCollectionClusterSetupResponse, error)
 	// Create shard key
@@ -137,6 +139,15 @@ func (c *collectionsClient) CollectionClusterInfo(ctx context.Context, in *Colle
 	return out, nil
 }
 
+func (c *collectionsClient) CollectionExists(ctx context.Context, in *CollectionExistsRequest, opts ...grpc.CallOption) (*CollectionExistsResponse, error) {
+	out := new(CollectionExistsResponse)
+	err := c.cc.Invoke(ctx, "/qdrant.Collections/CollectionExists", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *collectionsClient) UpdateCollectionClusterSetup(ctx context.Context, in *UpdateCollectionClusterSetupRequest, opts ...grpc.CallOption) (*UpdateCollectionClusterSetupResponse, error) {
 	out := new(UpdateCollectionClusterSetupResponse)
 	err := c.cc.Invoke(ctx, "/qdrant.Collections/UpdateCollectionClusterSetup", in, out, opts...)
@@ -186,6 +197,8 @@ type CollectionsServer interface {
 	ListAliases(context.Context, *ListAliasesRequest) (*ListAliasesResponse, error)
 	// Get cluster information for a collection
 	CollectionClusterInfo(context.Context, *CollectionClusterInfoRequest) (*CollectionClusterInfoResponse, error)
+	// Check the existence of a collection
+	CollectionExists(context.Context, *CollectionExistsRequest) (*CollectionExistsResponse, error)
 	// Update cluster setup for a collection
 	UpdateCollectionClusterSetup(context.Context, *UpdateCollectionClusterSetupRequest) (*UpdateCollectionClusterSetupResponse, error)
 	// Create shard key
@@ -225,6 +238,9 @@ func (UnimplementedCollectionsServer) ListAliases(context.Context, *ListAliasesR
 }
 func (UnimplementedCollectionsServer) CollectionClusterInfo(context.Context, *CollectionClusterInfoRequest) (*CollectionClusterInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CollectionClusterInfo not implemented")
+}
+func (UnimplementedCollectionsServer) CollectionExists(context.Context, *CollectionExistsRequest) (*CollectionExistsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CollectionExists not implemented")
 }
 func (UnimplementedCollectionsServer) UpdateCollectionClusterSetup(context.Context, *UpdateCollectionClusterSetupRequest) (*UpdateCollectionClusterSetupResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCollectionClusterSetup not implemented")
@@ -410,6 +426,24 @@ func _Collections_CollectionClusterInfo_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Collections_CollectionExists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CollectionExistsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CollectionsServer).CollectionExists(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/qdrant.Collections/CollectionExists",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CollectionsServer).CollectionExists(ctx, req.(*CollectionExistsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Collections_UpdateCollectionClusterSetup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateCollectionClusterSetupRequest)
 	if err := dec(in); err != nil {
@@ -506,6 +540,10 @@ var Collections_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CollectionClusterInfo",
 			Handler:    _Collections_CollectionClusterInfo_Handler,
+		},
+		{
+			MethodName: "CollectionExists",
+			Handler:    _Collections_CollectionExists_Handler,
 		},
 		{
 			MethodName: "UpdateCollectionClusterSetup",
