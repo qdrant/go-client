@@ -2,15 +2,8 @@ module github.com/qdrant/go-client
 
 go 1.21
 
-toolchain go1.21.3
-
-replace (
-	github.com/testcontainers/testcontainers-go => github.com/testcontainers/testcontainers-go v0.28.1-0.20240301154625-bf87aee46d20
-	github.com/testcontainers/testcontainers-go/modules/qdrant => github.com/testcontainers/testcontainers-go/modules/qdrant v0.0.0-20240301154625-bf87aee46d20
-)
-
 require (
-	github.com/testcontainers/testcontainers-go/modules/qdrant v0.0.0-00010101000000-000000000000
+	github.com/testcontainers/testcontainers-go/modules/qdrant v0.29.1
 	google.golang.org/grpc v1.61.1
 	google.golang.org/protobuf v1.31.0
 )
