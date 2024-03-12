@@ -7,6 +7,7 @@ import (
 	"time"
 
 	pb "github.com/qdrant/go-client/qdrant"
+	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/qdrant"
 
 	grpc "google.golang.org/grpc"
@@ -20,7 +21,7 @@ func TestNewQdrantClient(t *testing.T) {
 		distance              = pb.Distance_Dot
 	)
 
-	c, err := qdrant.RunContainer(context.Background())
+	c, err := qdrant.RunContainer(context.Background(), testcontainers.WithImage("qdrant/qdrant:v1.8.1"))
 	if err != nil {
 		t.Fatalf("Could not start qdrant container: %v", err)
 	}
