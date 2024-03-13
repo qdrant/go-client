@@ -4,7 +4,7 @@
 // - protoc             v3.21.12
 // source: points_service.proto
 
-package go_client
+package qdrant
 
 import (
 	context "context"

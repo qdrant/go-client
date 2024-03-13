@@ -4,7 +4,7 @@
 // - protoc             v3.21.12
 // source: qdrant.proto
 
-package go_client
+package qdrant
 
 import (
 	context "context"
