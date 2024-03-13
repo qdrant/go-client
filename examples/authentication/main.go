@@ -22,7 +22,7 @@ func main() {
 	flag.Parse()
 	// Set up a connection to the server.
 	config := &tls.Config{}
-	conn, err := grpc.Dial(*addr, grpc.WithTransportCredentials(credentials.NewTLS(config)))
+	conn, err := grpc.Dial(*addr, grpc.WithTransportCredentials(credentials.NewTLS(config)), grpc.WithUnaryInterceptor(interceptor))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -32,12 +32,16 @@ func main() {
 
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	md := metadata.New(map[string]string{"api-key": "secret-key-*******"})
-	ctx = metadata.NewOutgoingContext(ctx, md)
 	defer cancel()
 	r, err := collections_client.List(ctx, &pb.ListCollectionsRequest{})
 	if err != nil {
 		log.Fatalf("could not get collections: %v", err)
 	}
 	log.Printf("List of collections: %s", r.GetCollections())
+}
+
+func interceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	md := metadata.New(map[string]string{"api-key": "secret-key-*******"})
+	newCtx := metadata.NewOutgoingContext(ctx, md)
+	return invoker(newCtx, method, req, reply, cc, opts...)
 }
