@@ -21,7 +21,7 @@ func TestNewQdrantClient(t *testing.T) {
 		distance              = pb.Distance_Dot
 	)
 
-	c, err := qdrant.RunContainer(context.Background(), testcontainers.WithImage("qdrant/qdrant:v1.9.0"))
+	c, err := qdrant.RunContainer(context.Background(), testcontainers.WithImage("qdrant/qdrant:dev"))
 	if err != nil {
 		t.Fatalf("Could not start qdrant container: %v", err)
 	}
