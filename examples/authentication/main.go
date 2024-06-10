@@ -41,7 +41,6 @@ func main() {
 }
 
 func interceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-	md := metadata.New(map[string]string{"api-key": "secret-key-*******"})
-	newCtx := metadata.NewOutgoingContext(ctx, md)
+	newCtx := metadata.AppendToOutgoingContext(ctx, "api-key", "secret-key-*******")
 	return invoker(newCtx, method, req, reply, cc, opts...)
 }
