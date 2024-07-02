@@ -4,7 +4,7 @@
 // 	protoc        v4.22.2
 // source: collections.proto
 
-package go_client
+package qdrant
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

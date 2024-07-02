@@ -4,7 +4,7 @@
 // - protoc             v4.22.2
 // source: collections_service.proto
 
-package go_client
+package qdrant
 
 import (
 	context "context"
