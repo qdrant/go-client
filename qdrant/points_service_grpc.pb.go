@@ -84,6 +84,8 @@ type PointsClient interface {
 	Query(ctx context.Context, in *QueryPoints, opts ...grpc.CallOption) (*QueryResponse, error)
 	// Universally query points in a batch fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
 	QueryBatch(ctx context.Context, in *QueryBatchPoints, opts ...grpc.CallOption) (*QueryBatchResponse, error)
+	// Universally query points in a group fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+	QueryGroups(ctx context.Context, in *QueryPointGroups, opts ...grpc.CallOption) (*QueryGroupsResponse, error)
 }
 
 type pointsClient struct {
@@ -310,6 +312,15 @@ func (c *pointsClient) QueryBatch(ctx context.Context, in *QueryBatchPoints, opt
 	return out, nil
 }
 
+func (c *pointsClient) QueryGroups(ctx context.Context, in *QueryPointGroups, opts ...grpc.CallOption) (*QueryGroupsResponse, error) {
+	out := new(QueryGroupsResponse)
+	err := c.cc.Invoke(ctx, "/qdrant.Points/QueryGroups", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PointsServer is the server API for Points service.
 // All implementations must embed UnimplementedPointsServer
 // for forward compatibility
@@ -376,6 +387,8 @@ type PointsServer interface {
 	Query(context.Context, *QueryPoints) (*QueryResponse, error)
 	// Universally query points in a batch fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
 	QueryBatch(context.Context, *QueryBatchPoints) (*QueryBatchResponse, error)
+	// Universally query points in a group fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+	QueryGroups(context.Context, *QueryPointGroups) (*QueryGroupsResponse, error)
 	mustEmbedUnimplementedPointsServer()
 }
 
@@ -454,6 +467,9 @@ func (UnimplementedPointsServer) Query(context.Context, *QueryPoints) (*QueryRes
 }
 func (UnimplementedPointsServer) QueryBatch(context.Context, *QueryBatchPoints) (*QueryBatchResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method QueryBatch not implemented")
+}
+func (UnimplementedPointsServer) QueryGroups(context.Context, *QueryPointGroups) (*QueryGroupsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryGroups not implemented")
 }
 func (UnimplementedPointsServer) mustEmbedUnimplementedPointsServer() {}
 
@@ -900,6 +916,24 @@ func _Points_QueryBatch_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Points_QueryGroups_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryPointGroups)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PointsServer).QueryGroups(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/qdrant.Points/QueryGroups",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PointsServer).QueryGroups(ctx, req.(*QueryPointGroups))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Points_ServiceDesc is the grpc.ServiceDesc for Points service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1002,6 +1036,10 @@ var Points_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "QueryBatch",
 			Handler:    _Points_QueryBatch_Handler,
+		},
+		{
+			MethodName: "QueryGroups",
+			Handler:    _Points_QueryGroups_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

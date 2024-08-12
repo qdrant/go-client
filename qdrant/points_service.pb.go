@@ -24,7 +24,7 @@ var File_points_service_proto protoreflect.FileDescriptor
 var file_points_service_proto_rawDesc = []byte{
 	0x0a, 0x14, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
 	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x06, 0x71, 0x64, 0x72, 0x61, 0x6e, 0x74, 0x1a, 0x0c,
-	0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x32, 0xce, 0x0d, 0x0a,
+	0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x32, 0x96, 0x0e, 0x0a,
 	0x06, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x12, 0x41, 0x0a, 0x06, 0x55, 0x70, 0x73, 0x65, 0x72,
 	0x74, 0x12, 0x14, 0x2e, 0x71, 0x64, 0x72, 0x61, 0x6e, 0x74, 0x2e, 0x55, 0x70, 0x73, 0x65, 0x72,
 	0x74, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x1a, 0x1f, 0x2e, 0x71, 0x64, 0x72, 0x61, 0x6e, 0x74,
@@ -133,8 +133,12 @@ var file_points_service_proto_rawDesc = []byte{
 	0x42, 0x61, 0x74, 0x63, 0x68, 0x12, 0x18, 0x2e, 0x71, 0x64, 0x72, 0x61, 0x6e, 0x74, 0x2e, 0x51,
 	0x75, 0x65, 0x72, 0x79, 0x42, 0x61, 0x74, 0x63, 0x68, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x1a,
 	0x1a, 0x2e, 0x71, 0x64, 0x72, 0x61, 0x6e, 0x74, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x42, 0x61,
-	0x74, 0x63, 0x68, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x63, 0x68, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x46, 0x0a,
+	0x0b, 0x51, 0x75, 0x65, 0x72, 0x79, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x12, 0x18, 0x2e, 0x71,
+	0x64, 0x72, 0x61, 0x6e, 0x74, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x50, 0x6f, 0x69, 0x6e, 0x74,
+	0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x1a, 0x1b, 0x2e, 0x71, 0x64, 0x72, 0x61, 0x6e, 0x74, 0x2e,
+	0x51, 0x75, 0x65, 0x72, 0x79, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var file_points_service_proto_goTypes = []interface{}{
@@ -161,21 +165,23 @@ var file_points_service_proto_goTypes = []interface{}{
 	(*UpdateBatchPoints)(nil),          // 20: qdrant.UpdateBatchPoints
 	(*QueryPoints)(nil),                // 21: qdrant.QueryPoints
 	(*QueryBatchPoints)(nil),           // 22: qdrant.QueryBatchPoints
-	(*PointsOperationResponse)(nil),    // 23: qdrant.PointsOperationResponse
-	(*GetResponse)(nil),                // 24: qdrant.GetResponse
-	(*SearchResponse)(nil),             // 25: qdrant.SearchResponse
-	(*SearchBatchResponse)(nil),        // 26: qdrant.SearchBatchResponse
-	(*SearchGroupsResponse)(nil),       // 27: qdrant.SearchGroupsResponse
-	(*ScrollResponse)(nil),             // 28: qdrant.ScrollResponse
-	(*RecommendResponse)(nil),          // 29: qdrant.RecommendResponse
-	(*RecommendBatchResponse)(nil),     // 30: qdrant.RecommendBatchResponse
-	(*RecommendGroupsResponse)(nil),    // 31: qdrant.RecommendGroupsResponse
-	(*DiscoverResponse)(nil),           // 32: qdrant.DiscoverResponse
-	(*DiscoverBatchResponse)(nil),      // 33: qdrant.DiscoverBatchResponse
-	(*CountResponse)(nil),              // 34: qdrant.CountResponse
-	(*UpdateBatchResponse)(nil),        // 35: qdrant.UpdateBatchResponse
-	(*QueryResponse)(nil),              // 36: qdrant.QueryResponse
-	(*QueryBatchResponse)(nil),         // 37: qdrant.QueryBatchResponse
+	(*QueryPointGroups)(nil),           // 23: qdrant.QueryPointGroups
+	(*PointsOperationResponse)(nil),    // 24: qdrant.PointsOperationResponse
+	(*GetResponse)(nil),                // 25: qdrant.GetResponse
+	(*SearchResponse)(nil),             // 26: qdrant.SearchResponse
+	(*SearchBatchResponse)(nil),        // 27: qdrant.SearchBatchResponse
+	(*SearchGroupsResponse)(nil),       // 28: qdrant.SearchGroupsResponse
+	(*ScrollResponse)(nil),             // 29: qdrant.ScrollResponse
+	(*RecommendResponse)(nil),          // 30: qdrant.RecommendResponse
+	(*RecommendBatchResponse)(nil),     // 31: qdrant.RecommendBatchResponse
+	(*RecommendGroupsResponse)(nil),    // 32: qdrant.RecommendGroupsResponse
+	(*DiscoverResponse)(nil),           // 33: qdrant.DiscoverResponse
+	(*DiscoverBatchResponse)(nil),      // 34: qdrant.DiscoverBatchResponse
+	(*CountResponse)(nil),              // 35: qdrant.CountResponse
+	(*UpdateBatchResponse)(nil),        // 36: qdrant.UpdateBatchResponse
+	(*QueryResponse)(nil),              // 37: qdrant.QueryResponse
+	(*QueryBatchResponse)(nil),         // 38: qdrant.QueryBatchResponse
+	(*QueryGroupsResponse)(nil),        // 39: qdrant.QueryGroupsResponse
 }
 var file_points_service_proto_depIdxs = []int32{
 	0,  // 0: qdrant.Points.Upsert:input_type -> qdrant.UpsertPoints
@@ -202,32 +208,34 @@ var file_points_service_proto_depIdxs = []int32{
 	20, // 21: qdrant.Points.UpdateBatch:input_type -> qdrant.UpdateBatchPoints
 	21, // 22: qdrant.Points.Query:input_type -> qdrant.QueryPoints
 	22, // 23: qdrant.Points.QueryBatch:input_type -> qdrant.QueryBatchPoints
-	23, // 24: qdrant.Points.Upsert:output_type -> qdrant.PointsOperationResponse
-	23, // 25: qdrant.Points.Delete:output_type -> qdrant.PointsOperationResponse
-	24, // 26: qdrant.Points.Get:output_type -> qdrant.GetResponse
-	23, // 27: qdrant.Points.UpdateVectors:output_type -> qdrant.PointsOperationResponse
-	23, // 28: qdrant.Points.DeleteVectors:output_type -> qdrant.PointsOperationResponse
-	23, // 29: qdrant.Points.SetPayload:output_type -> qdrant.PointsOperationResponse
-	23, // 30: qdrant.Points.OverwritePayload:output_type -> qdrant.PointsOperationResponse
-	23, // 31: qdrant.Points.DeletePayload:output_type -> qdrant.PointsOperationResponse
-	23, // 32: qdrant.Points.ClearPayload:output_type -> qdrant.PointsOperationResponse
-	23, // 33: qdrant.Points.CreateFieldIndex:output_type -> qdrant.PointsOperationResponse
-	23, // 34: qdrant.Points.DeleteFieldIndex:output_type -> qdrant.PointsOperationResponse
-	25, // 35: qdrant.Points.Search:output_type -> qdrant.SearchResponse
-	26, // 36: qdrant.Points.SearchBatch:output_type -> qdrant.SearchBatchResponse
-	27, // 37: qdrant.Points.SearchGroups:output_type -> qdrant.SearchGroupsResponse
-	28, // 38: qdrant.Points.Scroll:output_type -> qdrant.ScrollResponse
-	29, // 39: qdrant.Points.Recommend:output_type -> qdrant.RecommendResponse
-	30, // 40: qdrant.Points.RecommendBatch:output_type -> qdrant.RecommendBatchResponse
-	31, // 41: qdrant.Points.RecommendGroups:output_type -> qdrant.RecommendGroupsResponse
-	32, // 42: qdrant.Points.Discover:output_type -> qdrant.DiscoverResponse
-	33, // 43: qdrant.Points.DiscoverBatch:output_type -> qdrant.DiscoverBatchResponse
-	34, // 44: qdrant.Points.Count:output_type -> qdrant.CountResponse
-	35, // 45: qdrant.Points.UpdateBatch:output_type -> qdrant.UpdateBatchResponse
-	36, // 46: qdrant.Points.Query:output_type -> qdrant.QueryResponse
-	37, // 47: qdrant.Points.QueryBatch:output_type -> qdrant.QueryBatchResponse
-	24, // [24:48] is the sub-list for method output_type
-	0,  // [0:24] is the sub-list for method input_type
+	23, // 24: qdrant.Points.QueryGroups:input_type -> qdrant.QueryPointGroups
+	24, // 25: qdrant.Points.Upsert:output_type -> qdrant.PointsOperationResponse
+	24, // 26: qdrant.Points.Delete:output_type -> qdrant.PointsOperationResponse
+	25, // 27: qdrant.Points.Get:output_type -> qdrant.GetResponse
+	24, // 28: qdrant.Points.UpdateVectors:output_type -> qdrant.PointsOperationResponse
+	24, // 29: qdrant.Points.DeleteVectors:output_type -> qdrant.PointsOperationResponse
+	24, // 30: qdrant.Points.SetPayload:output_type -> qdrant.PointsOperationResponse
+	24, // 31: qdrant.Points.OverwritePayload:output_type -> qdrant.PointsOperationResponse
+	24, // 32: qdrant.Points.DeletePayload:output_type -> qdrant.PointsOperationResponse
+	24, // 33: qdrant.Points.ClearPayload:output_type -> qdrant.PointsOperationResponse
+	24, // 34: qdrant.Points.CreateFieldIndex:output_type -> qdrant.PointsOperationResponse
+	24, // 35: qdrant.Points.DeleteFieldIndex:output_type -> qdrant.PointsOperationResponse
+	26, // 36: qdrant.Points.Search:output_type -> qdrant.SearchResponse
+	27, // 37: qdrant.Points.SearchBatch:output_type -> qdrant.SearchBatchResponse
+	28, // 38: qdrant.Points.SearchGroups:output_type -> qdrant.SearchGroupsResponse
+	29, // 39: qdrant.Points.Scroll:output_type -> qdrant.ScrollResponse
+	30, // 40: qdrant.Points.Recommend:output_type -> qdrant.RecommendResponse
+	31, // 41: qdrant.Points.RecommendBatch:output_type -> qdrant.RecommendBatchResponse
+	32, // 42: qdrant.Points.RecommendGroups:output_type -> qdrant.RecommendGroupsResponse
+	33, // 43: qdrant.Points.Discover:output_type -> qdrant.DiscoverResponse
+	34, // 44: qdrant.Points.DiscoverBatch:output_type -> qdrant.DiscoverBatchResponse
+	35, // 45: qdrant.Points.Count:output_type -> qdrant.CountResponse
+	36, // 46: qdrant.Points.UpdateBatch:output_type -> qdrant.UpdateBatchResponse
+	37, // 47: qdrant.Points.Query:output_type -> qdrant.QueryResponse
+	38, // 48: qdrant.Points.QueryBatch:output_type -> qdrant.QueryBatchResponse
+	39, // 49: qdrant.Points.QueryGroups:output_type -> qdrant.QueryGroupsResponse
+	25, // [25:50] is the sub-list for method output_type
+	0,  // [0:25] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
