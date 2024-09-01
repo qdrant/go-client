@@ -4,23 +4,14 @@ PROJECT_ROOT="$(pwd)/$(dirname "$0")/../"
 
 QDRANT_PROTO_DIR='proto'
 
-# go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
-# go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 
-# go install github.com/golang/protobuf/protoc-gen-go@v1.5.2
+export PATH="$PATH:$(go env GOPATH)/bin"
 
-
-GOPATH=$(go env GOPATH)
-
-case ":$PATH:" in
-    *":$GOPATH/bin:"*) ;;
-    *) export PATH="$GOPATH/bin:$PATH";;
-esac
-
-# SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 PROTO_DIR=./proto
 OUT_DIR=./qdrant
-PACKAGE_NAME=github.com/qdrant/go-client
+PACKAGE_NAME="github.com/qdrant/go-client;qdrant"
 
 protoc \
     --experimental_allow_proto3_optional \
