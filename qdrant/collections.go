@@ -2,6 +2,7 @@ package qdrant
 
 import (
 	"context"
+	"errors"
 )
 
 // Check the existence of a collection.
@@ -59,9 +60,14 @@ func (c *Client) UpdateCollection(ctx context.Context, request *UpdateCollection
 
 // Drop collection and all associated data.
 func (c *Client) DeleteCollection(ctx context.Context, collectionName string) error {
-	_, err := c.GetCollectionsClient().Delete(ctx, &DeleteCollection{
+	res, err := c.GetCollectionsClient().Delete(ctx, &DeleteCollection{
 		CollectionName: collectionName,
 	})
+
+	if !res.GetResult() {
+		return newQdrantErr(errors.New("failed to delete collection"), "DeleteCollection", collectionName)
+	}
+
 	if err != nil {
 		return newQdrantErr(err, "DeleteCollection", collectionName)
 	}
@@ -137,7 +143,7 @@ func (c *Client) ListCollectionAliases(ctx context.Context, collectionName strin
 	}
 	var aliases []string
 	for _, alias := range resp.GetAliases() {
-		aliases = append(aliases, alias.GetCollectionName())
+		aliases = append(aliases, alias.GetAliasName())
 	}
 	return aliases, nil
 }

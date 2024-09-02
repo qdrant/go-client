@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/qdrant/go-client-v2/qdrant"
+	"github.com/qdrant/go-client/qdrant"
 )
 
 var (
@@ -71,7 +71,7 @@ func main() {
 	waitUpsert := true
 	upsertPoints := []*qdrant.PointStruct{
 		{
-			Id:      qdrant.NewPointIDNum(1),
+			Id:      qdrant.NewIDNum(1),
 			Vectors: qdrant.NewVectors(0.05, 0.61, 0.76, 0.74),
 			Payload: qdrant.NewValueMap(map[string]any{
 				"city":    "Berlin",
@@ -81,7 +81,7 @@ func main() {
 			}),
 		},
 		{
-			Id:      qdrant.NewPointIDNum(2),
+			Id:      qdrant.NewIDNum(2),
 			Vectors: qdrant.NewVectors(0.19, 0.81, 0.75, 0.11),
 			Payload: qdrant.NewValueMap(map[string]any{
 				"city":    "Berlin",
@@ -89,14 +89,14 @@ func main() {
 			}),
 		},
 		{
-			Id:      qdrant.NewPointIDNum(3),
+			Id:      qdrant.NewIDNum(3),
 			Vectors: qdrant.NewVectors(0.36, 0.55, 0.47, 0.94),
 			Payload: qdrant.NewValueMap(map[string]any{
 				"city": []any{"Berlin", "London"},
 			}),
 		},
 		{
-			Id:      qdrant.NewPointID("58384991-3295-4e21-b711-fd3b94fa73e3"),
+			Id:      qdrant.NewID("58384991-3295-4e21-b711-fd3b94fa73e3"),
 			Vectors: qdrant.NewVectors(0.35, 0.08, 0.11, 0.44),
 			Payload: qdrant.NewValueMap(map[string]any{
 				"bool":   true,
@@ -119,8 +119,8 @@ func main() {
 	points, err := client.Get(ctx, &qdrant.GetPoints{
 		CollectionName: collectionName,
 		Ids: []*qdrant.PointId{
-			qdrant.NewPointIDNum(1),
-			qdrant.NewPointIDNum(2),
+			qdrant.NewIDNum(1),
+			qdrant.NewIDNum(2),
 		},
 	})
 	if err != nil {
