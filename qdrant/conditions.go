@@ -2,7 +2,15 @@
 // https://qdrant.tech/documentation/concepts/filtering/#filtering-conditions
 package qdrant
 
-// TODO: please add comments to all filters below
+// Creates a condition that matches an exact keyword in a specified field.
+// This is an alias for NewMatchKeyword().
+// See: https://qdrant.tech/documentation/concepts/filtering/#match
+func NewMatch(field, keyword string) *Condition {
+	return NewMatchKeyword(field, keyword)
+}
+
+// Creates a condition that matches an exact keyword in a specified field.
+// See: https://qdrant.tech/documentation/concepts/filtering/#match
 func NewMatchKeyword(field, keyword string) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{
@@ -16,6 +24,9 @@ func NewMatchKeyword(field, keyword string) *Condition {
 	}
 }
 
+// Creates a condition to match a specific substring, token or phrase.
+// Exact texts that will match the condition depend on full-text index configuration.
+// See: https://qdrant.tech/documentation/concepts/filtering/#full-text-match
 func NewMatchText(field, text string) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{
@@ -29,6 +40,8 @@ func NewMatchText(field, text string) *Condition {
 	}
 }
 
+// Creates a condition that matches a boolean value in a specified field.
+// See: https://qdrant.tech/documentation/concepts/filtering/#match
 func NewMatchBool(field string, value bool) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{
@@ -42,6 +55,8 @@ func NewMatchBool(field string, value bool) *Condition {
 	}
 }
 
+// Creates a condition that matches an integer value in a specified field.
+// See: https://qdrant.tech/documentation/concepts/filtering/#match
 func NewMatchInt(field string, value int64) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{
@@ -55,6 +70,8 @@ func NewMatchInt(field string, value int64) *Condition {
 	}
 }
 
+// Creates a condition that matches any of the given keywords in a specified field.
+// See: https://qdrant.tech/documentation/concepts/filtering/#match-any
 func NewMatchKeywords(field string, keywords ...string) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{
@@ -70,6 +87,8 @@ func NewMatchKeywords(field string, keywords ...string) *Condition {
 	}
 }
 
+// Creates a condition that matches any of the given integer values in a specified field.
+// See: https://qdrant.tech/documentation/concepts/filtering/#match-any
 func NewMatchInts(field string, values ...int64) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{
@@ -85,11 +104,15 @@ func NewMatchInts(field string, values ...int64) *Condition {
 	}
 }
 
-// Same as NewMatchExceptKeywords.
+// Creates a condition that matches any value except the given keywords in a specified field.
+// This is an alias for NewMatchExceptKeywords.
+// See: https://qdrant.tech/documentation/concepts/filtering/#match-except
 func NewMatchExcept(field string, keywords ...string) *Condition {
 	return NewMatchExceptKeywords(field, keywords...)
 }
 
+// Creates a condition that matches any value except the given keywords in a specified field.
+// See: https://qdrant.tech/documentation/concepts/filtering/#match-except
 func NewMatchExceptKeywords(field string, keywords ...string) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{
@@ -105,6 +128,8 @@ func NewMatchExceptKeywords(field string, keywords ...string) *Condition {
 	}
 }
 
+// Creates a condition that matches any value except the given integer values in a specified field.
+// See: https://qdrant.tech/documentation/concepts/filtering/#match-except
 func NewMatchExceptInts(field string, values ...int64) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{
@@ -120,6 +145,8 @@ func NewMatchExceptInts(field string, values ...int64) *Condition {
 	}
 }
 
+// Creates a condition that checks if a specified field is null.
+// See: https://qdrant.tech/documentation/concepts/filtering/#is-null
 func NewIsNull(field string) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_IsNull{
@@ -130,6 +157,8 @@ func NewIsNull(field string) *Condition {
 	}
 }
 
+// Creates a condition that checks if a specified field is empty.
+// See: https://qdrant.tech/documentation/concepts/filtering/#is-empty
 func NewIsEmpty(field string) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_IsEmpty{
@@ -140,6 +169,8 @@ func NewIsEmpty(field string) *Condition {
 	}
 }
 
+// Creates a condition that checks if a point has any of the specified IDs.
+// See: https://qdrant.tech/documentation/concepts/filtering/#has-id
 func NewHasID(ids ...*PointId) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_HasId{
@@ -150,6 +181,8 @@ func NewHasID(ids ...*PointId) *Condition {
 	}
 }
 
+// Creates a nested condition for filtering on nested fields.
+// See: https://qdrant.tech/documentation/concepts/filtering/#nested
 func NewNestedCondtion(field string, conditon *Condition) *Condition {
 	filter := &Filter{
 		Must: []*Condition{conditon},
@@ -165,6 +198,8 @@ func NewNestedCondtion(field string, conditon *Condition) *Condition {
 	}
 }
 
+// Creates a nested filter for filtering on nested fields.
+// See: https://qdrant.tech/documentation/concepts/filtering/#nested
 func NewNestedFilter(field string, filter *Filter) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Nested{
@@ -176,6 +211,8 @@ func NewNestedFilter(field string, filter *Filter) *Condition {
 	}
 }
 
+// Creates a condition from a filter.
+// This is useful for creating complex nested conditions.
 func NewFilterAsCondition(filter *Filter) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Filter{
@@ -184,6 +221,8 @@ func NewFilterAsCondition(filter *Filter) *Condition {
 	}
 }
 
+// Creates a range condition for numeric or date fields.
+// See: https://qdrant.tech/documentation/concepts/filtering/#range
 func NewRange(field string, rangeVal *Range) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{
@@ -195,6 +234,8 @@ func NewRange(field string, rangeVal *Range) *Condition {
 	}
 }
 
+// Creates a geo filter condition that matches points within a specified radius from a center point.
+// See: https://qdrant.tech/documentation/concepts/filtering/#geo-radius
 func NewGeoRadius(field string, lat, long float64, radius float32) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{
@@ -212,6 +253,8 @@ func NewGeoRadius(field string, lat, long float64, radius float32) *Condition {
 	}
 }
 
+// Creates a geo filter condition that matches points within a specified bounding box.
+// See: https://qdrant.tech/documentation/concepts/filtering/#geo-bounding-box
 func NewGeoBoundingBox(field string, topLeftLat, topLeftLon, bottomRightLat, bottomRightLon float64) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{
@@ -232,6 +275,8 @@ func NewGeoBoundingBox(field string, topLeftLat, topLeftLon, bottomRightLat, bot
 	}
 }
 
+// Creates a geo filter condition that matches points within a specified polygon.
+// See: https://qdrant.tech/documentation/concepts/filtering/#geo-polygon
 func NewGeoPolygon(field string, exterior *GeoLineString, interior ...*GeoLineString) *Condition {
 	geoPolygon := &GeoPolygon{
 		Exterior:  exterior,
@@ -248,6 +293,8 @@ func NewGeoPolygon(field string, exterior *GeoLineString, interior ...*GeoLineSt
 	}
 }
 
+// Creates a condition that filters based on the number of values in an array field.
+// See: https://qdrant.tech/documentation/concepts/filtering/#values-count
 func NewValuesCount(field string, valuesCount *ValuesCount) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{
@@ -259,6 +306,8 @@ func NewValuesCount(field string, valuesCount *ValuesCount) *Condition {
 	}
 }
 
+// Creates a condition that filters based on a datetime range.
+// See: https://qdrant.tech/documentation/concepts/filtering/#datetime-range
 func NewDatetimeRange(field string, dateTimeRange *DatetimeRange) *Condition {
 	return &Condition{
 		ConditionOneOf: &Condition_Field{

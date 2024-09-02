@@ -4,7 +4,15 @@ import (
 	"context"
 )
 
-// Check the existence of a collection.
+// Checks the existence of a collection.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - collectionName: The name of the collection to check.
+//
+// Returns:
+//   - bool: True if the collection exists, false otherwise.
+//   - error: An error if the operation fails.
 func (c *Client) CollectionExists(ctx context.Context, collectionName string) (bool, error) {
 	resp, err := c.GetCollectionsClient().CollectionExists(ctx, &CollectionExistsRequest{
 		CollectionName: collectionName,
@@ -15,7 +23,15 @@ func (c *Client) CollectionExists(ctx context.Context, collectionName string) (b
 	return resp.GetResult().GetExists(), nil
 }
 
-// Get detailed information about specified existing collection.
+// Retrieves detailed information about a specified existing collection.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - collectionName: The name of the collection to retrieve information for.
+//
+// Returns:
+//   - *CollectionInfo: Detailed information about the collection.
+//   - error: An error if the operation fails.
 func (c *Client) GetCollection(ctx context.Context, collectionName string) (*CollectionInfo, error) {
 	resp, err := c.GetCollectionsClient().Get(ctx, &GetCollectionInfoRequest{
 		CollectionName: collectionName,
@@ -26,7 +42,14 @@ func (c *Client) GetCollection(ctx context.Context, collectionName string) (*Col
 	return resp.GetResult(), nil
 }
 
-// Get names of all existing collections.
+// Retrieves the names of all existing collections.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//
+// Returns:
+//   - []string: A slice of collection names.
+//   - error: An error if the operation fails.
 func (c *Client) ListCollections(ctx context.Context) ([]string, error) {
 	resp, err := c.GetCollectionsClient().List(ctx, &ListCollectionsRequest{})
 	if err != nil {
@@ -39,7 +62,14 @@ func (c *Client) ListCollections(ctx context.Context) ([]string, error) {
 	return collections, nil
 }
 
-// Create new collection with given parameters.
+// Creates a new collection with the given parameters.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - request: The CreateCollection request containing collection parameters.
+//
+// Returns:
+//   - error: An error if the operation fails.
 func (c *Client) CreateCollection(ctx context.Context, request *CreateCollection) error {
 	_, err := c.GetCollectionsClient().Create(ctx, request)
 	if err != nil {
@@ -48,7 +78,14 @@ func (c *Client) CreateCollection(ctx context.Context, request *CreateCollection
 	return nil
 }
 
-// Update parameters of the existing collection.
+// Updates parameters of an existing collection.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - request: The UpdateCollection request containing updated parameters.
+//
+// Returns:
+//   - error: An error if the operation fails.
 func (c *Client) UpdateCollection(ctx context.Context, request *UpdateCollection) error {
 	_, err := c.GetCollectionsClient().Update(ctx, request)
 	if err != nil {
@@ -57,7 +94,14 @@ func (c *Client) UpdateCollection(ctx context.Context, request *UpdateCollection
 	return nil
 }
 
-// Drop collection and all associated data.
+// Drops a collection and all associated data.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - collectionName: The name of the collection to delete.
+//
+// Returns:
+//   - error: An error if the operation fails.
 func (c *Client) DeleteCollection(ctx context.Context, collectionName string) error {
 	_, err := c.GetCollectionsClient().Delete(ctx, &DeleteCollection{
 		CollectionName: collectionName,
@@ -68,7 +112,15 @@ func (c *Client) DeleteCollection(ctx context.Context, collectionName string) er
 	return nil
 }
 
-// Create an alias for a collection.
+// Creates an alias for a collection.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - aliasName: The name of the alias to create.
+//   - collectionName: The name of the collection to alias.
+//
+// Returns:
+//   - error: An error if the operation fails.
 func (c *Client) CreateAlias(ctx context.Context, aliasName, collectionName string) error {
 	_, err := c.GetCollectionsClient().UpdateAliases(ctx, &ChangeAliases{
 		Actions: []*AliasOperations{
@@ -88,7 +140,14 @@ func (c *Client) CreateAlias(ctx context.Context, aliasName, collectionName stri
 	return nil
 }
 
-// Delete an alias.
+// Deletes an alias.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - aliasName: The name of the alias to delete.
+//
+// Returns:
+//   - error: An error if the operation fails.
 func (c *Client) DeleteAlias(ctx context.Context, aliasName string) error {
 	_, err := c.GetCollectionsClient().UpdateAliases(ctx, &ChangeAliases{
 		Actions: []*AliasOperations{
@@ -107,7 +166,15 @@ func (c *Client) DeleteAlias(ctx context.Context, aliasName string) error {
 	return nil
 }
 
-// Rename an alias.
+// Renames an alias.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - oldAliasName: The current name of the alias.
+//   - newAliasName: The new name for the alias.
+//
+// Returns:
+//   - error: An error if the operation fails.
 func (c *Client) RenameAlias(ctx context.Context, oldAliasName, newAliasName string) error {
 	_, err := c.GetCollectionsClient().UpdateAliases(ctx, &ChangeAliases{
 		Actions: []*AliasOperations{
@@ -127,7 +194,15 @@ func (c *Client) RenameAlias(ctx context.Context, oldAliasName, newAliasName str
 	return nil
 }
 
-// List all aliases for a collection.
+// Lists all aliases for a collection.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - collectionName: The name of the collection to list aliases for.
+//
+// Returns:
+//   - []string: A slice of alias names.
+//   - error: An error if the operation fails.
 func (c *Client) ListCollectionAliases(ctx context.Context, collectionName string) ([]string, error) {
 	resp, err := c.GetCollectionsClient().ListCollectionAliases(ctx, &ListCollectionAliasesRequest{
 		CollectionName: collectionName,
@@ -142,7 +217,14 @@ func (c *Client) ListCollectionAliases(ctx context.Context, collectionName strin
 	return aliases, nil
 }
 
-// List all aliases.
+// Lists all aliases.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//
+// Returns:
+//   - []*AliasDescription: A slice of AliasDescription objects.
+//   - error: An error if the operation fails.
 func (c *Client) ListAliases(ctx context.Context) ([]*AliasDescription, error) {
 	resp, err := c.GetCollectionsClient().ListAliases(ctx, &ListAliasesRequest{})
 	if err != nil {
@@ -151,7 +233,14 @@ func (c *Client) ListAliases(ctx context.Context) ([]*AliasDescription, error) {
 	return resp.GetAliases(), nil
 }
 
-// Update aliases.
+// Updates aliases.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - actions: A slice of AliasOperations to perform.
+//
+// Returns:
+//   - error: An error if the operation fails.
 func (c *Client) UpdateAliases(ctx context.Context, actions []*AliasOperations) error {
 	_, err := c.GetCollectionsClient().UpdateAliases(ctx, &ChangeAliases{
 		Actions: actions,
@@ -162,7 +251,15 @@ func (c *Client) UpdateAliases(ctx context.Context, actions []*AliasOperations) 
 	return nil
 }
 
-// Create a shard key for a collection.
+// Creates a shard key for a collection.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - collectionName: The name of the collection to create a shard key for.
+//   - request: The CreateShardKey request containing shard key parameters.
+//
+// Returns:
+//   - error: An error if the operation fails.
 func (c *Client) CreateShardKey(ctx context.Context, collectionName string, request *CreateShardKey) error {
 	_, err := c.GetCollectionsClient().CreateShardKey(ctx, &CreateShardKeyRequest{
 		CollectionName: collectionName,
@@ -174,7 +271,15 @@ func (c *Client) CreateShardKey(ctx context.Context, collectionName string, requ
 	return nil
 }
 
-// Delete a shard key for a collection.
+// Deletes a shard key for a collection.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - collectionName: The name of the collection to delete a shard key from.
+//   - request: The DeleteShardKey request containing shard key parameters.
+//
+// Returns:
+//   - error: An error if the operation fails.
 func (c *Client) DeleteShardKey(ctx context.Context, collectionName string, request *DeleteShardKey) error {
 	_, err := c.GetCollectionsClient().DeleteShardKey(ctx, &DeleteShardKeyRequest{
 		CollectionName: collectionName,

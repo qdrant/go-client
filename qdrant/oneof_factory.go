@@ -116,7 +116,7 @@ func NewQuantizationDiffDisabled() *QuantizationConfigDiff {
 }
 
 // Creates a *PayloadIndexParams instance from *KeywordIndexParams.
-// Same as NewPayloadIndexParamsKeyword().
+// This is an alias for NewPayloadIndexParamsKeyword().
 func NewPayloadIndexParams(params *KeywordIndexParams) *PayloadIndexParams {
 	return NewPayloadIndexParamsKeyword(params)
 }
@@ -194,7 +194,7 @@ func NewPayloadIndexParamsUUID(params *UuidIndexParams) *PayloadIndexParams {
 }
 
 // Creates an *AliasOperations instance to create an alias.
-// Same as NewAliasCreate().
+// This is an alias for NewAliasCreate().
 func NewAlias(aliasName, collectionName string) *AliasOperations {
 	return NewAliasCreate(aliasName, collectionName)
 }
@@ -235,7 +235,7 @@ func NewAliasDelete(aliasName string) *AliasOperations {
 }
 
 // Creates a *ShardKey instance from a string.
-// Same as NewShardKeyKeyword().
+// This is an alias for NewShardKeyKeyword().
 func NewShardKey(key string) *ShardKey {
 	return NewShardKeyKeyword(key)
 }
@@ -259,7 +259,7 @@ func NewShardKeyNum(key uint64) *ShardKey {
 }
 
 // Creates a *ReadConsistency instance from a ReadConsistencyType.
-// Same as NewReadConsistencyType().
+// This is an alias for NewReadConsistencyType().
 func NewReadConsistency(readConsistencyType ReadConsistencyType) *ReadConsistency {
 	return NewReadConsistencyType(readConsistencyType)
 }
@@ -283,7 +283,7 @@ func NewReadConsistencyFactor(readConsistencyFactor uint64) *ReadConsistency {
 }
 
 // Creates a *PointId instance from a UUID string.
-// Same as NewPointIDUUID().
+// This is an alias for NewPointIDUUID().
 func NewPointID(uuid string) *PointId {
 	return NewPointIDUUID(uuid)
 }
@@ -307,7 +307,7 @@ func NewPointIDNum(num uint64) *PointId {
 }
 
 // Creates a *VectorInput instance for dense vectors.
-// Same as NewVectorInputDense().
+// This is an alias for NewVectorInputDense().
 func NewVectorInput(values ...float32) *VectorInput {
 	return NewVectorInputDense(values)
 }
@@ -362,7 +362,7 @@ func NewVectorInputMulti(vectors [][]float32) *VectorInput {
 }
 
 // Creates a *WithPayloadSelector instance with payload enabled/disabled.
-// Same as NewWithPayloadEnable().
+// This is an alias for NewWithPayloadEnable().
 func NewWithPayload(enable bool) *WithPayloadSelector {
 	return NewWithPayloadEnable(enable)
 }
@@ -399,7 +399,7 @@ func NewWithPayloadExclude(exclude ...string) *WithPayloadSelector {
 }
 
 // Creates a *WithVectorsSelector instance with vectors enabled/disabled.
-// Same as NewWithVectorsEnable().
+// This is an alias for NewWithVectorsEnable().
 func NewWithVectors(enable bool) *WithVectorsSelector {
 	return NewWithVectorsEnable(enable)
 }
@@ -425,7 +425,7 @@ func NewWithVectorsInclude(names ...string) *WithVectorsSelector {
 }
 
 // Creates a *Vectors instance for dense vectors.
-// Same as NewVectorsDense().
+// This is an alias for NewVectorsDense().
 func NewVectors(values ...float32) *Vectors {
 	return NewVectorsDense(values)
 }
@@ -469,7 +469,7 @@ func NewVectorsMap(vectors map[string]*Vector) *Vectors {
 }
 
 // Creates a *Vector instance for dense vectors.
-// Same as NewVectorDense().
+// This is an alias for NewVectorDense().
 func NewVector(values ...float32) *Vector {
 	return NewVectorDense(values)
 }
@@ -541,8 +541,7 @@ func NewStartFromTimestamp(seconds int64, nanos int32) *StartFrom {
 	}
 }
 
-// Creates a *StartFrom instance for a datetime string.
-// TODO: please specify the format of the string, like RFC3339
+// Creates a *StartFrom instance for a datetime string in the RFC3339 format.
 func NewStartFromDatetime(value string) *StartFrom {
 	return &StartFrom{
 		Value: &StartFrom_Datetime{
@@ -552,7 +551,7 @@ func NewStartFromDatetime(value string) *StartFrom {
 }
 
 // Creates a *TargetVector instance from a *Vector.
-// Same as NewTargetVector().
+// This is an alias for NewTargetVector().
 func NewTarget(vector *Vector) *TargetVector {
 	return NewTargetVector(vector)
 }
@@ -593,7 +592,7 @@ func NewQueryNearest(nearest *VectorInput) *Query {
 }
 
 // Creates a *Query instance for a nearest query from dense vectors.
-// Same as NewQueryDense().
+// This is an alias for NewQueryDense().
 func NewQuery(values ...float32) *Query {
 	return NewQueryDense(values)
 }
@@ -799,7 +798,7 @@ func NewGroupIDString(value string) *GroupId {
 }
 
 // Creates a *PointsSelector instance for selecting points by IDs.
-// Same as NewPointsSelectorIDs().
+// This is an alias for NewPointsSelectorIDs().
 func NewPointsSelector(ids ...*PointId) *PointsSelector {
 	return NewPointsSelectorIDs(ids)
 }
