@@ -283,13 +283,13 @@ func NewReadConsistencyFactor(readConsistencyFactor uint64) *ReadConsistency {
 }
 
 // Creates a *PointId instance from a UUID string.
-// This is an alias for NewPointIDUUID().
-func NewPointID(uuid string) *PointId {
-	return NewPointIDUUID(uuid)
+// Same as NewIDUUID().
+func NewID(uuid string) *PointId {
+	return NewIDUUID(uuid)
 }
 
 // Creates a *PointId instance from a UUID string.
-func NewPointIDUUID(uuid string) *PointId {
+func NewIDUUID(uuid string) *PointId {
 	return &PointId{
 		PointIdOptions: &PointId_Uuid{
 			Uuid: uuid,
@@ -298,7 +298,7 @@ func NewPointIDUUID(uuid string) *PointId {
 }
 
 // Creates a *PointId instance from a positive integer.
-func NewPointIDNum(num uint64) *PointId {
+func NewIDNum(num uint64) *PointId {
 	return &PointId{
 		PointIdOptions: &PointId_Num{
 			Num: num,

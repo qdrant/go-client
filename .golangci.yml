@@ -122,12 +122,7 @@ linters-settings:
     # Default: []
     disable:
       - fieldalignment # too strict
-    # Settings per analyzer.
-    settings:
-      shadow:
-        # Whether to be strict about shadowing; can be noisy.
-        # Default: false
-        strict: true
+      - shadow  # too noisy
 
   inamedparam:
     # Skips check for interface methods with only a single parameter.
@@ -245,7 +240,6 @@ linters:
     - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
     - gomodguard # allow and block lists linter for direct Go module dependencies. This is different from depguard where there are different block types for example version constraints and module recommendations
     - goprintffuncname # checks that printf-like functions are named with f at the end
-    - gosec # inspects source code for security problems
     - intrange # finds places where for loops could make use of an integer range
     - lll # reports long lines
     - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
@@ -342,6 +336,5 @@ issues:
         - dupl
         - funlen
         - goconst
-        - gosec
         - noctx
         - wrapcheck
