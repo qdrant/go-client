@@ -263,7 +263,7 @@ func (c *Client) Query(ctx context.Context, request *QueryPoints) ([]*ScoredPoin
 	return resp.GetResult(), nil
 }
 
-// Pperforms multiple universal queries on points in a batch.
+// Performs multiple universal queries on points in a batch.
 // Covers all capabilities of search, recommend, discover, filters.
 // Also enables hybrid and multi-stage queries.
 //

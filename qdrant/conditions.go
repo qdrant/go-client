@@ -183,7 +183,7 @@ func NewHasID(ids ...*PointId) *Condition {
 
 // Creates a nested condition for filtering on nested fields.
 // See: https://qdrant.tech/documentation/concepts/filtering/#nested
-func NewNestedCondtion(field string, conditon *Condition) *Condition {
+func NewNestedCondition(field string, conditon *Condition) *Condition {
 	filter := &Filter{
 		Must: []*Condition{conditon},
 	}
