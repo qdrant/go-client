@@ -58,7 +58,7 @@ func (c *Client) GetSnapshotsClient() SnapshotsClient {
 	return c.GetGrpcClient().Snapshots()
 }
 
-// Get the low-level client for the qdrant gRPC service.
+// Get the low-level client for the Qdrant gRPC service.
 // https://github.com/qdrant/qdrant/blob/master/lib/api/src/grpc/proto/qdrant.proto
 func (c *Client) GetQdrantClient() QdrantClient {
 	return c.GetGrpcClient().Qdrant()
