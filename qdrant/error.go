@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-//nolint:revive // The linter says qdrant.QdrantErr stutters, but it's an apt name.
+//nolint:revive // The linter says qdrant.QdrantError stutters, but it's an apt name.
 type QdrantError struct {
 	operationName string
 	context       string

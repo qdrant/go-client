@@ -63,15 +63,12 @@ func (c *Client) DeleteCollection(ctx context.Context, collectionName string) er
 	res, err := c.GetCollectionsClient().Delete(ctx, &DeleteCollection{
 		CollectionName: collectionName,
 	})
-
 	if err != nil {
 		return newQdrantErr(err, "DeleteCollection", collectionName)
 	}
-
 	if !res.GetResult() {
 		return newQdrantErr(errors.New("failed to delete collection"), "DeleteCollection", collectionName)
 	}
-
 	return nil
 }
 
