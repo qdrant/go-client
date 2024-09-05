@@ -51,7 +51,7 @@ func TestCollectionsClient(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		_, err = client.GetCollection(ctx, collectionName)
+		_, err = client.GetCollectionInfo(ctx, collectionName)
 		require.NoError(t, err)
 	})
 
@@ -62,7 +62,7 @@ func TestCollectionsClient(t *testing.T) {
 	})
 
 	t.Run("GetCollection", func(t *testing.T) {
-		collInfo, err := client.GetCollection(ctx, collectionName)
+		collInfo, err := client.GetCollectionInfo(ctx, collectionName)
 		require.NoError(t, err)
 		require.Zero(t, collInfo.GetPointsCount())
 	})
@@ -83,7 +83,7 @@ func TestCollectionsClient(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		collInfo, err := client.GetCollection(ctx, collectionName)
+		collInfo, err := client.GetCollectionInfo(ctx, collectionName)
 		require.NoError(t, err)
 		require.Equal(t, threshold, collInfo.GetConfig().GetOptimizerConfig().GetIndexingThreshold())
 	})

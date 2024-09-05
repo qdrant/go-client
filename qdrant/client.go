@@ -65,7 +65,7 @@ func (c *Client) GetQdrantClient() QdrantClient {
 }
 
 // Get the underlying *grpc.ClientConn.
-func (c *Client) GetConnnection() *grpc.ClientConn {
+func (c *Client) GetConnection() *grpc.ClientConn {
 	return c.GetGrpcClient().Conn()
 }
 

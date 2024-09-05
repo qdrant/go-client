@@ -1,5 +1,6 @@
 // This file contains constructor functions for creating conditions to be used in filters.
 // https://qdrant.tech/documentation/concepts/filtering/#filtering-conditions
+
 package qdrant
 
 // Creates a condition that matches an exact keyword in a specified field.
