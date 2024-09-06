@@ -56,11 +56,11 @@ golangci-lint run
 
 ### Preparing for a New Release
 
-Much of the client is generated from upstream Qdrant proto definitions, which are downloaded from [qdrant/qdrant](https://github.com/qdrant/qdrant).
+The client uses generated stubs from upstream Qdrant proto definitions, which are downloaded from [qdrant/qdrant](https://github.com/qdrant/qdrant/tree/master/lib/api/src/grpc/proto).
 
 #### Steps:
 
-1. Download and generate the latest proto definitions by running the following command from the project root:
+1. Download and generate the latest client stubs by running the following command from the project root:
 
 ```bash
 BRANCH=dev sh tools/sync_proto.sh
