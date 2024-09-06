@@ -68,7 +68,7 @@ BRANCH=dev sh tools/sync_proto.sh
 
 2. Update the test image value in [`qdrant_test/image_test.go`](https://github.com/qdrant/go-client/blob/new-client/qdrant_test/image_test.go) to `qdrant/qdrant:dev`.
 
-3. Manually remove the gRPC server definitions from the auto-generated code. 
+3. Remove the gRPC server definitions from the auto-generated code. 
 
 There is currently [no way](https://github.com/golang/protobuf/issues/373) to skip generating Go server definitions.
 
