@@ -42,7 +42,7 @@ client, err := qdrant.NewClient(&qdrant.Config{
 })
 ```
 
-which creates a client that will connect to Qdrant on <https://localhost:6334>.
+Which creates a client that will connect to Qdrant on <http://localhost:6334>.
 
 Internally, the high-level client uses a low-level gRPC client to interact with
 Qdrant. `qdrant.Config` provides additional options to control how the gRPC
