@@ -4,8 +4,8 @@ PROJECT_ROOT="$(pwd)/$(dirname "$0")/../"
 
 QDRANT_PROTO_DIR='proto'
 
-go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2
-go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 export PATH="$PATH:$(go env GOPATH)/bin"
 
