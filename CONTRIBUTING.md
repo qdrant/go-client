@@ -8,8 +8,8 @@ We track public bugs and feature requests using GitHub issues. Please report by 
 - Steps to reproduce the issue
   - Be as specific as possible
   - Include sample code when possible
-- What you expected to happen
-- What actually happened
+- What you expect to happen
+- What happened
 - Additional notes (e.g., why you think the issue occurs or solutions you’ve tried that didn’t work)
 
 ## Contributing Code
@@ -66,17 +66,21 @@ Much of the client is generated from upstream Qdrant proto definitions, which ar
 BRANCH=dev sh tools/sync_proto.sh
 ```
 
-2. Update the test image value in `qdrant_test/image_test.go` to `qdrant/qdrant:dev`.
+2. Update the test image value in [`qdrant_test/image_test.go`](https://github.com/qdrant/go-client/blob/new-client/qdrant_test/image_test.go) to `qdrant/qdrant:dev`.
 
 3. Manually remove the gRPC server definitions from the auto-generated code. 
 
-There is currently [no way](https://github.com/golang/protobuf/issues/373) to skip generating Go server definitions, so you’ll need to manually delete them from `snapshots_service_grpc.pb.go`, `points_service_grpc.pb.go`, and `collections_service_grpc.pb.go`. Remove lines starting from comments like `// CollectionsServer is the server API for Collections service.` until the end of the file. [Here’s an example commit]().
+There is currently [no way](https://github.com/golang/protobuf/issues/373) to skip generating Go server definitions.
 
-4. Implement new Qdrant methods in `points.go`, `collections.go`, or `qdrant.go` as needed.
+You’ll need to manually delete them from [`snapshots_service_grpc.pb.go`](https://github.com/qdrant/go-client/blob/new-client/qdrant/snapshots_service_grpc.pb.go), [`points_service_grpc.pb.go`](https://github.com/qdrant/go-client/blob/new-client/qdrant/points_service.pb.go), and [`collections_service_grpc.pb.go`](https://github.com/qdrant/go-client/blob/new-client/qdrant/collections_service_grpc.pb.go).
 
-5. If there are any new `oneOf` properties in the proto definitions, add helper constructors in `oneof_factory.go` following the existing patterns.
+Remove lines starting from comments like `// CollectionsServer is the server API for Collections service.` until the end of the file. [Here’s an example commit](https://github.com/qdrant/go-client/commit/6d04e31bb2acccf54f964a634df8930533642892).
 
-6. Submit your pull request and get some of those approvals.
+4. Implement new Qdrant methods in [`points.go`](https://github.com/qdrant/go-client/blob/new-client/qdrant/points.go), [`collections.go`](https://github.com/qdrant/go-client/blob/new-client/qdrant/collections.go), or [`qdrant.go`](https://github.com/qdrant/go-client/blob/new-client/qdrant/qdrant.go) as needed.
+
+5. If there are any new `oneOf` properties in the proto definitions, add helper constructors in [`oneof_factory.go`](https://github.com/qdrant/go-client/blob/new-client/qdrant/oneof_factory.go) following the existing patterns.
+
+6. Submit your pull request and get those approvals.
 
 ### Releasing a New Version
 
