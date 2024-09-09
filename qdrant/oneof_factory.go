@@ -1,6 +1,7 @@
 // This file contains helper functions to create oneof gRPC fields.
 // It is very verbose to create them using the struct literal syntax.
 // So we do it for the users and export these helper functions.
+
 package qdrant
 
 import "google.golang.org/protobuf/types/known/timestamppb"

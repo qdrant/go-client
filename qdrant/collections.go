@@ -33,7 +33,7 @@ func (c *Client) CollectionExists(ctx context.Context, collectionName string) (b
 // Returns:
 //   - *CollectionInfo: Detailed information about the collection.
 //   - error: An error if the operation fails.
-func (c *Client) GetCollection(ctx context.Context, collectionName string) (*CollectionInfo, error) {
+func (c *Client) GetCollectionInfo(ctx context.Context, collectionName string) (*CollectionInfo, error) {
 	resp, err := c.GetCollectionsClient().Get(ctx, &GetCollectionInfoRequest{
 		CollectionName: collectionName,
 	})
