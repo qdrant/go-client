@@ -2,45 +2,29 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
-	"flag"
 	"log"
-	"time"
 
-	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/metadata"
-
-	pb "github.com/qdrant/go-client/qdrant"
-	"google.golang.org/grpc"
-)
-
-var (
-	addr = flag.String("addr", "secure.cloud.qdrant.io:6334", "the address to connect to")
+	"github.com/qdrant/go-client/qdrant"
 )
 
 func main() {
-	flag.Parse()
-	// Set up a connection to the server.
-	config := &tls.Config{}
-	conn, err := grpc.Dial(*addr, grpc.WithTransportCredentials(credentials.NewTLS(config)), grpc.WithUnaryInterceptor(interceptor))
+	// Create new client
+	client, err := qdrant.NewClient(&qdrant.Config{
+		Host:   "xyz-example.eu-central.aws.cloud.qdrant.io",
+		Port:   6334,
+		APIKey: "<paste-your-api-key-here>",
+		UseTLS: true,
+		// TLSConfig: &tls.Config{...},
+		// GrpcOptions: []grpc.DialOption{},
+	})
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Fatalf("could not instantiate: %v", err)
 	}
-	defer conn.Close()
-
-	collections_client := pb.NewCollectionsClient(conn)
-
-	// Contact the server and print out its response.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	r, err := collections_client.List(ctx, &pb.ListCollectionsRequest{})
+	defer client.Close()
+	// List collections
+	collections, err := client.ListCollections(context.Background())
 	if err != nil {
 		log.Fatalf("could not get collections: %v", err)
 	}
-	log.Printf("List of collections: %s", r.GetCollections())
-}
-
-func interceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-	newCtx := metadata.AppendToOutgoingContext(ctx, "api-key", "secret-key-*******")
-	return invoker(newCtx, method, req, reply, cc, opts...)
+	log.Printf("List of collections: %v", collections)
 }

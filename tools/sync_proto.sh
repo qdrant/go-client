@@ -2,11 +2,12 @@
 
 set -e
 
+BRANCH=${BRANCH:-"master"}
 PROJECT_ROOT="$(pwd)/$(dirname "$0")/../"
 
 cd $(mktemp -d)
 
-git clone --sparse --filter=blob:none --depth=1 git@github.com:qdrant/qdrant.git
+git clone --sparse --branch $BRANCH --filter=blob:none --depth=1 https://github.com/qdrant/qdrant
 cd qdrant
 git sparse-checkout add lib/api/src/grpc/proto
 
@@ -37,3 +38,5 @@ sed -i '
 
 # Remove csharp option from proto files
 sed -i '/option csharp_namespace = .*/d' $CLIENT_DIR/*.proto
+
+sh tools/generate_proto_go.sh
