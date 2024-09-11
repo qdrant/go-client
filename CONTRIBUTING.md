@@ -63,7 +63,7 @@ The client uses generated stubs from upstream Qdrant proto definitions, which ar
 1. Download and generate the latest client stubs by running the following command from the project root:
 
 ```bash
-BRANCH=dev sh tools/sync_proto.sh
+BRANCH=dev sh internal/tools/sync_proto.sh
 ```
 
 2. Update the test image value in [`qdrant_test/image_test.go`](https://github.com/qdrant/go-client/blob/new-client/qdrant_test/image_test.go) to `qdrant/qdrant:dev`.
@@ -89,7 +89,7 @@ Once the new Qdrant version is live:
 1. Run the following command:
 
 ```bash
-BRANCH=master sh tools/sync_proto.sh
+BRANCH=master sh internal/tools/sync_proto.sh
 ```
 
 2. Update the test image value in `qdrant_test/image_test.go` to `qdrant/qdrant:NEW_VERSION`.
