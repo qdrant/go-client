@@ -3,7 +3,7 @@
 set -e
 
 BRANCH=${BRANCH:-"master"}
-PROJECT_ROOT="$(pwd)/$(dirname "$0")/../"
+PROJECT_ROOT="$(pwd)/$(dirname "$0")/../../"
 
 cd $(mktemp -d)
 
@@ -16,7 +16,7 @@ PROTO_DIR="$(pwd)/lib/api/src/grpc/proto"
 # Ensure current path is project root
 cd $PROJECT_ROOT
 
-CLIENT_DIR="proto"
+CLIENT_DIR="internal/proto"
 
 cp $PROTO_DIR/*.proto $CLIENT_DIR/
 
@@ -39,4 +39,4 @@ sed -i '
 # Remove csharp option from proto files
 sed -i '/option csharp_namespace = .*/d' $CLIENT_DIR/*.proto
 
-sh tools/generate_proto_go.sh
+./internal/tools/generate_proto_go.sh
