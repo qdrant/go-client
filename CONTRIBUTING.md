@@ -56,6 +56,11 @@ golangci-lint run
 
 ### Preparing for a New Release
 
+#### Pre-requisites
+
+- [Go Installation](https://go.dev/doc/install)
+- [Protobuf Compiler Installation](https://grpc.io/docs/protoc-installation/)
+
 The client uses generated stubs from upstream Qdrant proto definitions, which are downloaded from [qdrant/qdrant](https://github.com/qdrant/qdrant/tree/master/lib/api/src/grpc/proto).
 
 #### Steps:
@@ -66,7 +71,7 @@ The client uses generated stubs from upstream Qdrant proto definitions, which ar
 BRANCH=dev sh internal/tools/sync_proto.sh
 ```
 
-2. Update the test image value in [`qdrant_test/image_test.go`](https://github.com/qdrant/go-client/blob/master/qdrant_test/image_test.go) to `qdrant/qdrant:dev`.
+2. Update the `TestImage` value in [`qdrant_test/image_test.go`](https://github.com/qdrant/go-client/blob/master/qdrant_test/image_test.go) to `qdrant/qdrant:dev`.
 
 3. Remove the gRPC server definitions from the auto-generated code. 
 
@@ -76,11 +81,15 @@ You’ll need to manually delete them from [`snapshots_service_grpc.pb.go`](http
 
 Remove lines starting from comments like `// CollectionsServer is the server API for Collections service.` until the end of the file. [Here’s an example commit](https://github.com/qdrant/go-client/commit/6d04e31bb2acccf54f964a634df8930533642892).
 
-4. Implement new Qdrant methods in [`points.go`](https://github.com/qdrant/go-client/blob/master/qdrant/points.go), [`collections.go`](https://github.com/qdrant/go-client/blob/master/qdrant/collections.go), or [`qdrant.go`](https://github.com/qdrant/go-client/blob/master/qdrant/qdrant.go) as needed.
+4. Implement new Qdrant methods in [`points.go`](https://github.com/qdrant/go-client/blob/master/qdrant/points.go), [`collections.go`](https://github.com/qdrant/go-client/blob/master/qdrant/collections.go), or [`qdrant.go`](https://github.com/qdrant/go-client/blob/master/qdrant/qdrant.go) as needed and associated tests in [`qdrant_test/`](https://github.com/qdrant/go-client/tree/master/qdrant_test).
 
-5. If there are any new `oneOf` properties in the proto definitions, add helper constructors in [`oneof_factory.go`](https://github.com/qdrant/go-client/blob/master/qdrant/oneof_factory.go) following the existing patterns.
+Since the API reference is published at https://pkg.go.dev/github.com/qdrant/go-client, the docstrings have to be appropriate.
 
-6. Submit your pull request and get those approvals.
+5. If there are any new `oneOf` properties in the proto definitions, add helper constructors to [`oneof_factory.go`](https://github.com/qdrant/go-client/blob/master/qdrant/oneof_factory.go) following the existing patterns.
+
+6. Run the linter, formatter and tests as per the instructions above. 
+
+7. Submit your pull request and get those approvals.
 
 ### Releasing a New Version
 
@@ -92,7 +101,7 @@ Once the new Qdrant version is live:
 BRANCH=master sh internal/tools/sync_proto.sh
 ```
 
-2. Update the test image value in `qdrant_test/image_test.go` to `qdrant/qdrant:NEW_VERSION`.
+2. Update the `TestImage` value in `qdrant_test/image_test.go` to `qdrant/qdrant:vNEW_VERSION`.
 
 3. Merge the pull request.
 
@@ -102,3 +111,8 @@ BRANCH=master sh internal/tools/sync_proto.sh
 git tag v1.11.0
 git push --tags
 ```
+
+OR
+
+Do a release at https://github.com/qdrant/go-client/releases with notes.
+
