@@ -112,7 +112,4 @@ git tag v1.11.0
 git push --tags
 ```
 
-OR
-
-Do a release at https://github.com/qdrant/go-client/releases with notes.
-
+5. Optionally, do a release at https://github.com/qdrant/go-client/releases from the tag with notes.
