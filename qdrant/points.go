@@ -300,3 +300,51 @@ func (c *Client) QueryGroups(ctx context.Context, request *QueryPointGroups) ([]
 	}
 	return resp.GetResult().GetGroups(), nil
 }
+
+// Facets the points that would match a filter, with respect to a payload field.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - request: The FacetCounts request containing the facet parameters.
+//
+// Returns:
+//   - []*FacetHit: A slice of facet hits matching the query. Each hit contains the value and the count for this value
+func (c *Client) Facet(ctx context.Context, request *FacetCounts) ([]*FacetHit, error) {
+	resp, err := c.GetPointsClient().Facet(ctx, request)
+	if err != nil {
+		return nil, newQdrantErr(err, "Facet", request.GetCollectionName())
+	}
+	return resp.GetHits(), nil
+}
+
+// Calculates the distances between a random sample of points.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - request: The SearchMatrixPoints request containing the sample size and other parameters.
+//
+// Returns:
+//   - *SearchMatrixPairs: Pairwise representation of distances.
+func (c *Client) SearchMatrixPairs(ctx context.Context, request *SearchMatrixPoints) (*SearchMatrixPairs, error) {
+	resp, err := c.GetPointsClient().SearchMatrixPairs(ctx, request)
+	if err != nil {
+		return nil, newQdrantErr(err, "SearchMatrixPairs", request.GetCollectionName())
+	}
+	return resp.GetResult(), nil
+}
+
+// Calculates the distances between a random sample of points.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - request: The SearchMatrixPoints request containing the sample size and other parameters.
+//
+// Returns:
+//   - *SearchMatrixOffsets: Parallel lists of offsets within an id list, and the distance between them.
+func (c *Client) SearchMatrixOffsets(ctx context.Context, request *SearchMatrixPoints) (*SearchMatrixOffsets, error) {
+	resp, err := c.GetPointsClient().SearchMatrixOffsets(ctx, request)
+	if err != nil {
+		return nil, newQdrantErr(err, "SearchMatrixOffsets", request.GetCollectionName())
+	}
+	return resp.GetResult(), nil
+}
