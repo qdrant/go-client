@@ -49,8 +49,18 @@ func TestPointsClient(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	testPointID := qdrant.NewID("ed7ac159-d8a7-41fb-9da3-66a14916330f")
 	wait := true
+
+	result, err := client.CreateFieldIndex(ctx, &qdrant.CreateFieldIndexCollection{
+		CollectionName: collectionName,
+		FieldName:      "key",
+		FieldType:      qdrant.FieldType_FieldTypeKeyword.Enum(),
+		Wait:           &wait,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	testPointID := qdrant.NewID("ed7ac159-d8a7-41fb-9da3-66a14916330f")
 
 	t.Run("UpsertPoints", func(t *testing.T) {
 		points := []*qdrant.PointStruct{
@@ -180,6 +190,39 @@ func TestPointsClient(t *testing.T) {
 		})
 		require.NoError(t, err)
 		require.Empty(t, groups)
+	})
+
+	t.Run("Facet", func(t *testing.T) {
+		res, err := client.Facet(ctx, &qdrant.FacetCounts{
+			CollectionName: collectionName,
+			Key:            "key",
+		})
+		require.NoError(t, err)
+		require.Empty(t, res)
+	})
+
+	t.Run("SearchMatrixPairs", func(t *testing.T) {
+		sample := uint64(10)
+		limit := uint64(10)
+		res, err := client.SearchMatrixPairs(ctx, &qdrant.SearchMatrixPoints{
+			CollectionName: collectionName,
+			Sample:         &sample,
+			Limit:          &limit,
+		})
+		require.NoError(t, err)
+		require.Empty(t, res)
+	})
+
+	t.Run("SearchMatrixOffsets", func(t *testing.T) {
+		sample := uint64(10)
+		limit := uint64(10)
+		res, err := client.SearchMatrixOffsets(ctx, &qdrant.SearchMatrixPoints{
+			CollectionName: collectionName,
+			Sample:         &sample,
+			Limit:          &limit,
+		})
+		require.NoError(t, err)
+		require.Empty(t, res)
 	})
 
 	t.Run("DeleteVectors", func(t *testing.T) {
