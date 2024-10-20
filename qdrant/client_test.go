@@ -36,7 +36,7 @@ func Example() {
 	// Execute health check
 	healthCheckResult, err := client.HealthCheck(ctx)
 	if err != nil {
-		//nolint:gocritic // log.Fatalf is used for simplicity
+		//nolint:gocritic // log.Fatalf is used for simplicity please return an error in real code
 		log.Fatalf("Could not get health: %v", err)
 	}
 	log.Printf("Qdrant version: %s", healthCheckResult.GetVersion())
@@ -172,7 +172,7 @@ func Example_authentication() {
 	// List collections
 	collections, err := client.ListCollections(context.Background())
 	if err != nil {
-		//nolint:gocritic // log.Fatalf is used for simplicity
+		//nolint:gocritic // log.Fatalf is used for simplicity please return an error in real code
 		log.Fatalf("could not get collections: %v", err)
 	}
 	log.Printf("List of collections: %v", collections)
