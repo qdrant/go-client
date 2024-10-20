@@ -8,14 +8,15 @@ import (
 	"github.com/qdrant/go-client/qdrant"
 )
 
-var (
-	collectionName              = "test_collection"
-	vectorSize           uint64 = 4
-	distance                    = qdrant.Distance_Dot
-	defaultSegmentNumber uint64 = 2
-)
-
+//nolint:testableexamples // there is no qdrant database running
 func Example() {
+	var (
+		collectionName              = "test_collection"
+		vectorSize           uint64 = 4
+		distance                    = qdrant.Distance_Dot
+		defaultSegmentNumber uint64 = 2
+	)
+
 	// Create new client
 	client, err := qdrant.NewClient(&qdrant.Config{
 		Host: "localhost", // Can be omitted, default is "localhost"
@@ -35,6 +36,7 @@ func Example() {
 	// Execute health check
 	healthCheckResult, err := client.HealthCheck(ctx)
 	if err != nil {
+		//nolint:gocritic // log.Fatalf is used for simplicity
 		log.Fatalf("Could not get health: %v", err)
 	}
 	log.Printf("Qdrant version: %s", healthCheckResult.GetVersion())
@@ -57,16 +59,15 @@ func Example() {
 	})
 	if err != nil {
 		log.Fatalf("Could not create collection: %v", err)
-	} else {
-		log.Println("Collection", collectionName, "created")
 	}
+	log.Println("Collection", collectionName, "created")
 	// List collections
 	collections, err := client.ListCollections(ctx)
 	if err != nil {
 		log.Fatalf("Could not list collections: %v", err)
-	} else {
-		log.Printf("List of collections: %s", &collections)
 	}
+	log.Printf("List of collections: %s", &collections)
+
 	// Upsert some data
 	waitUpsert := true
 	upsertPoints := []*qdrant.PointStruct{
@@ -153,6 +154,7 @@ func Example() {
 	log.Printf("Found points: %s", filteredPoints)
 }
 
+//nolint:testableexamples // the example host is invalid
 func Example_authentication() {
 	// Create new client
 	client, err := qdrant.NewClient(&qdrant.Config{
@@ -170,6 +172,7 @@ func Example_authentication() {
 	// List collections
 	collections, err := client.ListCollections(context.Background())
 	if err != nil {
+		//nolint:gocritic // log.Fatalf is used for simplicity
 		log.Fatalf("could not get collections: %v", err)
 	}
 	log.Printf("List of collections: %v", collections)
