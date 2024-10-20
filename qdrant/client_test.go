@@ -1,4 +1,4 @@
-package main
+package qdrant_test
 
 import (
 	"context"
@@ -15,7 +15,7 @@ var (
 	defaultSegmentNumber uint64 = 2
 )
 
-func main() {
+func Example() {
 	// Create new client
 	client, err := qdrant.NewClient(&qdrant.Config{
 		Host: "localhost", // Can be omitted, default is "localhost"
@@ -151,4 +151,26 @@ func main() {
 		log.Fatalf("Could not search points: %v", err)
 	}
 	log.Printf("Found points: %s", filteredPoints)
+}
+
+func Example_authentication() {
+	// Create new client
+	client, err := qdrant.NewClient(&qdrant.Config{
+		Host:   "xyz-example.eu-central.aws.cloud.qdrant.io",
+		Port:   6334,
+		APIKey: "<paste-your-api-key-here>",
+		UseTLS: true,
+		// TLSConfig: &tls.Config{...},
+		// GrpcOptions: []grpc.DialOption{},
+	})
+	if err != nil {
+		log.Fatalf("could not instantiate: %v", err)
+	}
+	defer client.Close()
+	// List collections
+	collections, err := client.ListCollections(context.Background())
+	if err != nil {
+		log.Fatalf("could not get collections: %v", err)
+	}
+	log.Printf("List of collections: %v", collections)
 }
