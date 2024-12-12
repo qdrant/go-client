@@ -62,14 +62,15 @@ func (c *Client) Get(ctx context.Context, request *GetPoints) ([]*RetrievedPoint
 //   - request: The ScrollPoints request specifying the scroll parameters.
 //
 // Returns:
-//   - []*RetrievedPoint: A slice of retrieved points.
+//   - *ScrollResponse: A structure that contains a slice of retrieved points,
+//     the next offset, and the time spent to process.
 //   - error: An error if the operation fails.
-func (c *Client) Scroll(ctx context.Context, request *ScrollPoints) ([]*RetrievedPoint, error) {
+func (c *Client) Scroll(ctx context.Context, request *ScrollPoints) (*ScrollResponse, error) {
 	resp, err := c.GetPointsClient().Scroll(ctx, request)
 	if err != nil {
 		return nil, newQdrantErr(err, "Scroll", request.GetCollectionName())
 	}
-	return resp.GetResult(), nil
+	return resp, nil
 }
 
 // Updates vectors for points in a collection.

@@ -118,11 +118,12 @@ func TestPointsClient(t *testing.T) {
 	})
 
 	t.Run("ScrollPoints", func(t *testing.T) {
-		points, err := client.Scroll(ctx, &qdrant.ScrollPoints{
+		scrollResp, err := client.Scroll(ctx, &qdrant.ScrollPoints{
 			CollectionName: collectionName,
 		})
 		require.NoError(t, err)
-		require.Len(t, points, 1)
+		require.Len(t, scrollResp.GetResult(), 1)
+		require.Nil(t, scrollResp.GetNextPageOffset())
 	})
 
 	t.Run("UpdateVectors", func(t *testing.T) {
