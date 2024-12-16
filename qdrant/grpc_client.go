@@ -1,6 +1,10 @@
 package qdrant
 
 import (
+	"fmt"
+	"os/exec"
+	"strings"
+
 	"google.golang.org/grpc"
 )
 
@@ -34,6 +38,12 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 		config.getTransportCreds(),
 		config.getAPIKeyInterceptor(),
 	}, config.GrpcOptions...)
+
+	clientVersion, err := getClientVersion()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get client version: %w", err)
+	}
+	config.GrpcOptions = append(config.GrpcOptions, grpc.WithUserAgent(fmt.Sprintf("go-client/%s", clientVersion)))
 
 	conn, err := grpc.NewClient(config.getAddr(), config.GrpcOptions...)
 
@@ -83,4 +93,14 @@ func (c *GrpcClient) Snapshots() SnapshotsClient {
 // Tears down the *grpc.ClientConn and all underlying connections.
 func (c *GrpcClient) Close() error {
 	return c.conn.Close()
+}
+
+func getClientVersion() (string, error) {
+	packageName := "github.com/qdrant/go-client"
+	cmd := exec.Command("go", "list", "-m", "-f", "{{.Version}}", packageName)
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(output)), nil
 }
