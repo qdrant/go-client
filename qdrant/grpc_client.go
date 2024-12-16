@@ -34,16 +34,15 @@ func NewDefaultGrpcClient() (*GrpcClient, error) {
 func NewGrpcClient(config *Config) (*GrpcClient, error) {
 	// We append config.GrpcOptions in the end
 	// so that user's explicit options take precedence
-	config.GrpcOptions = append([]grpc.DialOption{
-		config.getTransportCreds(),
-		config.getAPIKeyInterceptor(),
-	}, config.GrpcOptions...)
-
 	clientVersion, err := getClientVersion()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get client version: %w", err)
 	}
-	config.GrpcOptions = append(config.GrpcOptions, grpc.WithUserAgent(fmt.Sprintf("go-client/%s", clientVersion)))
+	config.GrpcOptions = append([]grpc.DialOption{
+		config.getTransportCreds(),
+		config.getAPIKeyInterceptor(),
+		grpc.WithUserAgent(fmt.Sprintf("go-client/%s", clientVersion)),
+	}, config.GrpcOptions...)
 
 	conn, err := grpc.NewClient(config.getAddr(), config.GrpcOptions...)
 
