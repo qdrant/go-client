@@ -34,10 +34,7 @@ func NewDefaultGrpcClient() (*GrpcClient, error) {
 func NewGrpcClient(config *Config) (*GrpcClient, error) {
 	// We append config.GrpcOptions in the end
 	// so that user's explicit options take precedence
-	clientVersion, err := getClientVersion()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get client version: %w", err)
-	}
+	clientVersion := getClientVersion()
 	config.GrpcOptions = append([]grpc.DialOption{
 		config.getTransportCreds(),
 		config.getAPIKeyInterceptor(),
@@ -94,12 +91,12 @@ func (c *GrpcClient) Close() error {
 	return c.conn.Close()
 }
 
-func getClientVersion() (string, error) {
+func getClientVersion() string {
 	packageName := "github.com/qdrant/go-client"
 	cmd := exec.Command("go", "list", "-m", "-f", "{{.Version}}", packageName)
 	output, err := cmd.Output()
 	if err != nil {
-		return "", err
+		return "Unknown"
 	}
-	return strings.TrimSpace(string(output)), nil
+	return strings.TrimSpace(string(output))
 }
