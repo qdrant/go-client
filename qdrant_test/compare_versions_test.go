@@ -1,20 +1,22 @@
-package qdrant
+package qdrant_test
 
 import (
 	"testing"
+
+	"github.com/qdrant/go-client/qdrant"
 )
 
 func TestParseVersion(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected *Version
+		expected *qdrant.Version
 		hasError bool
 	}{
-		{"v1.2.3", &Version{Major: 1, Minor: 2, Rest: "3"}, false},
-		{"1.2.3", &Version{Major: 1, Minor: 2, Rest: "3"}, false},
-		{"v1.2", &Version{Major: 1, Minor: 2, Rest: ""}, false},
-		{"1.2", &Version{Major: 1, Minor: 2, Rest: ""}, false},
-		{"v1.2.3.4", &Version{Major: 1, Minor: 2, Rest: "3.4"}, false},
+		{"v1.2.3", &qdrant.Version{Major: 1, Minor: 2, Rest: "3"}, false},
+		{"1.2.3", &qdrant.Version{Major: 1, Minor: 2, Rest: "3"}, false},
+		{"v1.2", &qdrant.Version{Major: 1, Minor: 2, Rest: ""}, false},
+		{"1.2", &qdrant.Version{Major: 1, Minor: 2, Rest: ""}, false},
+		{"v1.2.3.4", &qdrant.Version{Major: 1, Minor: 2, Rest: "3.4"}, false},
 		{"", nil, true},
 		{"1", nil, true},
 		{"1.", nil, true},
@@ -23,12 +25,12 @@ func TestParseVersion(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result, err := ParseVersion(test.input)
+		result, err := qdrant.ParseVersion(test.input)
 		if (err != nil) != test.hasError {
 			t.Errorf("ParseVersion(%q) error = %v, wantErr %v", test.input, err, test.hasError)
 			continue
 		}
-		if !test.hasError && (result.Major != test.expected.Major ||
+		if !test.hasError && result != nil && (result.Major != test.expected.Major ||
 			result.Minor != test.expected.Minor ||
 			result.Rest != test.expected.Rest) {
 			t.Errorf("ParseVersion(%q) = %v, want %v", test.input, result, test.expected)
@@ -60,7 +62,7 @@ func TestIsCompatible(t *testing.T) {
 	for _, test := range tests {
 		clientVersion := test.clientVersion
 		serverVersion := test.serverVersion
-		result := IsCompatible(&clientVersion, &serverVersion)
+		result := qdrant.IsCompatible(&clientVersion, &serverVersion)
 		if result != test.expected {
 			t.Errorf("IsCompatible(%q, %q) = %v, want %v", clientVersion, serverVersion, result, test.expected)
 		}
