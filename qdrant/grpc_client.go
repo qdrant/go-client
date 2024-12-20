@@ -2,7 +2,7 @@ package qdrant
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"os/exec"
 	"strings"
 
@@ -52,14 +52,16 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 
 	if !config.SkipCompatibilityCheck {
 		serverVersion := getServerVersion(newGrpcClientFromConn)
+		logger := slog.Default()
 		if serverVersion == unknownVersion {
-			log.Printf("Failed to obtain server version. " +
+			logger.Warn("Failed to obtain server version. " +
 				"Unable to check client-server compatibility. " +
 				"Set SkipCompatibilityCheck=true to skip version check.")
 		} else if !IsCompatible(&clientVersion, &serverVersion) {
-			log.Printf("Qdrant client version `%s` is incompatible with server version `%s`. "+
+			logger.Warn("Client version is not compatible with server version. "+
 				"Major versions should match and minor version difference must not exceed 1. "+
-				"Set SkipCompatibilityCheck=true to skip version check.", clientVersion, serverVersion)
+				"Set SkipCompatibilityCheck=true to skip version check.",
+				"clientVersion", clientVersion, "serverVersion", serverVersion)
 		}
 	}
 
