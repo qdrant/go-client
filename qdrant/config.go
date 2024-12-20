@@ -33,6 +33,8 @@ type Config struct {
 	TLSConfig *tls.Config
 	// Additional gRPC options to use for the connection.
 	GrpcOptions []grpc.DialOption
+	// Whether to check compatibility between server's version and client's. Defaults to false.
+	SkipCompatibilityCheck bool
 }
 
 // Internal method.
