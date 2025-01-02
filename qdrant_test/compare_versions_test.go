@@ -12,11 +12,11 @@ func TestParseVersion(t *testing.T) {
 		expected *qdrant.Version
 		hasError bool
 	}{
-		{"v1.2.3", &qdrant.Version{Major: 1, Minor: 2, Rest: "3"}, false},
-		{"1.2.3", &qdrant.Version{Major: 1, Minor: 2, Rest: "3"}, false},
-		{"v1.2", &qdrant.Version{Major: 1, Minor: 2, Rest: ""}, false},
-		{"1.2", &qdrant.Version{Major: 1, Minor: 2, Rest: ""}, false},
-		{"v1.2.3.4", &qdrant.Version{Major: 1, Minor: 2, Rest: "3.4"}, false},
+		{"v1.2.3", &qdrant.Version{Major: 1, Minor: 2}, false},
+		{"1.2.3", &qdrant.Version{Major: 1, Minor: 2}, false},
+		{"v1.2", &qdrant.Version{Major: 1, Minor: 2}, false},
+		{"1.2", &qdrant.Version{Major: 1, Minor: 2}, false},
+		{"v1.2.3.4", &qdrant.Version{Major: 1, Minor: 2}, false},
 		{"", nil, true},
 		{"1", nil, true},
 		{"1.", nil, true},
@@ -31,8 +31,7 @@ func TestParseVersion(t *testing.T) {
 			continue
 		}
 		if !test.hasError && result != nil && (result.Major != test.expected.Major ||
-			result.Minor != test.expected.Minor ||
-			result.Rest != test.expected.Rest) {
+			result.Minor != test.expected.Minor) {
 			t.Errorf("ParseVersion(%q) = %v, want %v", test.input, result, test.expected)
 		}
 	}
@@ -62,7 +61,7 @@ func TestIsCompatible(t *testing.T) {
 	for _, test := range tests {
 		clientVersion := test.clientVersion
 		serverVersion := test.serverVersion
-		result := qdrant.IsCompatible(&clientVersion, &serverVersion)
+		result := qdrant.IsCompatible(clientVersion, serverVersion)
 		if result != test.expected {
 			t.Errorf("IsCompatible(%q, %q) = %v, want %v", clientVersion, serverVersion, result, test.expected)
 		}

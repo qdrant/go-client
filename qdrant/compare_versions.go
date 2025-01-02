@@ -3,8 +3,7 @@ package qdrant
 import (
 	"context"
 	"fmt"
-	"log"
-	"math"
+	"log/slog"
 	"strconv"
 	"strings"
 	"time"
@@ -18,15 +17,15 @@ const unknownVersion = "Unknown"
 type Version struct {
 	Major int
 	Minor int
-	Rest  string
 }
 
 func getServerVersion(clientConn *GrpcClient) string {
+	logger := slog.Default()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 	healthCheckResult, err := clientConn.qdrant.HealthCheck(ctx, &HealthCheckRequest{})
 	if err != nil {
-		log.Printf("Unable to get server version: %v, server version defaults to `%s`", err, unknownVersion)
+		logger.Warn("Unable to get server version, use default", "err", err, "default", unknownVersion)
 		return unknownVersion
 	}
 	serverVersion := healthCheckResult.GetVersion()
@@ -40,12 +39,12 @@ func removeLeadingNonNumeric(versionStr string) string {
 	})
 }
 
-// ParseVersion converts a version string "x.y.z" into a Version struct.
+// ParseVersion converts a version string "x.y[.z]" into a Version struct.
 func ParseVersion(versionStr string) (*Version, error) {
 	cleanedVersionStr := removeLeadingNonNumeric(versionStr)
 	parts := strings.SplitN(cleanedVersionStr, ".", fullVersionParts)
 	if len(parts) < reducedVersionParts {
-		return nil, fmt.Errorf("unable to parse version, expected format: x.y.z, found: %s", cleanedVersionStr)
+		return nil, fmt.Errorf("unable to parse version, expected format: x.y[.z], found: %s", cleanedVersionStr)
 	}
 
 	major, err := strconv.Atoi(parts[0])
@@ -58,36 +57,33 @@ func ParseVersion(versionStr string) (*Version, error) {
 		return nil, fmt.Errorf("failed to parse minor version: %w", err)
 	}
 
-	rest := ""
-	if len(parts) == fullVersionParts {
-		rest = parts[2]
-	}
-
 	return &Version{
 		Major: major,
 		Minor: minor,
-		Rest:  rest,
 	}, nil
 }
 
-func IsCompatible(clientVersion, serverVersion *string) bool {
-	if *clientVersion == *serverVersion {
+func IsCompatible(clientVersion, serverVersion string) bool {
+	if clientVersion == serverVersion {
 		return true
 	}
+	logger := slog.Default()
+	client, err := ParseVersion(clientVersion)
+	if err != nil {
+		logger.Warn("Unable to compare versions", "err", err)
+		return false
+	}
 
-	parsedClientVersion, err := ParseVersion(*clientVersion)
+	server, err := ParseVersion(serverVersion)
 	if err != nil {
-		log.Printf("Unable to compare versions: %v", err)
+		logger.Warn("Unable to compare versions", "err", err)
 		return false
 	}
-	parsedServerVersion, err := ParseVersion(*serverVersion)
-	if err != nil {
-		log.Printf("Unable to compare versions: %v", err)
+
+	if client.Major != server.Major {
 		return false
 	}
-	majorDiff := int(math.Abs(float64(parsedClientVersion.Major - parsedServerVersion.Major)))
-	if majorDiff >= 1 {
-		return false
-	}
-	return int(math.Abs(float64(parsedClientVersion.Minor-parsedServerVersion.Minor))) <= 1
+
+	diff := client.Minor - server.Minor
+	return diff <= 1 && diff >= -1
 }

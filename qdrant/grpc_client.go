@@ -57,7 +57,7 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 			logger.Warn("Failed to obtain server version. " +
 				"Unable to check client-server compatibility. " +
 				"Set SkipCompatibilityCheck=true to skip version check.")
-		} else if !IsCompatible(&clientVersion, &serverVersion) {
+		} else if !IsCompatible(clientVersion, serverVersion) {
 			logger.Warn("Client version is not compatible with server version. "+
 				"Major versions should match and minor version difference must not exceed 1. "+
 				"Set SkipCompatibilityCheck=true to skip version check.",
