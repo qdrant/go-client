@@ -2,6 +2,7 @@ package qdrant
 
 import (
 	"fmt"
+	"log/slog"
 	"os/exec"
 	"strings"
 
@@ -47,7 +48,24 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 		return nil, err
 	}
 
-	return NewGrpcClientFromConn(conn), nil
+	newGrpcClientFromConn := NewGrpcClientFromConn(conn)
+
+	if !config.SkipCompatibilityCheck {
+		serverVersion := getServerVersion(newGrpcClientFromConn)
+		logger := slog.Default()
+		if serverVersion == unknownVersion {
+			logger.Warn("Failed to obtain server version. " +
+				"Unable to check client-server compatibility. " +
+				"Set SkipCompatibilityCheck=true to skip version check.")
+		} else if !IsCompatible(clientVersion, serverVersion) {
+			logger.Warn("Client version is not compatible with server version. "+
+				"Major versions should match and minor version difference must not exceed 1. "+
+				"Set SkipCompatibilityCheck=true to skip version check.",
+				"clientVersion", clientVersion, "serverVersion", serverVersion)
+		}
+	}
+
+	return newGrpcClientFromConn, nil
 }
 
 // Create a new gRPC client from existing connection.
@@ -96,7 +114,7 @@ func getClientVersion() string {
 	cmd := exec.Command("go", "list", "-m", "-f", "{{.Version}}", packageName)
 	output, err := cmd.Output()
 	if err != nil {
-		return "Unknown"
+		return unknownVersion
 	}
 	return strings.TrimSpace(string(output))
 }
