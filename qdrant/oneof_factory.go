@@ -362,6 +362,33 @@ func NewVectorInputMulti(vectors [][]float32) *VectorInput {
 	}
 }
 
+// Creates a *VectorInput instance for a document.
+func NewVectorInputDocument(document *Document) *VectorInput {
+	return &VectorInput{
+		Variant: &VectorInput_Document{
+			Document: document,
+		},
+	}
+}
+
+// Creates a *VectorInput instance for an image.
+func NewVectorInputImage(image *Image) *VectorInput {
+	return &VectorInput{
+		Variant: &VectorInput_Image{
+			Image: image,
+		},
+	}
+}
+
+// Creates a *VectorInput instance for an inference object.
+func NewVectorInputObject(object *InferenceObject) *VectorInput {
+	return &VectorInput{
+		Variant: &VectorInput_Object{
+			Object: object,
+		},
+	}
+}
+
 // Creates a *WithPayloadSelector instance with payload enabled/disabled.
 // This is an alias for NewWithPayloadEnable().
 func NewWithPayload(enable bool) *WithPayloadSelector {
@@ -824,7 +851,20 @@ func NewPointsSelectorIDs(ids []*PointId) *PointsSelector {
 	}
 }
 
-// Creates a pointer to a value of any type.
-func PtrOf[T any](t T) *T {
-	return &t
+// Creates a *MaxOptimizationThreads instance from the number of specified threads.
+func NewMaxOptimizationThreads(value uint64) *MaxOptimizationThreads {
+	return &MaxOptimizationThreads{
+		Variant: &MaxOptimizationThreads_Value{
+			Value: value,
+		},
+	}
+}
+
+// Creates a *MaxOptimizationThreads instance from the specified settings.
+func NewMaxOptimizationThreadsSetting(setting MaxOptimizationThreads_Setting) *MaxOptimizationThreads {
+	return &MaxOptimizationThreads{
+		Variant: &MaxOptimizationThreads_Setting_{
+			Setting: setting,
+		},
+	}
 }

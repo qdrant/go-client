@@ -319,3 +319,15 @@ func NewDatetimeRange(field string, dateTimeRange *DatetimeRange) *Condition {
 		},
 	}
 }
+
+// Creates a condition that checks if a point has the specified vector.
+// See: https://qdrant.tech/documentation/concepts/filtering/#has-vector
+func NewHasVector(vector string) *Condition {
+	return &Condition{
+		ConditionOneOf: &Condition_HasVector{
+			HasVector: &HasVectorCondition{
+				HasVector: vector,
+			},
+		},
+	}
+}
