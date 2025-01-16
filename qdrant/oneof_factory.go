@@ -362,32 +362,32 @@ func NewVectorInputMulti(vectors [][]float32) *VectorInput {
 	}
 }
 
-// Creates a *VectorInput instance for a document.
-func NewVectorInputDocument(document *Document) *VectorInput {
-	return &VectorInput{
-		Variant: &VectorInput_Document{
-			Document: document,
-		},
-	}
-}
+// // Creates a *VectorInput instance for a document.
+// func NewVectorInputDocument(document *Document) *VectorInput {
+// 	return &VectorInput{
+// 		Variant: &VectorInput_Document{
+// 			Document: document,
+// 		},
+// 	}
+// }
 
-// Creates a *VectorInput instance for an image.
-func NewVectorInputImage(image *Image) *VectorInput {
-	return &VectorInput{
-		Variant: &VectorInput_Image{
-			Image: image,
-		},
-	}
-}
+// // Creates a *VectorInput instance for an image.
+// func NewVectorInputImage(image *Image) *VectorInput {
+// 	return &VectorInput{
+// 		Variant: &VectorInput_Image{
+// 			Image: image,
+// 		},
+// 	}
+// }
 
-// Creates a *VectorInput instance for an inference object.
-func NewVectorInputObject(object *InferenceObject) *VectorInput {
-	return &VectorInput{
-		Variant: &VectorInput_Object{
-			Object: object,
-		},
-	}
-}
+// // Creates a *VectorInput instance for an inference object.
+// func NewVectorInputObject(object *InferenceObject) *VectorInput {
+// 	return &VectorInput{
+// 		Variant: &VectorInput_Object{
+// 			Object: object,
+// 		},
+// 	}
+// }
 
 // Creates a *WithPayloadSelector instance with payload enabled/disabled.
 // This is an alias for NewWithPayloadEnable().
