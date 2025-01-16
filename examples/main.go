@@ -38,12 +38,6 @@ func main() {
 		log.Fatalf("Could not get health: %v", err)
 	}
 	log.Printf("Qdrant version: %s", healthCheckResult.GetVersion())
-	// Delete collection
-	err = client.DeleteCollection(ctx, collectionName)
-	if err != nil {
-		log.Fatalf("Could not delete collection: %v", err)
-	}
-	log.Println("Collection", collectionName, "deleted")
 	// Create collection
 	err = client.CreateCollection(ctx, &qdrant.CreateCollection{
 		CollectionName: collectionName,
@@ -151,4 +145,10 @@ func main() {
 		log.Fatalf("Could not search points: %v", err)
 	}
 	log.Printf("Found points: %s", filteredPoints)
+	// Delete collection
+	err = client.DeleteCollection(ctx, collectionName)
+	if err != nil {
+		log.Fatalf("Could not delete collection: %v", err)
+	}
+	log.Println("Collection", collectionName, "deleted")
 }
