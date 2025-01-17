@@ -72,3 +72,8 @@ func (c *Client) GetConnection() *grpc.ClientConn {
 func (c *Client) Close() error {
 	return c.grpcClient.Close()
 }
+
+// Creates a pointer to a value of any type.
+func PtrOf[T any](t T) *T {
+	return &t
+}
