@@ -40,6 +40,7 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 		config.getTransportCreds(),
 		config.getAPIKeyInterceptor(),
 		grpc.WithUserAgent(fmt.Sprintf("go-client/%s", clientVersion)),
+		grpc.WithUnaryInterceptor(UnaryClientInterceptor()),
 	}, config.GrpcOptions...)
 
 	conn, err := grpc.NewClient(config.getAddr(), config.GrpcOptions...)
