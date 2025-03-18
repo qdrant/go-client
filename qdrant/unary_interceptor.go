@@ -20,7 +20,7 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 		invoker grpc.UnaryInvoker,
 		opts ...grpc.CallOption,
 	) error {
-		var md metadata.MD
+		md := make(metadata.MD)
 		opts = append(opts, grpc.Header(&md))
 
 		err := invoker(ctx, method, req, reply, cc, opts...)
