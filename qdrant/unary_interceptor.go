@@ -20,6 +20,9 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 		invoker grpc.UnaryInvoker,
 		opts ...grpc.CallOption,
 	) error {
+		var md metadata.MD
+		opts = append(opts, grpc.Header(&md))
+
 		err := invoker(ctx, method, req, reply, cc, opts...)
 		if err == nil {
 			return nil
@@ -30,14 +33,12 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 			return err // return as is
 		}
 
-		if md, ok := metadata.FromIncomingContext(ctx); ok {
-			if values := md.Get("retry-after"); len(values) > 0 {
-				parsed, err := strconv.Atoi(values[0])
-				if err == nil {
-					return &QdrantResourceExhaustedError{
-						err,
-						parsed,
-					}
+		if values := md.Get("retry-after"); len(values) > 0 {
+			parsed, err := strconv.Atoi(values[0])
+			if err == nil {
+				return &QdrantResourceExhaustedError{
+					err,
+					parsed,
 				}
 			}
 		}
