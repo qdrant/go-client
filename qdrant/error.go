@@ -35,10 +35,10 @@ func newQdrantErr(err error, operationName string, contexts ...string) *QdrantEr
 }
 
 type QdrantResourceExhaustedError struct {
-	err         error
+	reason      string
 	RetryAfterS int
 }
 
 func (e *QdrantResourceExhaustedError) Error() string {
-	return fmt.Sprintf("ResourceExhausted: %s, retry after %d seconds", e.err, e.RetryAfterS)
+	return fmt.Sprintf("ResourceExhausted: %s, retry after %d seconds", e.reason, e.RetryAfterS)
 }
