@@ -34,6 +34,7 @@ func newQdrantErr(err error, operationName string, contexts ...string) *QdrantEr
 	}
 }
 
+//nolint:revive // The linter says qdrant.QdrantError stutters, but it's an apt name.
 type QdrantResourceExhaustedError struct {
 	reason      string
 	RetryAfterS int
