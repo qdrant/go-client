@@ -77,3 +77,8 @@ func (c *Config) getAPIKeyInterceptor() grpc.DialOption {
 		return invoker(newCtx, method, req, reply, cc, opts...)
 	})
 }
+
+// Internal method.
+func (c *Config) getResponseInterceptor() grpc.DialOption {
+	return grpc.WithChainUnaryInterceptor(UnaryClientInterceptor())
+}
