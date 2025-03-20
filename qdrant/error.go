@@ -33,3 +33,13 @@ func newQdrantErr(err error, operationName string, contexts ...string) *QdrantEr
 		context:       combinedContext,
 	}
 }
+
+//nolint:revive // The linter says QdrantResourceExhaustedError stutters, but it's an apt name.
+type QdrantResourceExhaustedError struct {
+	Reason      string
+	RetryAfterS int
+}
+
+func (e *QdrantResourceExhaustedError) Error() string {
+	return fmt.Sprintf("ResourceExhausted: %s, retry after %d seconds", e.Reason, e.RetryAfterS)
+}
