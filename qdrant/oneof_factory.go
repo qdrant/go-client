@@ -699,6 +699,15 @@ func NewQuerySample(sample Sample) *Query {
 	}
 }
 
+// Creates a *Query instance for score boosting via an arbitrary formula.
+func NewQueryFormula(formula *Formula) *Query {
+	return &Query{
+		Variant: &Query_Formula{
+			Formula: formula,
+		},
+	}
+}
+
 // Creates a *FacetValue instance from a string.
 func NewFacetValue(value string) *FacetValue {
 	return &FacetValue{
@@ -865,6 +874,178 @@ func NewMaxOptimizationThreadsSetting(setting MaxOptimizationThreads_Setting) *M
 	return &MaxOptimizationThreads{
 		Variant: &MaxOptimizationThreads_Setting_{
 			Setting: setting,
+		},
+	}
+}
+
+// Creates a *Expression instance from a constant.
+func NewExpressionConstant(constant float32) *Expression {
+	return &Expression{
+		Variant: &Expression_Constant{
+			Constant: constant,
+		},
+	}
+}
+
+// Creates a *Expression instance from a variable (payload key or score reference).
+func NewExpressionVariable(variable string) *Expression {
+	return &Expression{
+		Variant: &Expression_Variable{
+			Variable: variable,
+		},
+	}
+}
+
+// Creates a *Expression instance from a *Condition.
+// If true, becomes 1.0; otherwise 0.0.
+func NewExpressionCondition(condition *Condition) *Expression {
+	return &Expression{
+		Variant: &Expression_Condition{
+			Condition: condition,
+		},
+	}
+}
+
+// Creates a *Expression instance from a *GeoDistance.
+func NewExpressionGeoDistance(geoDistance *GeoDistance) *Expression {
+	return &Expression{
+		Variant: &Expression_GeoDistance{
+			GeoDistance: geoDistance,
+		},
+	}
+}
+
+// Creates a *Expression instance from a datetime constant string.
+func NewExpressionDatetime(datetime string) *Expression {
+	return &Expression{
+		Variant: &Expression_Datetime{
+			Datetime: datetime,
+		},
+	}
+}
+
+// Creates a *Expression instance from a datetime key in the payload.
+func NewExpressionDatetimeKey(datetimeKey string) *Expression {
+	return &Expression{
+		Variant: &Expression_DatetimeKey{
+			DatetimeKey: datetimeKey,
+		},
+	}
+}
+
+// Creates a *Expression instance for multiplication.
+func NewExpressionMult(mult *MultExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_Mult{
+			Mult: mult,
+		},
+	}
+}
+
+// Creates a *Expression instance for summation.
+func NewExpressionSum(sum *SumExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_Sum{
+			Sum: sum,
+		},
+	}
+}
+
+// Creates a *Expression instance for division.
+func NewExpressionDiv(div *DivExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_Div{
+			Div: div,
+		},
+	}
+}
+
+// Creates a *Expression instance to negate a value.
+func NewExpressionNeg(neg *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Neg{
+			Neg: neg,
+		},
+	}
+}
+
+// Creates a *Expression instance for absolute value.
+func NewExpressionAbs(abs *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Abs{
+			Abs: abs,
+		},
+	}
+}
+
+// Creates a *Expression instance for square root.
+func NewExpressionSqrt(sqrt *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Sqrt{
+			Sqrt: sqrt,
+		},
+	}
+}
+
+// Creates a *Expression instance for power expression.
+func NewExpressionPow(pow *PowExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_Pow{
+			Pow: pow,
+		},
+	}
+}
+
+// Creates a *Expression instance for exponential.
+func NewExpressionExp(exp *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Exp{
+			Exp: exp,
+		},
+	}
+}
+
+// Creates a *Expression instance for base-10 logarithm.
+func NewExpressionLog10(log10 *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Log10{
+			Log10: log10,
+		},
+	}
+}
+
+// Creates a *Expression instance for natural logarithm.
+func NewExpressionLn(ln *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Ln{
+			Ln: ln,
+		},
+	}
+}
+
+// Creates a *Expression instance for exponential decay.
+func NewExpressionExpDecay(expDecay *DecayParamsExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_ExpDecay{
+			ExpDecay: expDecay,
+		},
+	}
+}
+
+// Creates a *Expression instance for Gaussian decay.
+func NewExpressionGaussDecay(gaussDecay *DecayParamsExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_GaussDecay{
+			GaussDecay: gaussDecay,
+		},
+	}
+}
+
+// Creates a *Expression instance for linear decay.
+func NewExpressionLinDecay(LinDecay *DecayParamsExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_LinDecay{
+			LinDecay: LinDecay,
 		},
 	}
 }
