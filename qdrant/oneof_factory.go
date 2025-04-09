@@ -1042,10 +1042,10 @@ func NewExpressionGaussDecay(gaussDecay *DecayParamsExpression) *Expression {
 }
 
 // Creates a *Expression instance for linear decay.
-func NewExpressionLinDecay(LinDecay *DecayParamsExpression) *Expression {
+func NewExpressionLinDecay(linDecay *DecayParamsExpression) *Expression {
 	return &Expression{
 		Variant: &Expression_LinDecay{
-			LinDecay: LinDecay,
+			LinDecay: linDecay,
 		},
 	}
 }
