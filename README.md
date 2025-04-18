@@ -132,4 +132,4 @@ searchResult, err := client.Query(context.Background(), &qdrant.QueryPoints{
 
 ## ⚖️ LICENSE
 
-Apache 2.0 © [2024](https://github.com/qdrant/go-client/blob/master/LICENSE)
+[Apache 2.0](https://github.com/qdrant/go-client/blob/master/LICENSE)
