@@ -11,7 +11,7 @@
     <a href="https://github.com/qdrant/go-client/actions/workflows/ci.yml"><img src="https://github.com/qdrant/go-client/actions/workflows/ci.yml/badge.svg?branch=master" alt="Tests"></a>
     <a href="https://github.com/qdrant/go-client/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-success" alt="Apache 2.0 License"></a>
     <a href="https://qdrant.to/discord"><img src="https://img.shields.io/badge/Discord-Qdrant-5865F2.svg?logo=discord" alt="Discord"></a>
-    <a href="https://qdrant.to/roadmap"><img src="https://img.shields.io/badge/Roadmap-2024-bc1439.svg" alt="Roadmap 2024"></a>
+    <a href="https://qdrant.to/roadmap"><img src="https://img.shields.io/badge/Roadmap-2025-bc1439.svg" alt="Roadmap 2025"></a>
 </p>
 
 Go client library with handy utilities for interfacing with [Qdrant](https://qdrant.tech/).
@@ -54,7 +54,7 @@ import "github.com/qdrant/go-client/qdrant"
 client, err := qdrant.NewClient(&qdrant.Config{
 	Host:   "xyz-example.eu-central.aws.cloud.qdrant.io",
 	Port:   6334,
-	APIKey: "<paste-your-api-key-here>",
+	APIKey: "<your-api-key>",
 	UseTLS: true,  // uses default config with minimum TLS version set to 1.3
 	// TLSConfig: &tls.Config{...},
 	// GrpcOptions: []grpc.DialOption{},
@@ -115,11 +115,11 @@ searchResult, err := client.Query(context.Background(), &qdrant.QueryPoints{
 })
 ```
 
-Search for similar vectors with filtering condition
+Search for similar vectors with a filtering condition
 
 ```go
 searchResult, err := client.Query(context.Background(), &qdrant.QueryPoints{
-	CollectionName: "test_collection",
+	CollectionName: "{collection_name}",
 	Query:          qdrant.NewQuery(0.2, 0.1, 0.9, 0.7),
 	Filter: &qdrant.Filter{
 		Must: []*qdrant.Condition{
@@ -132,4 +132,4 @@ searchResult, err := client.Query(context.Background(), &qdrant.QueryPoints{
 
 ## ⚖️ LICENSE
 
-Apache 2.0 © [2024](https://github.com/qdrant/go-client/blob/master/LICENSE)
+[Apache 2.0](https://github.com/qdrant/go-client/blob/master/LICENSE)
