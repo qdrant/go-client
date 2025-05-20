@@ -3,8 +3,7 @@ package qdrant
 import (
 	"fmt"
 	"log/slog"
-	"os/exec"
-	"strings"
+	"runtime/debug"
 
 	"google.golang.org/grpc"
 )
@@ -112,10 +111,20 @@ func (c *GrpcClient) Close() error {
 
 func getClientVersion() string {
 	packageName := "github.com/qdrant/go-client"
-	cmd := exec.Command("go", "list", "-m", "-f", "{{.Version}}", packageName)
-	output, err := cmd.Output()
-	if err != nil {
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
 		return unknownVersion
 	}
-	return strings.TrimSpace(string(output))
+
+	if bi.Main.Path == packageName {
+		return bi.Main.Version
+	}
+
+	for _, dep := range bi.Deps {
+		if dep.Path == packageName {
+			return dep.Version
+		}
+	}
+
+	return unknownVersion
 }
