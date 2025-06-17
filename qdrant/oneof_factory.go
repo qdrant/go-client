@@ -362,32 +362,32 @@ func NewVectorInputMulti(vectors [][]float32) *VectorInput {
 	}
 }
 
-// // Creates a *VectorInput instance for a document.
-// func NewVectorInputDocument(document *Document) *VectorInput {
-// 	return &VectorInput{
-// 		Variant: &VectorInput_Document{
-// 			Document: document,
-// 		},
-// 	}
-// }
+// Creates a *VectorInput instance from a *Document for cloud inference.
+func NewVectorInputDocument(document *Document) *VectorInput {
+	return &VectorInput{
+		Variant: &VectorInput_Document{
+			Document: document,
+		},
+	}
+}
 
-// // Creates a *VectorInput instance for an image.
-// func NewVectorInputImage(image *Image) *VectorInput {
-// 	return &VectorInput{
-// 		Variant: &VectorInput_Image{
-// 			Image: image,
-// 		},
-// 	}
-// }
+// Creates a *VectorInput instance from a *Image for cloud inference.
+func NewVectorInputImage(image *Image) *VectorInput {
+	return &VectorInput{
+		Variant: &VectorInput_Image{
+			Image: image,
+		},
+	}
+}
 
-// // Creates a *VectorInput instance for an inference object.
-// func NewVectorInputObject(object *InferenceObject) *VectorInput {
-// 	return &VectorInput{
-// 		Variant: &VectorInput_Object{
-// 			Object: object,
-// 		},
-// 	}
-// }
+// Creates a *VectorInput instance from a *InferenceObject for cloud inference.
+func NewVectorInputObject(object *InferenceObject) *VectorInput {
+	return &VectorInput{
+		Variant: &VectorInput_Object{
+			Object: object,
+		},
+	}
+}
 
 // Creates a *WithPayloadSelector instance with payload enabled/disabled.
 // This is an alias for NewWithPayloadEnable().
@@ -485,6 +485,33 @@ func NewVectorsMulti(vectors [][]float32) *Vectors {
 	}
 }
 
+// Creates a *Vectors instance from a *Document for cloud inference.
+func NewVectorsDocument(document *Document) *Vectors {
+	return &Vectors{
+		VectorsOptions: &Vectors_Vector{
+			Vector: NewVectorDocument(document),
+		},
+	}
+}
+
+// Creates a *Vectors instance from a *Image for cloud inference.
+func NewVectorsImage(image *Image) *Vectors {
+	return &Vectors{
+		VectorsOptions: &Vectors_Vector{
+			Vector: NewVectorImage(image),
+		},
+	}
+}
+
+// Creates a *Vectors instance from a *InferenceObject for cloud inference.
+func NewVectorsObject(object *InferenceObject) *Vectors {
+	return &Vectors{
+		VectorsOptions: &Vectors_Vector{
+			Vector: NewVectorObject(object),
+		},
+	}
+}
+
 // Creates a *Vectors instance for a map of named *Vector.
 func NewVectorsMap(vectors map[string]*Vector) *Vectors {
 	return &Vectors{
@@ -529,6 +556,33 @@ func NewVectorMulti(vectors [][]float32) *Vector {
 	return &Vector{
 		Data:         flattenedVec,
 		VectorsCount: &vectorsCount,
+	}
+}
+
+// Creates a *Vector instance from a *Document for cloud inference.
+func NewVectorDocument(document *Document) *Vector {
+	return &Vector{
+		Vector: &Vector_Document{
+			Document: document,
+		},
+	}
+}
+
+// Creates a *Vector instance from a *Image for cloud inference.
+func NewVectorImage(image *Image) *Vector {
+	return &Vector{
+		Vector: &Vector_Image{
+			Image: image,
+		},
+	}
+}
+
+// Creates a *Vector instance from a *InferenceObject for cloud inference.
+func NewVectorObject(object *InferenceObject) *Vector {
+	return &Vector{
+		Vector: &Vector_Object{
+			Object: object,
+		},
 	}
 }
 
