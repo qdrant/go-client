@@ -72,6 +72,24 @@ func (c *Client) Scroll(ctx context.Context, request *ScrollPoints) ([]*Retrieve
 	return resp.GetResult(), nil
 }
 
+// Iterates over all or filtered points in a collection with offset.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - request: The ScrollPoints request specifying the scroll parameters.
+//
+// Returns:
+//   - []*RetrievedPoint: A slice of retrieved points.
+//   - *PointId: The next page offset for pagination.
+//   - error: An error if the operation fails.
+func (c *Client) ScrollAndOffset(ctx context.Context, request *ScrollPoints) ([]*RetrievedPoint, *PointId, error) {
+	resp, err := c.GetPointsClient().Scroll(ctx, request)
+	if err != nil {
+		return nil, nil, newQdrantErr(err, "ScrollAndOffset", request.GetCollectionName())
+	}
+	return resp.GetResult(), resp.GetNextPageOffset(), nil
+}
+
 // Updates vectors for points in a collection.
 //
 // Parameters:
