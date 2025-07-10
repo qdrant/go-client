@@ -762,6 +762,18 @@ func NewQueryFormula(formula *Formula) *Query {
 	}
 }
 
+// Creates a *Query instance for re-ranking points with MMR (Maximal Marginal Relevance).
+func NewQueryMMR(nearest *VectorInput, mmr *Mmr) *Query {
+	return &Query{
+		Variant: &Query_NearestWithMmr{
+			NearestWithMmr: &NearestInputWithMmr{
+				Nearest: nearest,
+				Mmr:     mmr,
+			},
+		},
+	}
+}
+
 // Creates a *FacetValue instance from a string.
 func NewFacetValue(value string) *FacetValue {
 	return &FacetValue{
