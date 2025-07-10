@@ -497,16 +497,16 @@ message TextIndexParams {
   optional bool on_disk = 5; // If true - store index on disk.
   optional StopwordsSet stopwords = 6; // Stopwords for the text index
   optional bool phrase_matching = 7; // If true - support phrase matching.
-  optional StemmingAlgorithm stemmer = 8; // Set an algorithm for stemming.
+  optional StemmingAlgorithm stemming = 8; // Set an algorithm for stemming.
 }
 
 message StemmingAlgorithm {
   oneof stemming_params {
-    SnowballParams snowball = 1; // Parameters for snowball stemming
+    SnowballParameters snowball = 1; // Parameters for snowball stemming
   }
 }
 
-message SnowballParams {
+message SnowballParameters {
   string language = 1; // Which language the algorithm should stem.
 }
 
