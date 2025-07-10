@@ -63,7 +63,7 @@ golangci-lint run
 
 The client uses generated stubs from upstream Qdrant proto definitions, which are downloaded from [qdrant/qdrant](https://github.com/qdrant/qdrant/tree/master/lib/api/src/grpc/proto).
 
-#### Steps:
+#### Steps
 
 1. Download and generate the latest client stubs by running the following command from the project root:
 
@@ -75,11 +75,11 @@ BRANCH=dev sh internal/tools/sync_proto.sh
 
 3. Implement new Qdrant methods in [`points.go`](https://github.com/qdrant/go-client/blob/master/qdrant/points.go), [`collections.go`](https://github.com/qdrant/go-client/blob/master/qdrant/collections.go), or [`qdrant.go`](https://github.com/qdrant/go-client/blob/master/qdrant/qdrant.go) as needed and associated tests in [`qdrant_test/`](https://github.com/qdrant/go-client/tree/master/qdrant_test).
 
-Since the API reference is published at https://pkg.go.dev/github.com/qdrant/go-client, the docstrings have to be appropriate.
+Since the API reference is published at <https://pkg.go.dev/github.com/qdrant/go-client>, the docstrings have to be appropriate.
 
 4. If there are any new `oneOf` properties in the proto definitions, add helper constructors to [`oneof_factory.go`](https://github.com/qdrant/go-client/blob/master/qdrant/oneof_factory.go) following the existing patterns.
 
-5. Run the linter, formatter and tests as per the instructions above. 
+5. Run the linter, formatter and tests as per the instructions above.
 
 6. Submit your pull request and get those approvals.
 
@@ -104,4 +104,4 @@ git tag v1.11.0
 git push --tags
 ```
 
-5. Optionally, do a release at https://github.com/qdrant/go-client/releases from the tag with notes.
+5. Optionally, do a release at <https://github.com/qdrant/go-client/releases> from the tag with notes.
