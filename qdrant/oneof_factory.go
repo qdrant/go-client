@@ -117,6 +117,8 @@ func NewQuantizationDiffDisabled() *QuantizationConfigDiff {
 }
 
 // Creates a *BinaryQuantizationQueryEncoding instance with a specific setting.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
 func NewBinaryQuantizationQueryEncodingSetting(setting BinaryQuantizationQueryEncoding_Setting) *BinaryQuantizationQueryEncoding {
 	return &BinaryQuantizationQueryEncoding{
 		Variant: &BinaryQuantizationQueryEncoding_Setting_{
