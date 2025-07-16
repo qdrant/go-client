@@ -116,6 +116,15 @@ func NewQuantizationDiffDisabled() *QuantizationConfigDiff {
 	}
 }
 
+// Creates a *BinaryQuantizationQueryEncoding instance with a specific setting.
+func NewBinaryQuantizationQueryEncodingSetting(setting BinaryQuantizationQueryEncoding_Setting) *BinaryQuantizationQueryEncoding {
+	return &BinaryQuantizationQueryEncoding{
+		Variant: &BinaryQuantizationQueryEncoding_Setting_{
+			Setting: setting,
+		},
+	}
+}
+
 // Creates a *PayloadIndexParams instance from *KeywordIndexParams.
 // This is an alias for NewPayloadIndexParamsKeyword().
 func NewPayloadIndexParams(params *KeywordIndexParams) *PayloadIndexParams {
