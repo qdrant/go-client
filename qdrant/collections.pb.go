@@ -2179,6 +2179,8 @@ type OptimizersConfigDiff struct {
 	// It is recommended to select the default number of segments as a factor of the number of search threads,
 	// so that each segment would be handled evenly by one of the threads.
 	DefaultSegmentNumber *uint64 `protobuf:"varint,3,opt,name=default_segment_number,json=defaultSegmentNumber,proto3,oneof" json:"default_segment_number,omitempty"`
+	// Deprecated:
+	//
 	// Do not create segments larger this size (in kilobytes).
 	// Large segments might require disproportionately long indexation times,
 	// therefore it makes sense to limit the size of segments.
@@ -3189,7 +3191,7 @@ type CreateCollection struct {
 	VectorsConfig          *VectorsConfig        `protobuf:"bytes,10,opt,name=vectors_config,json=vectorsConfig,proto3,oneof" json:"vectors_config,omitempty"`                                // Configuration for vectors
 	ReplicationFactor      *uint32               `protobuf:"varint,11,opt,name=replication_factor,json=replicationFactor,proto3,oneof" json:"replication_factor,omitempty"`                   // Number of replicas of each shard that network tries to maintain, default = 1
 	WriteConsistencyFactor *uint32               `protobuf:"varint,12,opt,name=write_consistency_factor,json=writeConsistencyFactor,proto3,oneof" json:"write_consistency_factor,omitempty"`  // How many replicas should apply the operation for us to consider it successful, default = 1
-	InitFromCollection     *string               `protobuf:"bytes,13,opt,name=init_from_collection,json=initFromCollection,proto3,oneof" json:"init_from_collection,omitempty"`               // Specify name of the other collection to copy data from
+	InitFromCollection     *string               `protobuf:"bytes,13,opt,name=init_from_collection,json=initFromCollection,proto3,oneof" json:"init_from_collection,omitempty"`               // Deprecated: specify name of the other collection to copy data from
 	QuantizationConfig     *QuantizationConfig   `protobuf:"bytes,14,opt,name=quantization_config,json=quantizationConfig,proto3,oneof" json:"quantization_config,omitempty"`                 // Quantization configuration of vector
 	ShardingMethod         *ShardingMethod       `protobuf:"varint,15,opt,name=sharding_method,json=shardingMethod,proto3,enum=qdrant.ShardingMethod,oneof" json:"sharding_method,omitempty"` // Sharding method
 	SparseVectorsConfig    *SparseVectorConfig   `protobuf:"bytes,16,opt,name=sparse_vectors_config,json=sparseVectorsConfig,proto3,oneof" json:"sparse_vectors_config,omitempty"`            // Configuration for sparse vectors
