@@ -1126,3 +1126,12 @@ func NewExpressionLinDecay(linDecay *DecayParamsExpression) *Expression {
 		},
 	}
 }
+
+// Creates a *StemmingAlgorithm instance using Snowball stemmer.
+func NewStemmingAlgorithmSnowball(snowBall *SnowballParams) *StemmingAlgorithm {
+	return &StemmingAlgorithm{
+		StemmingParams: &StemmingAlgorithm_Snowball{
+			Snowball: snowBall,
+		},
+	}
+}
