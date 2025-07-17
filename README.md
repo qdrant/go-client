@@ -4,7 +4,7 @@
       <source media="(prefers-color-scheme: light)" srcset="https://github.com/qdrant/qdrant/raw/master/docs/logo-light.svg">
       <img height="100" alt="Qdrant" src="https://github.com/qdrant/qdrant/raw/master/docs/logo.svg">
   </picture>
-  <img height="150" width="100" src="./examples/512px-Go_Logo_Blue.svg.png" alt="Golang">
+  <img height="150" width="100" src="./examples/Go_Logo_Blue.svg.png" alt="Golang">
 </p>
 
 <p align="center">
