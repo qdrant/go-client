@@ -1,5 +1,9 @@
 <p align="center">
-  <img height="120" src="https://github.com/user-attachments/assets/a69a26dd-ecfb-46d5-bbe1-3c0b9f0c430a" alt="Qdrant-Go">
+  <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/qdrant/qdrant/raw/master/docs/logo-dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="https://github.com/qdrant/qdrant/raw/master/docs/logo-light.svg">
+      <img height="100" alt="Qdrant" src="https://github.com/qdrant/qdrant/raw/master/docs/logo.svg">
+  </picture>
 </p>
 
 <p align="center">
