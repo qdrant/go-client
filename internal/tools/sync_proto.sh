@@ -27,7 +27,7 @@ rm $CLIENT_DIR/qdrant_internal_service.proto
 rm $CLIENT_DIR/raft_service.proto
 rm $CLIENT_DIR/health_check.proto
 rm $CLIENT_DIR/shard_snapshots_service.proto
-sed -i '' '
+sed -i '
     /collections_internal_service.proto/d;
     /points_internal_service.proto/d;
     /qdrant_internal_service.proto/d;
@@ -37,6 +37,6 @@ sed -i '' '
     ' $CLIENT_DIR/qdrant.proto
 
 # Remove csharp option from proto files
-sed -i '' '/option csharp_namespace = .*/d' $CLIENT_DIR/*.proto
+sed -i '/option csharp_namespace = .*/d' $CLIENT_DIR/*.proto
 
 ./internal/tools/generate_proto_go.sh
