@@ -116,6 +116,17 @@ func NewQuantizationDiffDisabled() *QuantizationConfigDiff {
 	}
 }
 
+// Creates a *BinaryQuantizationQueryEncoding instance with a specific setting.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewBinaryQuantizationQueryEncodingSetting(setting BinaryQuantizationQueryEncoding_Setting) *BinaryQuantizationQueryEncoding {
+	return &BinaryQuantizationQueryEncoding{
+		Variant: &BinaryQuantizationQueryEncoding_Setting_{
+			Setting: setting,
+		},
+	}
+}
+
 // Creates a *PayloadIndexParams instance from *KeywordIndexParams.
 // This is an alias for NewPayloadIndexParamsKeyword().
 func NewPayloadIndexParams(params *KeywordIndexParams) *PayloadIndexParams {
@@ -762,6 +773,18 @@ func NewQueryFormula(formula *Formula) *Query {
 	}
 }
 
+// Creates a *Query instance for re-ranking points with MMR (Maximal Marginal Relevance).
+func NewQueryMMR(nearest *VectorInput, mmr *Mmr) *Query {
+	return &Query{
+		Variant: &Query_NearestWithMmr{
+			NearestWithMmr: &NearestInputWithMmr{
+				Nearest: nearest,
+				Mmr:     mmr,
+			},
+		},
+	}
+}
+
 // Creates a *FacetValue instance from a string.
 func NewFacetValue(value string) *FacetValue {
 	return &FacetValue{
@@ -1100,6 +1123,15 @@ func NewExpressionLinDecay(linDecay *DecayParamsExpression) *Expression {
 	return &Expression{
 		Variant: &Expression_LinDecay{
 			LinDecay: linDecay,
+		},
+	}
+}
+
+// Creates a *StemmingAlgorithm instance using Snowball stemmer.
+func NewStemmingAlgorithmSnowball(snowBall *SnowballParams) *StemmingAlgorithm {
+	return &StemmingAlgorithm{
+		StemmingParams: &StemmingAlgorithm_Snowball{
+			Snowball: snowBall,
 		},
 	}
 }
