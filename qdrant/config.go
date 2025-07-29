@@ -44,10 +44,12 @@ type Config struct {
 	// If 0 or 1, a single connection is used.
 	// If greater than 1, a pool of connections is created and requests are distributed in a round-robin fashion.
 	PoolSize uint
-	// KeepAliveTime specifies the duration after which if the client does not see any activity, it pings the server to check if the transport is still alive.
+	// KeepAliveTime specifies the duration after which if the client does not see any activity,
+	// it pings the server to check if the transport is still alive.
 	// If set to 0, keepalive is disabled. Defaults to 10 seconds.
 	KeepAliveTime int
-	// KeepAliveTimeout specifies the duration the client waits for a response from the server after sending a ping. If the server does not respond within this timeout, the connection is closed.
+	// KeepAliveTimeout specifies the duration the client waits for a response from the server after sending a ping.
+	// If the server does not respond within this timeout, the connection is closed.
 	// If set to 0, defaults to 2 seconds.
 	KeepAliveTimeout int
 }
@@ -142,10 +144,14 @@ func (c *Config) getRateLimitInterceptor() grpc.DialOption {
 	})
 }
 
+// Internal method.
 func getClientKeepAliveParams(keepAliveTime, keepAliveTimeout int) grpc.DialOption {
 	return grpc.WithKeepaliveParams(keepalive.ClientParameters{
-		Time:                time.Duration(keepAliveTime) * time.Second,    // send pings every keepAliveTime (default 10s) if no activity
-		Timeout:             time.Duration(keepAliveTimeout) * time.Second, // wait keepAliveTimeout (default 2s) for ping ack before closing
-		PermitWithoutStream: true,                                          // send pings even with no active streams
+		// Send pings every keepAliveTime (default 10s) if no activity
+		Time: time.Duration(keepAliveTime) * time.Second,
+		// Wait keepAliveTimeout (default 2s) for ping ack before closing
+		Timeout: time.Duration(keepAliveTimeout) * time.Second,
+		// Send pings even with no active streams
+		PermitWithoutStream: true,
 	})
 }
