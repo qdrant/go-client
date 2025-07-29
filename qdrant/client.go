@@ -26,7 +26,7 @@ func NewClient(config *Config) (*Client, error) {
 	client := &Client{
 		clients: make([]*GrpcClient, 0, poolSize),
 	}
-	// Ensure config is not modified for the caller
+	// Ensure config is not modified for the caller by cloning.
 	cfgCopy := *config
 	// Iterate over the pool size to create the individual client.
 	for i := range poolSize {
