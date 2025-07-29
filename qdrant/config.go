@@ -40,8 +40,8 @@ type Config struct {
 	GrpcOptions []grpc.DialOption
 	// Whether to check compatibility between server's version and client's. Defaults to false.
 	SkipCompatibilityCheck bool
-	// PoolSize specifies the number of connections to create.
-	// If 0 or 1, a single connection is used.
+	// If 0 the default of 3 will be used.
+	// If 1 a single connection is used (aka no pool).
 	// If greater than 1, a pool of connections is created and requests are distributed in a round-robin fashion.
 	PoolSize uint
 	// KeepAliveTime specifies the duration after which if the client does not see any activity,
