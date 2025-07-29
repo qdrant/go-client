@@ -20,23 +20,18 @@ type Client struct {
 // or a pool of clients. If PoolSize > 1, requests are distributed across
 // the connections in a round-robin fashion.
 func NewClient(config *Config) (*Client, error) {
-	poolSize := config.PoolSize
-	if poolSize <= 1 {
-		poolSize = 1
-	}
-
+	// Determine pool size
+	poolSize := max(config.PoolSize, 1)
+	// Create the client, with an inner connection pool of go grpc clients
 	client := &Client{
 		clients: make([]*GrpcClient, 0, poolSize),
 	}
-
-	// In case of a pool, we only want to check compatibility once.
-	isFirstClient := true
-	originalSkipCheck := config.SkipCompatibilityCheck
-	// ensure config is not modified for the caller
+	// Ensure config is not modified for the caller
 	cfgCopy := *config
-
-	for i := 0; i < poolSize; i++ {
-		if !isFirstClient {
+	// Iterate over the pool size to create the individual client.
+	for i := range poolSize {
+		if i > 0 {
+			// In case of a pool, we only want to check compatibility once.
 			cfgCopy.SkipCompatibilityCheck = true
 		}
 		grpcClient, err := NewGrpcClient(&cfgCopy)
@@ -46,11 +41,8 @@ func NewClient(config *Config) (*Client, error) {
 			return nil, fmt.Errorf("failed to create client %d in pool: %w", i, err)
 		}
 		client.clients = append(client.clients, grpcClient)
-		isFirstClient = false
 	}
-	// Restore original config value in the passed config
-	config.SkipCompatibilityCheck = originalSkipCheck
-
+	// Return the client
 	return client, nil
 }
 

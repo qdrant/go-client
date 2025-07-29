@@ -41,7 +41,7 @@ type Config struct {
 	// PoolSize specifies the number of connections to create.
 	// If 0 or 1, a single connection is used.
 	// If greater than 1, a pool of connections is created and requests are distributed in a round-robin fashion.
-	PoolSize int
+	PoolSize uint
 }
 
 // Internal method.
