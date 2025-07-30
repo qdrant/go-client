@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"log/slog"
 	"strconv"
+	"time"
 
 	"google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 	status "google.golang.org/grpc/status"
 )
@@ -43,6 +45,14 @@ type Config struct {
 	// If 1 a single connection is used (aka no pool).
 	// If greater than 1, a pool of connections is created and requests are distributed in a round-robin fashion.
 	PoolSize uint
+	// KeepAliveTime specifies the duration after which if the client does not see any activity,
+	// it pings the server to check if the transport is still alive.
+	// If set to 0, keepalive is disabled. Defaults to 10 seconds.
+	KeepAliveTime int
+	// KeepAliveTimeout specifies the duration the client waits for a response from the server after sending a ping.
+	// If the server does not respond within this timeout, the connection is closed.
+	// If set to 0, defaults to 2 seconds.
+	KeepAliveTimeout int
 }
 
 // Internal method.
@@ -56,6 +66,22 @@ func (c *Config) getAddr() string {
 		port = defaultPort
 	}
 	return fmt.Sprintf("%s:%d", host, port)
+}
+
+// Internal method.
+func (c *Config) getKeepAliveParams() []grpc.DialOption {
+	if c.KeepAliveTime == 0 {
+		return nil
+	}
+	keepAliveTime := 10
+	if c.KeepAliveTime > 0 {
+		keepAliveTime = c.KeepAliveTime
+	}
+	keepAliveTimeout := 2
+	if c.KeepAliveTimeout > 0 {
+		keepAliveTimeout = c.KeepAliveTimeout
+	}
+	return []grpc.DialOption{getClientKeepAliveParams(keepAliveTime, keepAliveTimeout)}
 }
 
 // Internal method.
@@ -116,5 +142,17 @@ func (c *Config) getRateLimitInterceptor() grpc.DialOption {
 			}
 		}
 		return err
+	})
+}
+
+// Internal method.
+func getClientKeepAliveParams(keepAliveTime, keepAliveTimeout int) grpc.DialOption {
+	return grpc.WithKeepaliveParams(keepalive.ClientParameters{
+		// Send pings every keepAliveTime (default 10s) if no activity
+		Time: time.Duration(keepAliveTime) * time.Second,
+		// Wait keepAliveTimeout (default 2s) for ping ack before closing
+		Timeout: time.Duration(keepAliveTimeout) * time.Second,
+		// Send pings even with no active streams
+		PermitWithoutStream: true,
 	})
 }
