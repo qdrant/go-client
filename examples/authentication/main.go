@@ -7,6 +7,7 @@ import (
 	"github.com/qdrant/go-client/qdrant"
 )
 
+//nolint:mnd,gocritic // magic numbers is acceptable for this example, as well as exit with fatal.
 func main() {
 	// Create new client
 	client, err := qdrant.NewClient(&qdrant.Config{

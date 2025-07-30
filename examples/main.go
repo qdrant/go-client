@@ -2,20 +2,25 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/qdrant/go-client/qdrant"
 )
 
-var (
-	collectionName              = "test_collection"
-	vectorSize           uint64 = 4
-	distance                    = qdrant.Distance_Dot
-	defaultSegmentNumber uint64 = 2
+const (
+	collectionName = "test_collection"
 )
 
 func main() {
+	if err := run(); err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+}
+
+//nolint:funlen,mnd // a long function with magic numbers is acceptable for this example
+func run() error {
 	// Create new client
 	client, err := qdrant.NewClient(&qdrant.Config{
 		Host: "localhost", // Can be omitted, default is "localhost"
@@ -35,32 +40,31 @@ func main() {
 	// Execute health check
 	healthCheckResult, err := client.HealthCheck(ctx)
 	if err != nil {
-		log.Fatalf("Could not get health: %v", err)
+		return fmt.Errorf("could not get health: %w", err)
 	}
 	log.Printf("Qdrant version: %s", healthCheckResult.GetVersion())
 	// Create collection
+	defaultSegmentNumber := uint64(2)
 	err = client.CreateCollection(ctx, &qdrant.CreateCollection{
 		CollectionName: collectionName,
 		VectorsConfig: qdrant.NewVectorsConfig(&qdrant.VectorParams{
-			Size:     vectorSize,
-			Distance: distance,
+			Size:     uint64(4),
+			Distance: qdrant.Distance_Dot,
 		}),
 		OptimizersConfig: &qdrant.OptimizersConfigDiff{
 			DefaultSegmentNumber: &defaultSegmentNumber,
 		},
 	})
 	if err != nil {
-		log.Fatalf("Could not create collection: %v", err)
-	} else {
-		log.Println("Collection", collectionName, "created")
+		return fmt.Errorf("could not create collection: %w", err)
 	}
+	log.Println("Collection", collectionName, "created")
 	// List collections
 	collections, err := client.ListCollections(ctx)
 	if err != nil {
-		log.Fatalf("Could not list collections: %v", err)
-	} else {
-		log.Printf("List of collections: %s", &collections)
+		return fmt.Errorf("could not list collections: %w", err)
 	}
+	log.Printf("List of collections: %s", &collections)
 	// Upsert some data
 	waitUpsert := true
 	upsertPoints := []*qdrant.PointStruct{
@@ -106,7 +110,7 @@ func main() {
 		Points:         upsertPoints,
 	})
 	if err != nil {
-		log.Fatalf("Could not upsert points: %v", err)
+		return fmt.Errorf("could not upsert points: %w", err)
 	}
 	log.Println("Upsert", len(upsertPoints), "points")
 	// Get points
@@ -118,7 +122,7 @@ func main() {
 		},
 	})
 	if err != nil {
-		log.Fatalf("Could not retrieve points: %v", err)
+		return fmt.Errorf("could not retrieve points: %w", err)
 	}
 	log.Printf("Retrieved points: %s", points)
 	// Query the database
@@ -128,7 +132,7 @@ func main() {
 		WithPayload:    qdrant.NewWithPayloadInclude("city"),
 	})
 	if err != nil {
-		log.Fatalf("Could not search points: %v", err)
+		return fmt.Errorf("could not search points: %w", err)
 	}
 	log.Printf("Found points: %s", searchedPoints)
 	// Query again (with filter)
@@ -142,13 +146,14 @@ func main() {
 		},
 	})
 	if err != nil {
-		log.Fatalf("Could not search points: %v", err)
+		return fmt.Errorf("could not search points: %w", err)
 	}
 	log.Printf("Found points: %s", filteredPoints)
 	// Delete collection
 	err = client.DeleteCollection(ctx, collectionName)
 	if err != nil {
-		log.Fatalf("Could not delete collection: %v", err)
+		return fmt.Errorf("could not delete collection: %w", err)
 	}
 	log.Println("Collection", collectionName, "deleted")
+	return nil
 }
