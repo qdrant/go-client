@@ -203,6 +203,8 @@ linters:
         - os.WriteFile
         - prometheus.ExponentialBuckets.*
         - prometheus.LinearBuckets
+        - qdrant.NewQuery
+        - qdrant.NewVectors
     nakedret:
       # Make an issue if func has more lines of code than this setting, and it has naked returns.
       # Default: 30

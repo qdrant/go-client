@@ -25,7 +25,7 @@ func getServerVersion(clientConn *GrpcClient) string {
 	defer cancel()
 	healthCheckResult, err := clientConn.qdrant.HealthCheck(ctx, &HealthCheckRequest{})
 	if err != nil {
-		logger.Warn("Unable to get server version, use default", "err", err, "default", unknownVersion)
+		logger.WarnContext(ctx, "Unable to get server version, use default", "err", err, "default", unknownVersion)
 		return unknownVersion
 	}
 	serverVersion := healthCheckResult.GetVersion()
@@ -70,13 +70,13 @@ func IsCompatible(clientVersion, serverVersion string) bool {
 	logger := slog.Default()
 	client, err := ParseVersion(clientVersion)
 	if err != nil {
-		logger.Warn("Unable to compare versions", "err", err)
+		logger.Warn("Unable to compare versions", "err", err) //nolint:noctx // We don't have context here.
 		return false
 	}
 
 	server, err := ParseVersion(serverVersion)
 	if err != nil {
-		logger.Warn("Unable to compare versions", "err", err)
+		logger.Warn("Unable to compare versions", "err", err) //nolint:noctx // We don't have context here.
 		return false
 	}
 
