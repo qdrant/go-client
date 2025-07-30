@@ -15,6 +15,7 @@ func main() {
 		Port:   6334,
 		APIKey: "<paste-your-api-key-here>",
 		UseTLS: true,
+		Cloud:  true,
 		// TLSConfig: &tls.Config{...},
 		// GrpcOptions: []grpc.DialOption{},
 	})
