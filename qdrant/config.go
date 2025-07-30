@@ -54,7 +54,8 @@ type Config struct {
 	// If 0, the default is disabled for local mode, and 10 seconds for Cloud mode.
 	// If set to -1, keepalive is disabled.
 	KeepAliveTime int
-	// KeepAliveTimeout specifies the duration the client waits for a response from the server after sending a ping (in seconds).
+	// KeepAliveTimeout specifies the duration the client waits for a response from the server after
+	// sending a ping (in seconds).
 	// If the server does not respond within this timeout, the connection is closed.
 	// If set to 0, defaults to 2 seconds.
 	// This setting is only used if keepalive is active (see KeepAliveTime).
