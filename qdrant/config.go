@@ -60,6 +60,9 @@ type Config struct {
 	// If set to 0, defaults to 2 seconds.
 	// This setting is only used if keepalive is active (see KeepAliveTime).
 	KeepAliveTimeout uint
+	// HealthCheck configuration for connection pool monitoring.
+	// If nil, health checking is disabled.
+	HealthCheck *HealthCheckConfig
 }
 
 // Internal method.

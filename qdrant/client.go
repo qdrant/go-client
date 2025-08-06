@@ -1,8 +1,10 @@
 package qdrant
 
 import (
+	"context"
 	"fmt"
 	"sync/atomic"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -11,8 +13,9 @@ import (
 // It can manage a single connection or a pool of connections, chosen by setting
 // PoolSize in the Config.
 type Client struct {
-	clients []*GrpcClient
-	next    uint32
+	clients       []*GrpcClient
+	next          uint32
+	healthMonitor *HealthMonitor
 }
 
 // NewClient creates a new Qdrant client.
@@ -48,6 +51,13 @@ func NewClient(config *Config) (*Client, error) {
 		}
 		client.clients = append(client.clients, grpcClient)
 	}
+
+	// Initialize health monitoring if configured
+	if cfgCopy.HealthCheck != nil {
+		client.healthMonitor = NewHealthMonitor(client.clients, cfgCopy.HealthCheck)
+		client.healthMonitor.Start()
+	}
+
 	// Return the client
 	return client, nil
 }
@@ -59,11 +69,26 @@ func DefaultClient() (*Client, error) {
 }
 
 // get returns the next GrpcClient from the pool in a round-robin fashion.
+// If health monitoring is enabled, it prefers healthy connections.
 func (c *Client) get() *GrpcClient {
 	if len(c.clients) == 1 {
 		return c.clients[0]
 	}
-	// Atomically increment and wrap around the counter
+
+	// If health monitoring is enabled, try to get a healthy connection
+	if c.healthMonitor != nil {
+		healthyIndices := c.healthMonitor.GetHealthyConnections()
+		if len(healthyIndices) > 0 {
+			// Use round-robin among healthy connections
+			idx := atomic.AddUint32(&c.next, 1) - 1
+			healthyIdx := healthyIndices[idx%uint32(len(healthyIndices))]
+			return c.clients[healthyIdx]
+		}
+		// If no healthy connections, fall back to regular round-robin
+		// This allows for potential recovery attempts
+	}
+
+	// Regular round-robin selection
 	idx := atomic.AddUint32(&c.next, 1) - 1
 	return c.clients[idx%uint32(len(c.clients))]
 }
@@ -106,6 +131,12 @@ func (c *Client) GetConnection() *grpc.ClientConn {
 
 // Close tears down all underlying connections.
 func (c *Client) Close() error {
+	// Stop health monitoring first
+	if c.healthMonitor != nil {
+		c.healthMonitor.Stop()
+		c.healthMonitor = nil
+	}
+
 	var lastErr error
 	for _, client := range c.clients {
 		if err := client.Close(); err != nil {
@@ -114,6 +145,59 @@ func (c *Client) Close() error {
 	}
 	c.clients = nil // Clear the slice
 	return lastErr
+}
+
+// GetHealthMonitor returns the health monitor instance if health checking is enabled.
+// Returns nil if health checking is disabled.
+func (c *Client) GetHealthMonitor() *HealthMonitor {
+	return c.healthMonitor
+}
+
+// GetPoolHealth returns the overall health status of the connection pool.
+// Returns nil if health monitoring is disabled.
+func (c *Client) GetPoolHealth() *PoolHealth {
+	if c.healthMonitor == nil {
+		return nil
+	}
+	health := c.healthMonitor.GetOverallHealth()
+	return &health
+}
+
+// IsHealthy returns true if at least one connection in the pool is healthy.
+// If health monitoring is disabled, always returns true.
+func (c *Client) IsHealthy() bool {
+	if c.healthMonitor == nil {
+		return true // Assume healthy if monitoring is disabled
+	}
+	return c.healthMonitor.GetOverallHealth().IsHealthy()
+}
+
+// WaitForHealthy blocks until at least one connection becomes healthy or the context is cancelled.
+// Returns immediately if health monitoring is disabled.
+func (c *Client) WaitForHealthy(ctx context.Context) error {
+	if c.healthMonitor == nil {
+		return nil // No monitoring, assume healthy
+	}
+
+	// Check if already healthy
+	if c.IsHealthy() {
+		return nil
+	}
+
+	// Poll for health status
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if c.IsHealthy() {
+				return nil
+			}
+		}
+	}
 }
 
 // Creates a pointer to a value of any type.
