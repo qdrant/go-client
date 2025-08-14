@@ -61,6 +61,9 @@ client, err := qdrant.NewClient(&qdrant.Config{
 	Port:   6334,
 	APIKey: "<your-api-key>",
 	UseTLS: true,  // uses default config with minimum TLS version set to 1.3
+	// PoolSize: 3,
+	// KeepAliveTime: 10,
+	// KeepAliveTimeout: 2,
 	// TLSConfig: &tls.Config{...},
 	// GrpcOptions: []grpc.DialOption{},
 })
