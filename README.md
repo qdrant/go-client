@@ -66,25 +66,6 @@ client, err := qdrant.NewClient(&qdrant.Config{
 })
 ```
 
-#### Creating a client for the cloud
-
-When connecting to Qdrant Cloud, we recommend setting the `Cloud` boolean to true.
-This sets default settings for connection pooling and keep-alive to be more resilient.
-
-```go
-import "github.com/qdrant/go-client/qdrant"
-
-client, err := qdrant.NewClient(&qdrant.Config{
-	Host:   "xyz-example.eu-central.aws.cloud.qdrant.io",
-	Port:   6334,
-	APIKey: "<your-api-key>",
-	UseTLS: true,
-	Cloud:  true,
-	// TLSConfig: &tls.Config{...},
-	// GrpcOptions: []grpc.DialOption{},
-})	
-```
-
 ### Working with collections
 
 Once a client has been created, create a new collection

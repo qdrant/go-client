@@ -40,18 +40,14 @@ type Config struct {
 	GrpcOptions []grpc.DialOption
 	// Whether to check compatibility between server's version and client's. Defaults to false.
 	SkipCompatibilityCheck bool
-	// If set, the client is configured for connection with Qdrant Cloud,
-	// changing some defaults for optimized resilience and performance.
-	// If not set, the client behaves as for a local Qdrant installation (default).
-	Cloud bool
 	// PoolSize specifies the number of connections to create.
-	// If 0, the default of 1 will be used for local mode, and 3 for Cloud mode.
+	// If 0, the default of 3 will be used.
 	// If 1 a single connection is used (aka no pool).
 	// If greater than 1, a pool of connections is created and requests are distributed in a round-robin fashion.
 	PoolSize uint
 	// KeepAliveTime specifies the duration after which if the client does not see any activity (in seconds),
 	// it pings the server to check if the transport is still alive.
-	// If 0, the default is disabled for local mode, and 10 seconds for Cloud mode.
+	// If 0, the default is 10 seconds.
 	// If set to -1, keepalive is disabled.
 	KeepAliveTime int
 	// KeepAliveTimeout specifies the duration the client waits for a response from the server after
@@ -77,12 +73,11 @@ func (c *Config) getAddr() string {
 
 // Internal method.
 func (c *Config) getKeepAliveParams() []grpc.DialOption {
-	if c.KeepAliveTime == -1 ||
-		(!c.Cloud && c.KeepAliveTime == 0) {
+	if c.KeepAliveTime == -1 {
 		// Disabled
 		return nil
 	}
-	// We run in cloud, or local and have an explicit keep alive time
+	// Default to 10 seconds
 	keepAliveTime := 10
 	if c.KeepAliveTime > 0 {
 		keepAliveTime = c.KeepAliveTime

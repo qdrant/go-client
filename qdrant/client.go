@@ -22,13 +22,8 @@ type Client struct {
 func NewClient(config *Config) (*Client, error) {
 	// Ensure config is not modified for the caller by cloning.
 	cfgCopy := *config
-	// Set default values, depending of Cloud bool
 	if cfgCopy.PoolSize == 0 {
-		if cfgCopy.Cloud {
-			cfgCopy.PoolSize = 3
-		} else {
-			cfgCopy.PoolSize = 1
-		}
+		cfgCopy.PoolSize = 3
 	}
 	// Create the client, with an inner connection pool of go grpc clients
 	client := &Client{
