@@ -8,10 +8,16 @@ This is a simple example application that demonstrates how to create a Go applic
 
 ## Quick Start
 
-### 1. Build and Run with Docker
+### 1. Start Qdrant
+
+First, make sure Qdrant is running. You can start it with Docker:
 
 ```bash
-# Build and run
-bash -x build-and-run.sh
+docker run --rm -it -p 6334:6334 -p 6333:6333 qdrant/qdrant
 ```
 
+### 2. Building and Running
+
+```bash
+bash -x build-and-run.sh
+```
