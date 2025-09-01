@@ -4,7 +4,9 @@
 
 package qdrant
 
-import "google.golang.org/protobuf/types/known/timestamppb"
+import (
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
 
 // Creates a *VectorsConfig instance from *VectorParams.
 func NewVectorsConfig(params *VectorParams) *VectorsConfig {
@@ -543,30 +545,38 @@ func NewVector(values ...float32) *Vector {
 // Creates a *Vector instance for dense vectors.
 func NewVectorDense(vector []float32) *Vector {
 	return &Vector{
-		Data: vector,
+		Vector: &Vector_Dense{
+			Dense: &DenseVector{
+				Data: vector,
+			},
+		},
 	}
 }
 
 // Creates a *Vector instance for sparse vectors.
 func NewVectorSparse(indices []uint32, values []float32) *Vector {
 	return &Vector{
-		Data: values,
-		Indices: &SparseIndices{
-			Data: indices,
+		Vector: &Vector_Sparse{
+			Sparse: &SparseVector{
+				Indices: indices,
+				Values:  values,
+			},
 		},
 	}
 }
 
 // Creates a *Vector instance for multi vectors.
 func NewVectorMulti(vectors [][]float32) *Vector {
-	vectorsCount := uint32(len(vectors))
-	var flattenedVec []float32
-	for _, vector := range vectors {
-		flattenedVec = append(flattenedVec, vector...)
+	denseVecs := make([]*DenseVector, len(vectors))
+	for i, vector := range vectors {
+		denseVecs[i] = &DenseVector{Data: vector}
 	}
 	return &Vector{
-		Data:         flattenedVec,
-		VectorsCount: &vectorsCount,
+		Vector: &Vector_MultiDense{
+			MultiDense: &MultiDenseVector{
+				Vectors: denseVecs,
+			},
+		},
 	}
 }
 
