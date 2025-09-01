@@ -65,9 +65,6 @@ message InferenceObject {
 
 // Legacy vector format, which determines the vector type by the configuration of its fields.
 message Vector {
-  repeated float data = 1; // Vector data (flatten for multi vectors), deprecated
-  optional SparseIndices indices = 2; // Sparse indices for sparse vectors, deprecated
-  optional uint32 vectors_count = 3; // Number of vectors per multi vector, deprecated
   oneof vector {
     DenseVector dense = 101; // Dense vector
     SparseVector sparse = 102; // Sparse vector
@@ -79,9 +76,6 @@ message Vector {
 }
 
 message VectorOutput {
-  repeated float data = 1; // Vector data (flatten for multi vectors), deprecated
-  optional SparseIndices indices = 2; // Sparse indices for sparse vectors, deprecated
-  optional uint32 vectors_count = 3; // Number of vectors per multi vector, deprecated
   oneof vector {
     DenseVector dense = 101; // Dense vector
     SparseVector sparse = 102; // Sparse vector
@@ -134,6 +128,7 @@ message UpsertPoints {
   repeated PointStruct points = 3;
   optional WriteOrdering ordering = 4; // Write ordering guarantees
   optional ShardKeySelector shard_key_selector = 5; // Option for custom sharding to specify used shard keys
+  optional Filter update_filter = 6; // If specified, only points that match this filter will be updated, others will be inserted
 }
 
 message DeletePoints {
@@ -161,6 +156,7 @@ message UpdatePointVectors {
   repeated PointVectors points = 3; // List of points and vectors to update
   optional WriteOrdering ordering = 4; // Write ordering guarantees
   optional ShardKeySelector shard_key_selector = 5; // Option for custom sharding to specify used shard keys
+  optional Filter update_filter = 6; // If specified, only points that match this filter will be updated
 }
 
 message PointVectors {
@@ -562,7 +558,7 @@ message ContextInput {
 }
 
 enum Fusion {
-    RRF = 0; // Reciprocal Rank Fusion
+    RRF = 0; // Reciprocal Rank Fusion (with default parameters)
     DBSF = 1; // Distribution-Based Score Fusion
 }
 
@@ -635,7 +631,7 @@ message DecayParamsExpression {
     optional Expression target = 2;
     // The scale factor of the decay, in terms of `x`. Defaults to 1.0. Must be a non-zero positive number.
     optional float scale = 3;
-    // The midpoint of the decay. Defaults to 0.5. Output will be this value when `|x - target| == scale`.
+    // The midpoint of the decay. Should be between 0 and 1. Defaults to 0.5. Output will be this value when `|x - target| == scale`.
     optional float midpoint = 4;
 }
 
@@ -666,6 +662,11 @@ message Mmr {
     optional uint32 candidates_limit = 3;
 }
 
+// Parameterized reciprocal rank fusion
+message Rrf {
+    optional uint32 k = 1; // K parameter for reciprocal rank fusion
+}
+
 message Query {
   oneof variant {
     VectorInput nearest = 1; // Find the nearest neighbors to this vector.
@@ -677,6 +678,7 @@ message Query {
     Sample sample = 7; // Sample points from the collection.
     Formula formula = 8; // Score boosting via an arbitrary formula
     NearestInputWithMmr nearest_with_mmr = 9; // Search nearest neighbors, but re-rank based on the Maximal Marginal Relevance algorithm.
+    Rrf rrf = 10; // Parameterized reciprocal rank fusion
   }
 }
 
@@ -793,6 +795,7 @@ message PointsUpdateOperation {
   message PointStructList {
     repeated PointStruct points = 1;
     optional ShardKeySelector shard_key_selector = 2; // Option for custom sharding to specify used shard keys
+    optional Filter update_filter = 3; // If specified, only points that match this filter will be updated, others will be inserted
   }
   message SetPayload {
       map<string, Value> payload = 1;
@@ -814,6 +817,7 @@ message PointsUpdateOperation {
   message UpdateVectors {
     repeated PointVectors points = 1; // List of points and vectors to update
     optional ShardKeySelector shard_key_selector = 2; // Option for custom sharding to specify used shard keys
+    optional Filter update_filter = 3; // If specified, only points that match this filter will be updated
   }
   message DeleteVectors {
     PointsSelector points_selector = 1; // Affected points
@@ -1022,6 +1026,7 @@ message UpdateBatchResponse {
 message FacetResponse {
     repeated FacetHit hits = 1;
     double time = 2; // Time spent to process
+    optional Usage usage = 3;
 }
 
 message SearchMatrixPairsResponse {
@@ -1109,6 +1114,7 @@ message Match {
     RepeatedIntegers except_integers = 7; // Match any other value except those integers
     RepeatedStrings except_keywords = 8; // Match any other value except those keywords
     string phrase = 9; // Match phrase text
+    string text_any = 10; // Match any word in the text
   }
 }
 
