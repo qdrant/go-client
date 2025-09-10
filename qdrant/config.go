@@ -45,7 +45,7 @@ type Config struct {
 	// If not set, the client behaves as for a local Qdrant installation (default).
 	Cloud bool
 	// PoolSize specifies the number of connections to create.
-	// If 0, the default of 1 will be used for local mode, and 3 for Cloud mode.
+	// If 0, the default of 3 will be used.
 	// If 1 a single connection is used (aka no pool).
 	// If greater than 1, a pool of connections is created and requests are distributed in a round-robin fashion.
 	PoolSize uint
