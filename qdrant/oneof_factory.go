@@ -710,6 +710,11 @@ func NewQueryID(id *PointId) *Query {
 	return NewQueryNearest(NewVectorInputID(id))
 }
 
+// Creates a *Query instance for a nearest query from a *Document input.
+func NewQueryDocument(document *Document) *Query {
+	return NewQueryNearest(NewVectorInputDocument(document))
+}
+
 // Creates a *Query instance for recommend query from *RecommendInput.
 func NewQueryRecommend(recommend *RecommendInput) *Query {
 	return &Query{
