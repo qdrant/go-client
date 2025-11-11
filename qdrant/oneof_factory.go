@@ -765,6 +765,15 @@ func NewQueryFusion(fusion Fusion) *Query {
 	}
 }
 
+// Creates a *Query instance for combining prefetch results with RRF (Reciprocal Rank Fusion).
+func NewQueryRRF(rrf *Rrf) *Query {
+	return &Query{
+		Variant: &Query_Rrf{
+			Rrf: rrf,
+		},
+	}
+}
+
 // Creates a *Query instance for sampling points.
 func NewQuerySample(sample Sample) *Query {
 	return &Query{
