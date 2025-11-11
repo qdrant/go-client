@@ -162,6 +162,22 @@ func NewMatchPhrase(field, phrase string) *Condition {
 	}
 }
 
+// Creates a condition that matches any word in the text.
+func NewMatchTextAny(field, textAny string) *Condition {
+	return &Condition{
+		ConditionOneOf: &Condition_Field{
+			Field: &FieldCondition{
+				Key: field,
+				Match: &Match{
+					MatchValue: &Match_TextAny{
+						TextAny: textAny,
+					},
+				},
+			},
+		},
+	}
+}
+
 // Creates a condition that checks if a specified field is null.
 // See: https://qdrant.tech/documentation/concepts/filtering/#is-null
 func NewIsNull(field string) *Condition {
