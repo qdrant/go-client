@@ -27,7 +27,10 @@ func run() error {
 		Port: 6334,        // Can be omitted, default is 6334
 		// APIKey: "<API_KEY>",
 		// UseTLS: true,
-		// TLSConfig: &tls.Config{},
+		// PoolSize: 3,
+		// KeepAliveTime: 10,
+		// KeepAliveTimeout: 2,
+		// TLSConfig: &tls.Config{...},
 		// GrpcOptions: []grpc.DialOption{},
 	})
 	if err != nil {
