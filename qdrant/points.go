@@ -366,3 +366,87 @@ func (c *Client) SearchMatrixOffsets(ctx context.Context, request *SearchMatrixP
 	}
 	return resp.GetResult(), nil
 }
+
+// GetDense returns the DenseVector from the VectorOutput.
+// Returns nil if no dense vector data is available.
+func (v *VectorOutput) GetDenseVector() *DenseVector {
+	if v == nil {
+		return nil
+	}
+
+	// Check deprecated data field first
+	if data := v.GetData(); len(data) > 0 {
+		return &DenseVector{Data: data}
+	}
+
+	if vector := v.GetVector(); vector != nil {
+		if dense, ok := vector.(*VectorOutput_Dense); ok && dense != nil {
+			return dense.Dense
+		}
+	}
+
+	return nil
+}
+
+// GetSparse returns the SparseVector from the VectorOutput.
+// Returns nil if no sparse vector data is available.
+func (v *VectorOutput) GetSparseVector() *SparseVector {
+	if v == nil {
+		return nil
+	}
+
+	// Check deprecated data field first
+	if data := v.GetData(); len(data) > 0 {
+		indices := v.GetIndices()
+		if indices == nil {
+			return nil
+		}
+		return &SparseVector{
+			Values:  data,
+			Indices: indices.GetData(),
+		}
+	}
+
+	if vector := v.GetVector(); vector != nil {
+		if sparse, ok := vector.(*VectorOutput_Sparse); ok && sparse != nil {
+			return sparse.Sparse
+		}
+	}
+
+	return nil
+}
+
+// GetMultiDense returns the MultiDenseVector from the VectorOutput.
+// Returns nil if no multi-dense vector data is available.
+func (v *VectorOutput) GetMultiVector() *MultiDenseVector {
+	if v == nil {
+		return nil
+	}
+
+	// Check deprecated data field first
+	if data := v.GetData(); len(data) > 0 {
+		vectorsCount := v.GetVectorsCount()
+		if vectorsCount == 0 {
+			return nil
+		}
+
+		vectorSize := len(data) / int(vectorsCount)
+		vectors := make([]*DenseVector, int(vectorsCount))
+
+		for i := range vectors {
+			start := i * vectorSize
+			end := start + vectorSize
+			vectors[i] = &DenseVector{Data: data[start:end]}
+		}
+
+		return &MultiDenseVector{Vectors: vectors}
+	}
+
+	if vector := v.GetVector(); vector != nil {
+		if multiDense, ok := vector.(*VectorOutput_MultiDense); ok && multiDense != nil {
+			return multiDense.MultiDense
+		}
+	}
+
+	return nil
+}

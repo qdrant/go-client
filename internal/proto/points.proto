@@ -3,6 +3,7 @@ syntax = "proto3";
 package qdrant;
 
 import "collections.proto";
+import "common.proto";
 import "google/protobuf/timestamp.proto";
 import "json_with_int.proto";
 
@@ -30,17 +31,6 @@ message ReadConsistency {
   }
 }
 
-// ---------------------------------------------
-// ------------- Point Id Requests -------------
-// ---------------------------------------------
-
-message PointId {
-  oneof point_id_options {
-    uint64 num = 1; // Numerical ID of the point
-    string uuid = 2; // UUID
-  }
-}
-
 message SparseIndices {
   repeated uint32 data = 1;
 }
@@ -63,11 +53,10 @@ message InferenceObject {
   map<string, Value> options = 3; // Model options
 }
 
-// Legacy vector format, which determines the vector type by the configuration of its fields.
 message Vector {
-  repeated float data = 1; // Vector data (flatten for multi vectors), deprecated
-  optional SparseIndices indices = 2; // Sparse indices for sparse vectors, deprecated
-  optional uint32 vectors_count = 3; // Number of vectors per multi vector, deprecated
+  repeated float data = 1 [deprecated=true]; // Vector data (flatten for multi vectors), deprecated
+  optional SparseIndices indices = 2 [deprecated=true]; // Sparse indices for sparse vectors, deprecated
+  optional uint32 vectors_count = 3 [deprecated=true]; // Number of vectors per multi vector, deprecated
   oneof vector {
     DenseVector dense = 101; // Dense vector
     SparseVector sparse = 102; // Sparse vector
@@ -79,9 +68,9 @@ message Vector {
 }
 
 message VectorOutput {
-  repeated float data = 1; // Vector data (flatten for multi vectors), deprecated
-  optional SparseIndices indices = 2; // Sparse indices for sparse vectors, deprecated
-  optional uint32 vectors_count = 3; // Number of vectors per multi vector, deprecated
+  repeated float data = 1 [deprecated=true]; // Vector data (flatten for multi vectors), deprecated
+  optional SparseIndices indices = 2 [deprecated=true]; // Sparse indices for sparse vectors, deprecated
+  optional uint32 vectors_count = 3 [deprecated=true]; // Number of vectors per multi vector, deprecated
   oneof vector {
     DenseVector dense = 101; // Dense vector
     SparseVector sparse = 102; // Sparse vector
@@ -121,6 +110,7 @@ message VectorInput {
 
 message ShardKeySelector {
   repeated ShardKey shard_keys = 1; // List of shard keys which should be used in the request
+  optional ShardKey fallback = 2;
 }
 
 
@@ -134,6 +124,7 @@ message UpsertPoints {
   repeated PointStruct points = 3;
   optional WriteOrdering ordering = 4; // Write ordering guarantees
   optional ShardKeySelector shard_key_selector = 5; // Option for custom sharding to specify used shard keys
+  optional Filter update_filter = 6; // If specified, only points that match this filter will be updated, others will be inserted
 }
 
 message DeletePoints {
@@ -161,6 +152,7 @@ message UpdatePointVectors {
   repeated PointVectors points = 3; // List of points and vectors to update
   optional WriteOrdering ordering = 4; // Write ordering guarantees
   optional ShardKeySelector shard_key_selector = 5; // Option for custom sharding to specify used shard keys
+  optional Filter update_filter = 6; // If specified, only points that match this filter will be updated
 }
 
 message PointVectors {
@@ -305,6 +297,28 @@ message QuantizationSearchParams {
   optional double oversampling = 3;
 }
 
+message AcornSearchParams {
+  /*
+  If true, then ACORN may be used for the HNSW search based on filters
+  selectivity.
+
+  Improves search recall for searches with multiple low-selectivity
+  payload filters, at cost of performance.
+  */
+  optional bool enable = 1;
+
+  /*
+  Maximum selectivity of filters to enable ACORN.
+
+  If estimated filters selectivity is higher than this value,
+  ACORN will not be used. Selectivity is estimated as:
+  `estimated number of points satisfying the filters / total number of points`.
+    
+  0.0 for never, 1.0 for always. Default is 0.4.
+  */
+  optional double max_selectivity = 2;
+}
+
 message SearchParams {
   /*
   Params relevant to HNSW index. Size of the beam in a beam-search.
@@ -327,6 +341,11 @@ message SearchParams {
   guarantee that all uploaded vectors will be included in search results
   */
   optional bool indexed_only = 4;
+
+  /*
+  ACORN search params
+  */
+  optional AcornSearchParams acorn = 5;
 }
 
 message SearchPoints {
@@ -562,7 +581,7 @@ message ContextInput {
 }
 
 enum Fusion {
-    RRF = 0; // Reciprocal Rank Fusion
+    RRF = 0; // Reciprocal Rank Fusion (with default parameters)
     DBSF = 1; // Distribution-Based Score Fusion
 }
 
@@ -635,7 +654,7 @@ message DecayParamsExpression {
     optional Expression target = 2;
     // The scale factor of the decay, in terms of `x`. Defaults to 1.0. Must be a non-zero positive number.
     optional float scale = 3;
-    // The midpoint of the decay. Defaults to 0.5. Output will be this value when `|x - target| == scale`.
+    // The midpoint of the decay. Should be between 0 and 1. Defaults to 0.5. Output will be this value when `|x - target| == scale`.
     optional float midpoint = 4;
 }
 
@@ -666,6 +685,11 @@ message Mmr {
     optional uint32 candidates_limit = 3;
 }
 
+// Parameterized reciprocal rank fusion
+message Rrf {
+    optional uint32 k = 1; // K parameter for reciprocal rank fusion
+}
+
 message Query {
   oneof variant {
     VectorInput nearest = 1; // Find the nearest neighbors to this vector.
@@ -677,6 +701,7 @@ message Query {
     Sample sample = 7; // Sample points from the collection.
     Formula formula = 8; // Score boosting via an arbitrary formula
     NearestInputWithMmr nearest_with_mmr = 9; // Search nearest neighbors, but re-rank based on the Maximal Marginal Relevance algorithm.
+    Rrf rrf = 10; // Parameterized reciprocal rank fusion
   }
 }
 
@@ -793,6 +818,7 @@ message PointsUpdateOperation {
   message PointStructList {
     repeated PointStruct points = 1;
     optional ShardKeySelector shard_key_selector = 2; // Option for custom sharding to specify used shard keys
+    optional Filter update_filter = 3; // If specified, only points that match this filter will be updated, others will be inserted
   }
   message SetPayload {
       map<string, Value> payload = 1;
@@ -814,6 +840,7 @@ message PointsUpdateOperation {
   message UpdateVectors {
     repeated PointVectors points = 1; // List of points and vectors to update
     optional ShardKeySelector shard_key_selector = 2; // Option for custom sharding to specify used shard keys
+    optional Filter update_filter = 3; // If specified, only points that match this filter will be updated
   }
   message DeleteVectors {
     PointsSelector points_selector = 1; // Affected points
@@ -1022,6 +1049,7 @@ message UpdateBatchResponse {
 message FacetResponse {
     repeated FacetHit hits = 1;
     double time = 2; // Time spent to process
+    optional Usage usage = 3;
 }
 
 message SearchMatrixPairsResponse {
@@ -1034,132 +1062,6 @@ message SearchMatrixOffsetsResponse {
   SearchMatrixOffsets result = 1;
   double time = 2; // Time spent to process
   optional Usage usage = 3;
-}
-
-// ---------------------------------------------
-// ------------- Filter Conditions -------------
-// ---------------------------------------------
-
-message Filter {
-  repeated Condition should = 1; // At least one of those conditions should match
-  repeated Condition must = 2; // All conditions must match
-  repeated Condition must_not = 3; // All conditions must NOT match
-  optional MinShould min_should = 4; // At least minimum amount of given conditions should match
-}
-
-message MinShould {
-  repeated Condition conditions = 1;
-  uint64 min_count = 2;
-}
-
-message Condition {
-  oneof condition_one_of {
-    FieldCondition field = 1;
-    IsEmptyCondition is_empty = 2;
-    HasIdCondition has_id = 3;
-    Filter filter = 4;
-    IsNullCondition is_null = 5;
-    NestedCondition nested = 6;
-    HasVectorCondition has_vector = 7;
-  }
-}
-
-message IsEmptyCondition {
-  string key = 1;
-}
-
-message IsNullCondition {
-    string key = 1;
-}
-
-message HasIdCondition {
-  repeated PointId has_id = 1;
-}
-
-message HasVectorCondition {
-  string has_vector = 1;
-}
-
-message NestedCondition {
-  string key = 1; // Path to nested object
-  Filter filter = 2; // Filter condition
-}
-
-message FieldCondition {
-  string key = 1;
-  Match match = 2; // Check if point has field with a given value
-  Range range = 3; // Check if points value lies in a given range
-  GeoBoundingBox geo_bounding_box = 4; // Check if points geolocation lies in a given area
-  GeoRadius geo_radius = 5; // Check if geo point is within a given radius
-  ValuesCount values_count = 6; // Check number of values for a specific field
-  GeoPolygon geo_polygon = 7; // Check if geo point is within a given polygon
-  DatetimeRange datetime_range = 8; // Check if datetime is within a given range
-  optional bool is_empty = 9; // Check if field is empty
-  optional bool is_null = 10; // Check if field is null
-}
-
-message Match {
-  oneof match_value {
-    string keyword = 1; // Match string keyword
-    int64 integer = 2; // Match integer
-    bool boolean = 3; // Match boolean
-    string text = 4; // Match text
-    RepeatedStrings keywords = 5; // Match multiple keywords
-    RepeatedIntegers integers = 6; // Match multiple integers
-    RepeatedIntegers except_integers = 7; // Match any other value except those integers
-    RepeatedStrings except_keywords = 8; // Match any other value except those keywords
-    string phrase = 9; // Match phrase text
-  }
-}
-
-message RepeatedStrings {
-  repeated string strings = 1;
-}
-
-message RepeatedIntegers {
-  repeated int64 integers = 1;
-}
-
-message Range {
-  optional double lt = 1;
-  optional double gt = 2;
-  optional double gte = 3;
-  optional double lte = 4;
-}
-
-message DatetimeRange {
-  optional google.protobuf.Timestamp lt = 1;
-  optional google.protobuf.Timestamp gt = 2;
-  optional google.protobuf.Timestamp gte = 3;
-  optional google.protobuf.Timestamp lte = 4;
-}
-
-message GeoBoundingBox {
-  GeoPoint top_left = 1; // north-west corner
-  GeoPoint bottom_right = 2; // south-east corner
-}
-
-message GeoRadius {
-  GeoPoint center = 1; // Center of the circle
-  float radius = 2; // In meters
-}
-
-message GeoLineString {
-  repeated GeoPoint points = 1;  // Ordered sequence of GeoPoints representing the line
-}
-
-// For a valid GeoPolygon, both the exterior and interior GeoLineStrings must consist of a minimum of 4 points.
-// Additionally, the first and last points of each GeoLineString must be the same.
-message GeoPolygon {
-  GeoLineString exterior = 1; // The exterior line bounds the surface
-  repeated GeoLineString interiors = 2; // Interior lines (if present) bound holes within the surface
-}
-
-message ValuesCount {
-  optional uint64 lt = 1;
-  optional uint64 gt = 2;
-  optional uint64 gte = 3;
-  optional uint64 lte = 4;
 }
 
 // ---------------------------------------------
@@ -1187,12 +1089,6 @@ message PointStruct {
   reserved 2; // deprecated "vector" field
   map<string, Value> payload = 3;
   optional Vectors vectors = 4;
-}
-
-
-message GeoPoint {
-  double lon = 1;
-  double lat = 2;
 }
 
 // ---------------------------------------------
