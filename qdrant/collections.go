@@ -294,3 +294,40 @@ func (c *Client) DeleteShardKey(ctx context.Context, collectionName string, requ
 	}
 	return nil
 }
+
+// Get cluster information for a collection.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - collectionName: The name of the collection.
+//
+// Returns:
+//   - *CollectionClusterInfoResponse: Detailed information about the collection's cluster.
+//   - error: An error if the operation fails.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func (c *Client) GetCollectionClusterInfo(ctx context.Context, collectionName string) (*CollectionClusterInfoResponse, error) {
+	response, err := c.GetCollectionsClient().CollectionClusterInfo(ctx, &CollectionClusterInfoRequest{
+		CollectionName: collectionName,
+	})
+	if err != nil {
+		return nil, newQdrantErr(err, "GetCollectionClusterInfo", collectionName)
+	}
+	return response, nil
+}
+
+// Update cluster setup for a collection.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - request: The update to perform on the cluster setup.
+//
+// Returns:
+//   - error: An error if the operation fails.
+func (c *Client) UpdateClusterCollectionSetup(ctx context.Context, request *UpdateCollectionClusterSetupRequest) error {
+	_, err := c.GetCollectionsClient().UpdateCollectionClusterSetup(ctx, request)
+	if err != nil {
+		return newQdrantErr(err, "UpdateClusterCollectionSetup", request.GetCollectionName())
+	}
+	return nil
+}

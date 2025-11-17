@@ -1154,3 +1154,99 @@ func NewStemmingAlgorithmSnowball(snowBall *SnowballParams) *StemmingAlgorithm {
 		},
 	}
 }
+
+// Creates a *UpdateCollectionClusterSetupRequest to move a shard.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterMoveShard(collectionName string, moveShard *MoveShard) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_MoveShard{
+			MoveShard: moveShard,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to replicate a shard.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterReplicateShard(collectionName string, replicateShard *ReplicateShard) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_ReplicateShard{
+			ReplicateShard: replicateShard,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to abort a shard transfer.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterAbortTransfer(collectionName string, abortTransfer *AbortShardTransfer) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_AbortTransfer{
+			AbortTransfer: abortTransfer,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to drop a replica.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterDropReplica(collectionName string, dropReplica *Replica) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_DropReplica{
+			DropReplica: dropReplica,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to create a shard key.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterCreateShardKey(collectionName string, createShardKey *CreateShardKey) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_CreateShardKey{
+			CreateShardKey: createShardKey,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to delete a shard key.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterDeleteShardKey(collectionName string, deleteShardKey *DeleteShardKey) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_DeleteShardKey{
+			DeleteShardKey: deleteShardKey,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to restart a transfer.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterRestartTransfer(collectionName string, restartTransfer *RestartTransfer) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_RestartTransfer{
+			RestartTransfer: restartTransfer,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to replicate points.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterReplicatePoints(collectionName string, replicatePoints *ReplicatePoints) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_ReplicatePoints{
+			ReplicatePoints: replicatePoints,
+		},
+	}
+}
