@@ -142,9 +142,23 @@ func NewValueStruct(v *Struct) *Value {
 	return &Value{Kind: &Value_StructValue{StructValue: v}}
 }
 
+// Constructs a new struct Value from the provided field map.
+func NewValueFromFields(fields map[string]*Value) *Value {
+	return &Value{Kind: &Value_StructValue{StructValue: &Struct{
+		Fields: fields,
+	}}}
+}
+
 // Constructs a new list Value.
 func NewValueList(v *ListValue) *Value {
 	return &Value{Kind: &Value_ListValue{ListValue: v}}
+}
+
+// Constructs a new list Value from the provided elements.
+func NewValueFromList(values ...*Value) *Value {
+	return &Value{Kind: &Value_ListValue{ListValue: &ListValue{
+		Values: values,
+	}}}
 }
 
 // Constructs a ListValue from a general-purpose Go slice.
