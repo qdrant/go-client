@@ -3,7 +3,7 @@ package qdrant;
 
 
 import "json_with_int.proto";
-import "common.proto";
+import "qdrant_common.proto";
 
 enum Datatype {
   Default = 0;
