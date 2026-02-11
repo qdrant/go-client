@@ -58,11 +58,11 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 		serverVersion := getServerVersion(newGrpcClientFromConn)
 		logger := slog.Default()
 		if serverVersion == unknownVersion {
-			logger.Warn("Failed to obtain server version. " + //nolint:noctx // We don't have context here.
+			logger.Warn("Failed to obtain server version. " +
 				"Unable to check client-server compatibility. " +
 				"Set SkipCompatibilityCheck=true to skip version check.")
 		} else if !IsCompatible(clientVersion, serverVersion) {
-			logger.Warn("Client version is not compatible with server version. "+ //nolint:noctx // We don't have context here.
+			logger.Warn("Client version is not compatible with server version. "+
 				"Major versions should match and minor version difference must not exceed 1. "+
 				"Set SkipCompatibilityCheck=true to skip version check.",
 				"clientVersion", clientVersion, "serverVersion", serverVersion)
