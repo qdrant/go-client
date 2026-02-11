@@ -99,7 +99,6 @@ func (c *Config) getTransportCreds() grpc.DialOption {
 		}
 		return grpc.WithTransportCredentials(credentials.NewTLS(c.TLSConfig))
 	} else if c.APIKey != "" {
-		//nolint:noctx // We don't have context here.
 		slog.Default().Warn("API key is being used without TLS(HTTPS). It will be transmitted in plaintext.")
 	}
 	return grpc.WithTransportCredentials(insecure.NewCredentials())

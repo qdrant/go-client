@@ -70,13 +70,13 @@ func IsCompatible(clientVersion, serverVersion string) bool {
 	logger := slog.Default()
 	client, err := ParseVersion(clientVersion)
 	if err != nil {
-		logger.Warn("Unable to compare versions", "err", err) //nolint:noctx // We don't have context here.
+		logger.Warn("Unable to compare versions", "err", err)
 		return false
 	}
 
 	server, err := ParseVersion(serverVersion)
 	if err != nil {
-		logger.Warn("Unable to compare versions", "err", err) //nolint:noctx // We don't have context here.
+		logger.Warn("Unable to compare versions", "err", err)
 		return false
 	}
 
