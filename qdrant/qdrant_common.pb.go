@@ -91,11 +91,13 @@ type isPointId_PointIdOptions interface {
 }
 
 type PointId_Num struct {
-	Num uint64 `protobuf:"varint,1,opt,name=num,proto3,oneof"` // Numerical ID of the point
+	// Numerical ID of the point
+	Num uint64 `protobuf:"varint,1,opt,name=num,proto3,oneof"`
 }
 
 type PointId_Uuid struct {
-	Uuid string `protobuf:"bytes,2,opt,name=uuid,proto3,oneof"` // UUID
+	// UUID
+	Uuid string `protobuf:"bytes,2,opt,name=uuid,proto3,oneof"`
 }
 
 func (*PointId_Num) isPointId_PointIdOptions() {}
@@ -162,10 +164,14 @@ type Filter struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Should    []*Condition `protobuf:"bytes,1,rep,name=should,proto3" json:"should,omitempty"`                              // At least one of those conditions should match
-	Must      []*Condition `protobuf:"bytes,2,rep,name=must,proto3" json:"must,omitempty"`                                  // All conditions must match
-	MustNot   []*Condition `protobuf:"bytes,3,rep,name=must_not,json=mustNot,proto3" json:"must_not,omitempty"`             // All conditions must NOT match
-	MinShould *MinShould   `protobuf:"bytes,4,opt,name=min_should,json=minShould,proto3,oneof" json:"min_should,omitempty"` // At least minimum amount of given conditions should match
+	// At least one of those conditions should match
+	Should []*Condition `protobuf:"bytes,1,rep,name=should,proto3" json:"should,omitempty"`
+	// All conditions must match
+	Must []*Condition `protobuf:"bytes,2,rep,name=must,proto3" json:"must,omitempty"`
+	// All conditions must NOT match
+	MustNot []*Condition `protobuf:"bytes,3,rep,name=must_not,json=mustNot,proto3" json:"must_not,omitempty"`
+	// At least minimum amount of given conditions should match
+	MinShould *MinShould `protobuf:"bytes,4,opt,name=min_should,json=minShould,proto3,oneof" json:"min_should,omitempty"`
 }
 
 func (x *Filter) Reset() {
@@ -627,8 +633,10 @@ type NestedCondition struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Key    string  `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`       // Path to nested object
-	Filter *Filter `protobuf:"bytes,2,opt,name=filter,proto3" json:"filter,omitempty"` // Filter condition
+	// Path to nested object
+	Key string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	// Filter condition
+	Filter *Filter `protobuf:"bytes,2,opt,name=filter,proto3" json:"filter,omitempty"`
 }
 
 func (x *NestedCondition) Reset() {
@@ -682,16 +690,25 @@ type FieldCondition struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Key            string          `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
-	Match          *Match          `protobuf:"bytes,2,opt,name=match,proto3" json:"match,omitempty"`                                           // Check if point has field with a given value
-	Range          *Range          `protobuf:"bytes,3,opt,name=range,proto3" json:"range,omitempty"`                                           // Check if points value lies in a given range
-	GeoBoundingBox *GeoBoundingBox `protobuf:"bytes,4,opt,name=geo_bounding_box,json=geoBoundingBox,proto3" json:"geo_bounding_box,omitempty"` // Check if points geolocation lies in a given area
-	GeoRadius      *GeoRadius      `protobuf:"bytes,5,opt,name=geo_radius,json=geoRadius,proto3" json:"geo_radius,omitempty"`                  // Check if geo point is within a given radius
-	ValuesCount    *ValuesCount    `protobuf:"bytes,6,opt,name=values_count,json=valuesCount,proto3" json:"values_count,omitempty"`            // Check number of values for a specific field
-	GeoPolygon     *GeoPolygon     `protobuf:"bytes,7,opt,name=geo_polygon,json=geoPolygon,proto3" json:"geo_polygon,omitempty"`               // Check if geo point is within a given polygon
-	DatetimeRange  *DatetimeRange  `protobuf:"bytes,8,opt,name=datetime_range,json=datetimeRange,proto3" json:"datetime_range,omitempty"`      // Check if datetime is within a given range
-	IsEmpty        *bool           `protobuf:"varint,9,opt,name=is_empty,json=isEmpty,proto3,oneof" json:"is_empty,omitempty"`                 // Check if field is empty
-	IsNull         *bool           `protobuf:"varint,10,opt,name=is_null,json=isNull,proto3,oneof" json:"is_null,omitempty"`                   // Check if field is null
+	Key string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	// Check if point has field with a given value
+	Match *Match `protobuf:"bytes,2,opt,name=match,proto3" json:"match,omitempty"`
+	// Check if points value lies in a given range
+	Range *Range `protobuf:"bytes,3,opt,name=range,proto3" json:"range,omitempty"`
+	// Check if points geolocation lies in a given area
+	GeoBoundingBox *GeoBoundingBox `protobuf:"bytes,4,opt,name=geo_bounding_box,json=geoBoundingBox,proto3" json:"geo_bounding_box,omitempty"`
+	// Check if geo point is within a given radius
+	GeoRadius *GeoRadius `protobuf:"bytes,5,opt,name=geo_radius,json=geoRadius,proto3" json:"geo_radius,omitempty"`
+	// Check number of values for a specific field
+	ValuesCount *ValuesCount `protobuf:"bytes,6,opt,name=values_count,json=valuesCount,proto3" json:"values_count,omitempty"`
+	// Check if geo point is within a given polygon
+	GeoPolygon *GeoPolygon `protobuf:"bytes,7,opt,name=geo_polygon,json=geoPolygon,proto3" json:"geo_polygon,omitempty"`
+	// Check if datetime is within a given range
+	DatetimeRange *DatetimeRange `protobuf:"bytes,8,opt,name=datetime_range,json=datetimeRange,proto3" json:"datetime_range,omitempty"`
+	// Check if field is empty
+	IsEmpty *bool `protobuf:"varint,9,opt,name=is_empty,json=isEmpty,proto3,oneof" json:"is_empty,omitempty"`
+	// Check if field is null
+	IsNull *bool `protobuf:"varint,10,opt,name=is_null,json=isNull,proto3,oneof" json:"is_null,omitempty"`
 }
 
 func (x *FieldCondition) Reset() {
@@ -930,43 +947,53 @@ type isMatch_MatchValue interface {
 }
 
 type Match_Keyword struct {
-	Keyword string `protobuf:"bytes,1,opt,name=keyword,proto3,oneof"` // Match string keyword
+	// Match string keyword
+	Keyword string `protobuf:"bytes,1,opt,name=keyword,proto3,oneof"`
 }
 
 type Match_Integer struct {
-	Integer int64 `protobuf:"varint,2,opt,name=integer,proto3,oneof"` // Match integer
+	// Match integer
+	Integer int64 `protobuf:"varint,2,opt,name=integer,proto3,oneof"`
 }
 
 type Match_Boolean struct {
-	Boolean bool `protobuf:"varint,3,opt,name=boolean,proto3,oneof"` // Match boolean
+	// Match boolean
+	Boolean bool `protobuf:"varint,3,opt,name=boolean,proto3,oneof"`
 }
 
 type Match_Text struct {
-	Text string `protobuf:"bytes,4,opt,name=text,proto3,oneof"` // Match text
+	// Match text
+	Text string `protobuf:"bytes,4,opt,name=text,proto3,oneof"`
 }
 
 type Match_Keywords struct {
-	Keywords *RepeatedStrings `protobuf:"bytes,5,opt,name=keywords,proto3,oneof"` // Match multiple keywords
+	// Match multiple keywords
+	Keywords *RepeatedStrings `protobuf:"bytes,5,opt,name=keywords,proto3,oneof"`
 }
 
 type Match_Integers struct {
-	Integers *RepeatedIntegers `protobuf:"bytes,6,opt,name=integers,proto3,oneof"` // Match multiple integers
+	// Match multiple integers
+	Integers *RepeatedIntegers `protobuf:"bytes,6,opt,name=integers,proto3,oneof"`
 }
 
 type Match_ExceptIntegers struct {
-	ExceptIntegers *RepeatedIntegers `protobuf:"bytes,7,opt,name=except_integers,json=exceptIntegers,proto3,oneof"` // Match any other value except those integers
+	// Match any other value except those integers
+	ExceptIntegers *RepeatedIntegers `protobuf:"bytes,7,opt,name=except_integers,json=exceptIntegers,proto3,oneof"`
 }
 
 type Match_ExceptKeywords struct {
-	ExceptKeywords *RepeatedStrings `protobuf:"bytes,8,opt,name=except_keywords,json=exceptKeywords,proto3,oneof"` // Match any other value except those keywords
+	// Match any other value except those keywords
+	ExceptKeywords *RepeatedStrings `protobuf:"bytes,8,opt,name=except_keywords,json=exceptKeywords,proto3,oneof"`
 }
 
 type Match_Phrase struct {
-	Phrase string `protobuf:"bytes,9,opt,name=phrase,proto3,oneof"` // Match phrase text
+	// Match phrase text
+	Phrase string `protobuf:"bytes,9,opt,name=phrase,proto3,oneof"`
 }
 
 type Match_TextAny struct {
-	TextAny string `protobuf:"bytes,10,opt,name=text_any,json=textAny,proto3,oneof"` // Match any word in the text
+	// Match any word in the text
+	TextAny string `protobuf:"bytes,10,opt,name=text_any,json=textAny,proto3,oneof"`
 }
 
 func (*Match_Keyword) isMatch_MatchValue() {}
@@ -1230,8 +1257,10 @@ type GeoBoundingBox struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TopLeft     *GeoPoint `protobuf:"bytes,1,opt,name=top_left,json=topLeft,proto3" json:"top_left,omitempty"`             // north-west corner
-	BottomRight *GeoPoint `protobuf:"bytes,2,opt,name=bottom_right,json=bottomRight,proto3" json:"bottom_right,omitempty"` // south-east corner
+	// north-west corner
+	TopLeft *GeoPoint `protobuf:"bytes,1,opt,name=top_left,json=topLeft,proto3" json:"top_left,omitempty"`
+	// south-east corner
+	BottomRight *GeoPoint `protobuf:"bytes,2,opt,name=bottom_right,json=bottomRight,proto3" json:"bottom_right,omitempty"`
 }
 
 func (x *GeoBoundingBox) Reset() {
@@ -1285,8 +1314,10 @@ type GeoRadius struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Center *GeoPoint `protobuf:"bytes,1,opt,name=center,proto3" json:"center,omitempty"`   // Center of the circle
-	Radius float32   `protobuf:"fixed32,2,opt,name=radius,proto3" json:"radius,omitempty"` // In meters
+	// Center of the circle
+	Center *GeoPoint `protobuf:"bytes,1,opt,name=center,proto3" json:"center,omitempty"`
+	// In meters
+	Radius float32 `protobuf:"fixed32,2,opt,name=radius,proto3" json:"radius,omitempty"`
 }
 
 func (x *GeoRadius) Reset() {
@@ -1340,7 +1371,8 @@ type GeoLineString struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Points []*GeoPoint `protobuf:"bytes,1,rep,name=points,proto3" json:"points,omitempty"` // Ordered sequence of GeoPoints representing the line
+	// Ordered sequence of GeoPoints representing the line
+	Points []*GeoPoint `protobuf:"bytes,1,rep,name=points,proto3" json:"points,omitempty"`
 }
 
 func (x *GeoLineString) Reset() {
@@ -1382,15 +1414,18 @@ func (x *GeoLineString) GetPoints() []*GeoPoint {
 	return nil
 }
 
-// For a valid GeoPolygon, both the exterior and interior GeoLineStrings must consist of a minimum of 4 points.
+// For a valid GeoPolygon, both the exterior and interior GeoLineStrings must
+// consist of a minimum of 4 points.
 // Additionally, the first and last points of each GeoLineString must be the same.
 type GeoPolygon struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Exterior  *GeoLineString   `protobuf:"bytes,1,opt,name=exterior,proto3" json:"exterior,omitempty"`   // The exterior line bounds the surface
-	Interiors []*GeoLineString `protobuf:"bytes,2,rep,name=interiors,proto3" json:"interiors,omitempty"` // Interior lines (if present) bound holes within the surface
+	// The exterior line bounds the surface
+	Exterior *GeoLineString `protobuf:"bytes,1,opt,name=exterior,proto3" json:"exterior,omitempty"`
+	// Interior lines (if present) bound holes within the surface
+	Interiors []*GeoLineString `protobuf:"bytes,2,rep,name=interiors,proto3" json:"interiors,omitempty"`
 }
 
 func (x *GeoPolygon) Reset() {

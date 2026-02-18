@@ -25,7 +25,7 @@ var file_collections_service_proto_rawDesc = []byte{
 	0x0a, 0x19, 0x63, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x5f, 0x73, 0x65,
 	0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x06, 0x71, 0x64, 0x72,
 	0x61, 0x6e, 0x74, 0x1a, 0x11, 0x63, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73,
-	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x32, 0xe2, 0x08, 0x0a, 0x0b, 0x43, 0x6f, 0x6c, 0x6c, 0x65,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x32, 0xb2, 0x09, 0x0a, 0x0b, 0x43, 0x6f, 0x6c, 0x6c, 0x65,
 	0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x4c, 0x0a, 0x03, 0x47, 0x65, 0x74, 0x12, 0x20, 0x2e,
 	0x71, 0x64, 0x72, 0x61, 0x6e, 0x74, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6c, 0x6c, 0x65, 0x63,
 	0x74, 0x69, 0x6f, 0x6e, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
@@ -95,7 +95,12 @@ var file_collections_service_proto_rawDesc = []byte{
 	0x61, 0x6e, 0x74, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x53, 0x68, 0x61, 0x72, 0x64, 0x4b,
 	0x65, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x71, 0x64, 0x72, 0x61,
 	0x6e, 0x74, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x53, 0x68, 0x61, 0x72, 0x64, 0x4b, 0x65,
-	0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x4e, 0x0a, 0x0d, 0x4c,
+	0x69, 0x73, 0x74, 0x53, 0x68, 0x61, 0x72, 0x64, 0x4b, 0x65, 0x79, 0x73, 0x12, 0x1c, 0x2e, 0x71,
+	0x64, 0x72, 0x61, 0x6e, 0x74, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x68, 0x61, 0x72, 0x64, 0x4b,
+	0x65, 0x79, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x71, 0x64, 0x72,
+	0x61, 0x6e, 0x74, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x68, 0x61, 0x72, 0x64, 0x4b, 0x65, 0x79,
+	0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x33,
 }
 
@@ -113,15 +118,17 @@ var file_collections_service_proto_goTypes = []any{
 	(*UpdateCollectionClusterSetupRequest)(nil),  // 10: qdrant.UpdateCollectionClusterSetupRequest
 	(*CreateShardKeyRequest)(nil),                // 11: qdrant.CreateShardKeyRequest
 	(*DeleteShardKeyRequest)(nil),                // 12: qdrant.DeleteShardKeyRequest
-	(*GetCollectionInfoResponse)(nil),            // 13: qdrant.GetCollectionInfoResponse
-	(*ListCollectionsResponse)(nil),              // 14: qdrant.ListCollectionsResponse
-	(*CollectionOperationResponse)(nil),          // 15: qdrant.CollectionOperationResponse
-	(*ListAliasesResponse)(nil),                  // 16: qdrant.ListAliasesResponse
-	(*CollectionClusterInfoResponse)(nil),        // 17: qdrant.CollectionClusterInfoResponse
-	(*CollectionExistsResponse)(nil),             // 18: qdrant.CollectionExistsResponse
-	(*UpdateCollectionClusterSetupResponse)(nil), // 19: qdrant.UpdateCollectionClusterSetupResponse
-	(*CreateShardKeyResponse)(nil),               // 20: qdrant.CreateShardKeyResponse
-	(*DeleteShardKeyResponse)(nil),               // 21: qdrant.DeleteShardKeyResponse
+	(*ListShardKeysRequest)(nil),                 // 13: qdrant.ListShardKeysRequest
+	(*GetCollectionInfoResponse)(nil),            // 14: qdrant.GetCollectionInfoResponse
+	(*ListCollectionsResponse)(nil),              // 15: qdrant.ListCollectionsResponse
+	(*CollectionOperationResponse)(nil),          // 16: qdrant.CollectionOperationResponse
+	(*ListAliasesResponse)(nil),                  // 17: qdrant.ListAliasesResponse
+	(*CollectionClusterInfoResponse)(nil),        // 18: qdrant.CollectionClusterInfoResponse
+	(*CollectionExistsResponse)(nil),             // 19: qdrant.CollectionExistsResponse
+	(*UpdateCollectionClusterSetupResponse)(nil), // 20: qdrant.UpdateCollectionClusterSetupResponse
+	(*CreateShardKeyResponse)(nil),               // 21: qdrant.CreateShardKeyResponse
+	(*DeleteShardKeyResponse)(nil),               // 22: qdrant.DeleteShardKeyResponse
+	(*ListShardKeysResponse)(nil),                // 23: qdrant.ListShardKeysResponse
 }
 var file_collections_service_proto_depIdxs = []int32{
 	0,  // 0: qdrant.Collections.Get:input_type -> qdrant.GetCollectionInfoRequest
@@ -137,21 +144,23 @@ var file_collections_service_proto_depIdxs = []int32{
 	10, // 10: qdrant.Collections.UpdateCollectionClusterSetup:input_type -> qdrant.UpdateCollectionClusterSetupRequest
 	11, // 11: qdrant.Collections.CreateShardKey:input_type -> qdrant.CreateShardKeyRequest
 	12, // 12: qdrant.Collections.DeleteShardKey:input_type -> qdrant.DeleteShardKeyRequest
-	13, // 13: qdrant.Collections.Get:output_type -> qdrant.GetCollectionInfoResponse
-	14, // 14: qdrant.Collections.List:output_type -> qdrant.ListCollectionsResponse
-	15, // 15: qdrant.Collections.Create:output_type -> qdrant.CollectionOperationResponse
-	15, // 16: qdrant.Collections.Update:output_type -> qdrant.CollectionOperationResponse
-	15, // 17: qdrant.Collections.Delete:output_type -> qdrant.CollectionOperationResponse
-	15, // 18: qdrant.Collections.UpdateAliases:output_type -> qdrant.CollectionOperationResponse
-	16, // 19: qdrant.Collections.ListCollectionAliases:output_type -> qdrant.ListAliasesResponse
-	16, // 20: qdrant.Collections.ListAliases:output_type -> qdrant.ListAliasesResponse
-	17, // 21: qdrant.Collections.CollectionClusterInfo:output_type -> qdrant.CollectionClusterInfoResponse
-	18, // 22: qdrant.Collections.CollectionExists:output_type -> qdrant.CollectionExistsResponse
-	19, // 23: qdrant.Collections.UpdateCollectionClusterSetup:output_type -> qdrant.UpdateCollectionClusterSetupResponse
-	20, // 24: qdrant.Collections.CreateShardKey:output_type -> qdrant.CreateShardKeyResponse
-	21, // 25: qdrant.Collections.DeleteShardKey:output_type -> qdrant.DeleteShardKeyResponse
-	13, // [13:26] is the sub-list for method output_type
-	0,  // [0:13] is the sub-list for method input_type
+	13, // 13: qdrant.Collections.ListShardKeys:input_type -> qdrant.ListShardKeysRequest
+	14, // 14: qdrant.Collections.Get:output_type -> qdrant.GetCollectionInfoResponse
+	15, // 15: qdrant.Collections.List:output_type -> qdrant.ListCollectionsResponse
+	16, // 16: qdrant.Collections.Create:output_type -> qdrant.CollectionOperationResponse
+	16, // 17: qdrant.Collections.Update:output_type -> qdrant.CollectionOperationResponse
+	16, // 18: qdrant.Collections.Delete:output_type -> qdrant.CollectionOperationResponse
+	16, // 19: qdrant.Collections.UpdateAliases:output_type -> qdrant.CollectionOperationResponse
+	17, // 20: qdrant.Collections.ListCollectionAliases:output_type -> qdrant.ListAliasesResponse
+	17, // 21: qdrant.Collections.ListAliases:output_type -> qdrant.ListAliasesResponse
+	18, // 22: qdrant.Collections.CollectionClusterInfo:output_type -> qdrant.CollectionClusterInfoResponse
+	19, // 23: qdrant.Collections.CollectionExists:output_type -> qdrant.CollectionExistsResponse
+	20, // 24: qdrant.Collections.UpdateCollectionClusterSetup:output_type -> qdrant.UpdateCollectionClusterSetupResponse
+	21, // 25: qdrant.Collections.CreateShardKey:output_type -> qdrant.CreateShardKeyResponse
+	22, // 26: qdrant.Collections.DeleteShardKey:output_type -> qdrant.DeleteShardKeyResponse
+	23, // 27: qdrant.Collections.ListShardKeys:output_type -> qdrant.ListShardKeysResponse
+	14, // [14:28] is the sub-list for method output_type
+	0,  // [0:14] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

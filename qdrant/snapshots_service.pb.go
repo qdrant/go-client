@@ -102,7 +102,8 @@ type DeleteFullSnapshotRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	SnapshotName string `protobuf:"bytes,1,opt,name=snapshot_name,json=snapshotName,proto3" json:"snapshot_name,omitempty"` // Name of the full snapshot
+	// Name of the full snapshot
+	SnapshotName string `protobuf:"bytes,1,opt,name=snapshot_name,json=snapshotName,proto3" json:"snapshot_name,omitempty"`
 }
 
 func (x *DeleteFullSnapshotRequest) Reset() {
@@ -149,7 +150,8 @@ type CreateSnapshotRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CollectionName string `protobuf:"bytes,1,opt,name=collection_name,json=collectionName,proto3" json:"collection_name,omitempty"` // Name of the collection
+	// Name of the collection
+	CollectionName string `protobuf:"bytes,1,opt,name=collection_name,json=collectionName,proto3" json:"collection_name,omitempty"`
 }
 
 func (x *CreateSnapshotRequest) Reset() {
@@ -196,7 +198,8 @@ type ListSnapshotsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CollectionName string `protobuf:"bytes,1,opt,name=collection_name,json=collectionName,proto3" json:"collection_name,omitempty"` // Name of the collection
+	// Name of the collection
+	CollectionName string `protobuf:"bytes,1,opt,name=collection_name,json=collectionName,proto3" json:"collection_name,omitempty"`
 }
 
 func (x *ListSnapshotsRequest) Reset() {
@@ -243,8 +246,10 @@ type DeleteSnapshotRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CollectionName string `protobuf:"bytes,1,opt,name=collection_name,json=collectionName,proto3" json:"collection_name,omitempty"` // Name of the collection
-	SnapshotName   string `protobuf:"bytes,2,opt,name=snapshot_name,json=snapshotName,proto3" json:"snapshot_name,omitempty"`       // Name of the collection snapshot
+	// Name of the collection
+	CollectionName string `protobuf:"bytes,1,opt,name=collection_name,json=collectionName,proto3" json:"collection_name,omitempty"`
+	// Name of the collection snapshot
+	SnapshotName string `protobuf:"bytes,2,opt,name=snapshot_name,json=snapshotName,proto3" json:"snapshot_name,omitempty"`
 }
 
 func (x *DeleteSnapshotRequest) Reset() {
@@ -298,10 +303,14 @@ type SnapshotDescription struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name         string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`                                     // Name of the snapshot
-	CreationTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=creation_time,json=creationTime,proto3" json:"creation_time,omitempty"` // Creation time of the snapshot
-	Size         int64                  `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`                                    // Size of the snapshot in bytes
-	Checksum     *string                `protobuf:"bytes,4,opt,name=checksum,proto3,oneof" json:"checksum,omitempty"`                       // SHA256 digest of the snapshot file
+	// Name of the snapshot
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Creation time of the snapshot
+	CreationTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=creation_time,json=creationTime,proto3" json:"creation_time,omitempty"`
+	// Size of the snapshot in bytes
+	Size int64 `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
+	// SHA256 digest of the snapshot file
+	Checksum *string `protobuf:"bytes,4,opt,name=checksum,proto3,oneof" json:"checksum,omitempty"`
 }
 
 func (x *SnapshotDescription) Reset() {
@@ -370,7 +379,8 @@ type CreateSnapshotResponse struct {
 	unknownFields protoimpl.UnknownFields
 
 	SnapshotDescription *SnapshotDescription `protobuf:"bytes,1,opt,name=snapshot_description,json=snapshotDescription,proto3" json:"snapshot_description,omitempty"`
-	Time                float64              `protobuf:"fixed64,2,opt,name=time,proto3" json:"time,omitempty"` // Time spent to process
+	// Time spent to process
+	Time float64 `protobuf:"fixed64,2,opt,name=time,proto3" json:"time,omitempty"`
 }
 
 func (x *CreateSnapshotResponse) Reset() {
@@ -425,7 +435,8 @@ type ListSnapshotsResponse struct {
 	unknownFields protoimpl.UnknownFields
 
 	SnapshotDescriptions []*SnapshotDescription `protobuf:"bytes,1,rep,name=snapshot_descriptions,json=snapshotDescriptions,proto3" json:"snapshot_descriptions,omitempty"`
-	Time                 float64                `protobuf:"fixed64,2,opt,name=time,proto3" json:"time,omitempty"` // Time spent to process
+	// Time spent to process
+	Time float64 `protobuf:"fixed64,2,opt,name=time,proto3" json:"time,omitempty"`
 }
 
 func (x *ListSnapshotsResponse) Reset() {
@@ -479,7 +490,8 @@ type DeleteSnapshotResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Time float64 `protobuf:"fixed64,1,opt,name=time,proto3" json:"time,omitempty"` // Time spent to process
+	// Time spent to process
+	Time float64 `protobuf:"fixed64,1,opt,name=time,proto3" json:"time,omitempty"`
 }
 
 func (x *DeleteSnapshotResponse) Reset() {

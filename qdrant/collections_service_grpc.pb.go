@@ -32,6 +32,7 @@ const (
 	Collections_UpdateCollectionClusterSetup_FullMethodName = "/qdrant.Collections/UpdateCollectionClusterSetup"
 	Collections_CreateShardKey_FullMethodName               = "/qdrant.Collections/CreateShardKey"
 	Collections_DeleteShardKey_FullMethodName               = "/qdrant.Collections/DeleteShardKey"
+	Collections_ListShardKeys_FullMethodName                = "/qdrant.Collections/ListShardKeys"
 )
 
 // CollectionsClient is the client API for Collections service.
@@ -40,7 +41,7 @@ const (
 type CollectionsClient interface {
 	// Get detailed information about specified existing collection
 	Get(ctx context.Context, in *GetCollectionInfoRequest, opts ...grpc.CallOption) (*GetCollectionInfoResponse, error)
-	// Get list name of all existing collections
+	// Get list of names of all existing collections
 	List(ctx context.Context, in *ListCollectionsRequest, opts ...grpc.CallOption) (*ListCollectionsResponse, error)
 	// Create new collection with given parameters
 	Create(ctx context.Context, in *CreateCollection, opts ...grpc.CallOption) (*CollectionOperationResponse, error)
@@ -64,6 +65,8 @@ type CollectionsClient interface {
 	CreateShardKey(ctx context.Context, in *CreateShardKeyRequest, opts ...grpc.CallOption) (*CreateShardKeyResponse, error)
 	// Delete shard key
 	DeleteShardKey(ctx context.Context, in *DeleteShardKeyRequest, opts ...grpc.CallOption) (*DeleteShardKeyResponse, error)
+	// List shard keys
+	ListShardKeys(ctx context.Context, in *ListShardKeysRequest, opts ...grpc.CallOption) (*ListShardKeysResponse, error)
 }
 
 type collectionsClient struct {
@@ -204,13 +207,23 @@ func (c *collectionsClient) DeleteShardKey(ctx context.Context, in *DeleteShardK
 	return out, nil
 }
 
+func (c *collectionsClient) ListShardKeys(ctx context.Context, in *ListShardKeysRequest, opts ...grpc.CallOption) (*ListShardKeysResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListShardKeysResponse)
+	err := c.cc.Invoke(ctx, Collections_ListShardKeys_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CollectionsServer is the server API for Collections service.
 // All implementations must embed UnimplementedCollectionsServer
 // for forward compatibility.
 type CollectionsServer interface {
 	// Get detailed information about specified existing collection
 	Get(context.Context, *GetCollectionInfoRequest) (*GetCollectionInfoResponse, error)
-	// Get list name of all existing collections
+	// Get list of names of all existing collections
 	List(context.Context, *ListCollectionsRequest) (*ListCollectionsResponse, error)
 	// Create new collection with given parameters
 	Create(context.Context, *CreateCollection) (*CollectionOperationResponse, error)
@@ -234,6 +247,8 @@ type CollectionsServer interface {
 	CreateShardKey(context.Context, *CreateShardKeyRequest) (*CreateShardKeyResponse, error)
 	// Delete shard key
 	DeleteShardKey(context.Context, *DeleteShardKeyRequest) (*DeleteShardKeyResponse, error)
+	// List shard keys
+	ListShardKeys(context.Context, *ListShardKeysRequest) (*ListShardKeysResponse, error)
 	mustEmbedUnimplementedCollectionsServer()
 }
 
@@ -282,6 +297,9 @@ func (UnimplementedCollectionsServer) CreateShardKey(context.Context, *CreateSha
 }
 func (UnimplementedCollectionsServer) DeleteShardKey(context.Context, *DeleteShardKeyRequest) (*DeleteShardKeyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteShardKey not implemented")
+}
+func (UnimplementedCollectionsServer) ListShardKeys(context.Context, *ListShardKeysRequest) (*ListShardKeysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListShardKeys not implemented")
 }
 func (UnimplementedCollectionsServer) mustEmbedUnimplementedCollectionsServer() {}
 func (UnimplementedCollectionsServer) testEmbeddedByValue()                     {}
@@ -538,6 +556,24 @@ func _Collections_DeleteShardKey_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Collections_ListShardKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListShardKeysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CollectionsServer).ListShardKeys(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Collections_ListShardKeys_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CollectionsServer).ListShardKeys(ctx, req.(*ListShardKeysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Collections_ServiceDesc is the grpc.ServiceDesc for Collections service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -596,6 +632,10 @@ var Collections_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteShardKey",
 			Handler:    _Collections_DeleteShardKey_Handler,
+		},
+		{
+			MethodName: "ListShardKeys",
+			Handler:    _Collections_ListShardKeys_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
