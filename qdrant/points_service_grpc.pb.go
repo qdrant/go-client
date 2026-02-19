@@ -53,7 +53,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PointsClient interface {
-	// Perform insert + updates on points. If a point with a given ID already exists - it will be overwritten.
+	// Perform insert + updates on points.
+	// If a point with a given ID already exists - it will be overwritten.
 	Upsert(ctx context.Context, in *UpsertPoints, opts ...grpc.CallOption) (*PointsOperationResponse, error)
 	// Delete points
 	Delete(ctx context.Context, in *DeletePoints, opts ...grpc.CallOption) (*PointsOperationResponse, error)
@@ -75,35 +76,45 @@ type PointsClient interface {
 	CreateFieldIndex(ctx context.Context, in *CreateFieldIndexCollection, opts ...grpc.CallOption) (*PointsOperationResponse, error)
 	// Delete field index for collection
 	DeleteFieldIndex(ctx context.Context, in *DeleteFieldIndexCollection, opts ...grpc.CallOption) (*PointsOperationResponse, error)
-	// Retrieve closest points based on vector similarity and given filtering conditions
+	// Retrieve closest points based on vector similarity and given filtering
+	// conditions
 	Search(ctx context.Context, in *SearchPoints, opts ...grpc.CallOption) (*SearchResponse, error)
-	// Retrieve closest points based on vector similarity and given filtering conditions
+	// Retrieve closest points based on vector similarity and given filtering
+	// conditions
 	SearchBatch(ctx context.Context, in *SearchBatchPoints, opts ...grpc.CallOption) (*SearchBatchResponse, error)
-	// Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given field
+	// Retrieve closest points based on vector similarity and given filtering
+	// conditions, grouped by a given field
 	SearchGroups(ctx context.Context, in *SearchPointGroups, opts ...grpc.CallOption) (*SearchGroupsResponse, error)
 	// Iterate over all or filtered points
 	Scroll(ctx context.Context, in *ScrollPoints, opts ...grpc.CallOption) (*ScrollResponse, error)
-	// Look for the points which are closer to stored positive examples and at the same time further to negative examples.
+	// Look for the points which are closer to stored positive examples and at
+	// the same time further to negative examples.
 	Recommend(ctx context.Context, in *RecommendPoints, opts ...grpc.CallOption) (*RecommendResponse, error)
-	// Look for the points which are closer to stored positive examples and at the same time further to negative examples.
+	// Look for the points which are closer to stored positive examples and at
+	// the same time further to negative examples.
 	RecommendBatch(ctx context.Context, in *RecommendBatchPoints, opts ...grpc.CallOption) (*RecommendBatchResponse, error)
-	// Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given field
+	// Look for the points which are closer to stored positive examples and at
+	// the same time further to negative examples, grouped by a given field
 	RecommendGroups(ctx context.Context, in *RecommendPointGroups, opts ...grpc.CallOption) (*RecommendGroupsResponse, error)
-	// Use context and a target to find the most similar points to the target, constrained by the context.
+	// Use context and a target to find the most similar points to the target,
+	// constrained by the context.
 	//
-	// When using only the context (without a target), a special search - called context search - is performed where
-	// pairs of points are used to generate a loss that guides the search towards the zone where
-	// most positive examples overlap. This means that the score minimizes the scenario of
-	// finding a point closer to a negative than to a positive part of a pair.
+	// When using only the context (without a target), a special search - called
+	// context search - is performed where pairs of points are used to generate a
+	// loss that guides the search towards the zone where most positive examples
+	// overlap. This means that the score minimizes the scenario of finding a
+	// point closer to a negative than to a positive part of a pair.
 	//
-	// Since the score of a context relates to loss, the maximum score a point can get is 0.0,
-	// and it becomes normal that many points can have a score of 0.0.
+	// Since the score of a context relates to loss, the maximum score a point
+	// can get is 0.0, and it becomes normal that many points can have a score of
+	// 0.0.
 	//
-	// When using target (with or without context), the score behaves a little different: The
-	// integer part of the score represents the rank with respect to the context, while the
-	// decimal part of the score relates to the distance to the target. The context part of the score for
-	// each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,
-	// and -1 otherwise.
+	// When using target (with or without context), the score behaves a little
+	// different: The integer part of the score represents the rank with respect
+	// to the context, while the decimal part of the score relates to the
+	// distance to the target. The context part of the score for each pair is
+	// calculated +1 if the point is closer to a positive than to a negative part
+	// of a pair, and -1 otherwise.
 	Discover(ctx context.Context, in *DiscoverPoints, opts ...grpc.CallOption) (*DiscoverResponse, error)
 	// Batch request points based on { positive, negative } pairs of examples, and/or a target
 	DiscoverBatch(ctx context.Context, in *DiscoverBatchPoints, opts ...grpc.CallOption) (*DiscoverBatchResponse, error)
@@ -111,13 +122,21 @@ type PointsClient interface {
 	Count(ctx context.Context, in *CountPoints, opts ...grpc.CallOption) (*CountResponse, error)
 	// Perform multiple update operations in one request
 	UpdateBatch(ctx context.Context, in *UpdateBatchPoints, opts ...grpc.CallOption) (*UpdateBatchResponse, error)
-	// Universally query points. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+	// Universally query points.
+	// This endpoint covers all capabilities of search, recommend, discover, filters.
+	// But also enables hybrid and multi-stage queries.
 	Query(ctx context.Context, in *QueryPoints, opts ...grpc.CallOption) (*QueryResponse, error)
-	// Universally query points in a batch fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+	// Universally query points in a batch fashion.
+	// This endpoint covers all capabilities of search, recommend, discover, filters.
+	// But also enables hybrid and multi-stage queries.
 	QueryBatch(ctx context.Context, in *QueryBatchPoints, opts ...grpc.CallOption) (*QueryBatchResponse, error)
-	// Universally query points in a group fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+	// Universally query points in a group fashion.
+	// This endpoint covers all capabilities of search, recommend, discover, filters.
+	// But also enables hybrid and multi-stage queries.
 	QueryGroups(ctx context.Context, in *QueryPointGroups, opts ...grpc.CallOption) (*QueryGroupsResponse, error)
-	// Perform facet counts. For each value in the field, count the number of points that have this value and match the conditions.
+	// Perform facet counts.
+	// For each value in the field, count the number of points that have this
+	// value and match the conditions.
 	Facet(ctx context.Context, in *FacetCounts, opts ...grpc.CallOption) (*FacetResponse, error)
 	// Compute distance matrix for sampled points with a pair based output format
 	SearchMatrixPairs(ctx context.Context, in *SearchMatrixPoints, opts ...grpc.CallOption) (*SearchMatrixPairsResponse, error)
@@ -417,7 +436,8 @@ func (c *pointsClient) SearchMatrixOffsets(ctx context.Context, in *SearchMatrix
 // All implementations must embed UnimplementedPointsServer
 // for forward compatibility.
 type PointsServer interface {
-	// Perform insert + updates on points. If a point with a given ID already exists - it will be overwritten.
+	// Perform insert + updates on points.
+	// If a point with a given ID already exists - it will be overwritten.
 	Upsert(context.Context, *UpsertPoints) (*PointsOperationResponse, error)
 	// Delete points
 	Delete(context.Context, *DeletePoints) (*PointsOperationResponse, error)
@@ -439,35 +459,45 @@ type PointsServer interface {
 	CreateFieldIndex(context.Context, *CreateFieldIndexCollection) (*PointsOperationResponse, error)
 	// Delete field index for collection
 	DeleteFieldIndex(context.Context, *DeleteFieldIndexCollection) (*PointsOperationResponse, error)
-	// Retrieve closest points based on vector similarity and given filtering conditions
+	// Retrieve closest points based on vector similarity and given filtering
+	// conditions
 	Search(context.Context, *SearchPoints) (*SearchResponse, error)
-	// Retrieve closest points based on vector similarity and given filtering conditions
+	// Retrieve closest points based on vector similarity and given filtering
+	// conditions
 	SearchBatch(context.Context, *SearchBatchPoints) (*SearchBatchResponse, error)
-	// Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given field
+	// Retrieve closest points based on vector similarity and given filtering
+	// conditions, grouped by a given field
 	SearchGroups(context.Context, *SearchPointGroups) (*SearchGroupsResponse, error)
 	// Iterate over all or filtered points
 	Scroll(context.Context, *ScrollPoints) (*ScrollResponse, error)
-	// Look for the points which are closer to stored positive examples and at the same time further to negative examples.
+	// Look for the points which are closer to stored positive examples and at
+	// the same time further to negative examples.
 	Recommend(context.Context, *RecommendPoints) (*RecommendResponse, error)
-	// Look for the points which are closer to stored positive examples and at the same time further to negative examples.
+	// Look for the points which are closer to stored positive examples and at
+	// the same time further to negative examples.
 	RecommendBatch(context.Context, *RecommendBatchPoints) (*RecommendBatchResponse, error)
-	// Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given field
+	// Look for the points which are closer to stored positive examples and at
+	// the same time further to negative examples, grouped by a given field
 	RecommendGroups(context.Context, *RecommendPointGroups) (*RecommendGroupsResponse, error)
-	// Use context and a target to find the most similar points to the target, constrained by the context.
+	// Use context and a target to find the most similar points to the target,
+	// constrained by the context.
 	//
-	// When using only the context (without a target), a special search - called context search - is performed where
-	// pairs of points are used to generate a loss that guides the search towards the zone where
-	// most positive examples overlap. This means that the score minimizes the scenario of
-	// finding a point closer to a negative than to a positive part of a pair.
+	// When using only the context (without a target), a special search - called
+	// context search - is performed where pairs of points are used to generate a
+	// loss that guides the search towards the zone where most positive examples
+	// overlap. This means that the score minimizes the scenario of finding a
+	// point closer to a negative than to a positive part of a pair.
 	//
-	// Since the score of a context relates to loss, the maximum score a point can get is 0.0,
-	// and it becomes normal that many points can have a score of 0.0.
+	// Since the score of a context relates to loss, the maximum score a point
+	// can get is 0.0, and it becomes normal that many points can have a score of
+	// 0.0.
 	//
-	// When using target (with or without context), the score behaves a little different: The
-	// integer part of the score represents the rank with respect to the context, while the
-	// decimal part of the score relates to the distance to the target. The context part of the score for
-	// each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,
-	// and -1 otherwise.
+	// When using target (with or without context), the score behaves a little
+	// different: The integer part of the score represents the rank with respect
+	// to the context, while the decimal part of the score relates to the
+	// distance to the target. The context part of the score for each pair is
+	// calculated +1 if the point is closer to a positive than to a negative part
+	// of a pair, and -1 otherwise.
 	Discover(context.Context, *DiscoverPoints) (*DiscoverResponse, error)
 	// Batch request points based on { positive, negative } pairs of examples, and/or a target
 	DiscoverBatch(context.Context, *DiscoverBatchPoints) (*DiscoverBatchResponse, error)
@@ -475,13 +505,21 @@ type PointsServer interface {
 	Count(context.Context, *CountPoints) (*CountResponse, error)
 	// Perform multiple update operations in one request
 	UpdateBatch(context.Context, *UpdateBatchPoints) (*UpdateBatchResponse, error)
-	// Universally query points. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+	// Universally query points.
+	// This endpoint covers all capabilities of search, recommend, discover, filters.
+	// But also enables hybrid and multi-stage queries.
 	Query(context.Context, *QueryPoints) (*QueryResponse, error)
-	// Universally query points in a batch fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+	// Universally query points in a batch fashion.
+	// This endpoint covers all capabilities of search, recommend, discover, filters.
+	// But also enables hybrid and multi-stage queries.
 	QueryBatch(context.Context, *QueryBatchPoints) (*QueryBatchResponse, error)
-	// Universally query points in a group fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+	// Universally query points in a group fashion.
+	// This endpoint covers all capabilities of search, recommend, discover, filters.
+	// But also enables hybrid and multi-stage queries.
 	QueryGroups(context.Context, *QueryPointGroups) (*QueryGroupsResponse, error)
-	// Perform facet counts. For each value in the field, count the number of points that have this value and match the conditions.
+	// Perform facet counts.
+	// For each value in the field, count the number of points that have this
+	// value and match the conditions.
 	Facet(context.Context, *FacetCounts) (*FacetResponse, error)
 	// Compute distance matrix for sampled points with a pair based output format
 	SearchMatrixPairs(context.Context, *SearchMatrixPoints) (*SearchMatrixPairsResponse, error)

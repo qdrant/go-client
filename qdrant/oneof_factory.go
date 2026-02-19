@@ -809,6 +809,15 @@ func NewQueryMMR(nearest *VectorInput, mmr *Mmr) *Query {
 	}
 }
 
+// Creates a *Query instance for search with feedback from some oracle.
+func NewQueryRelevanceFeedback(relevanceFeedback *RelevanceFeedbackInput) *Query {
+	return &Query{
+		Variant: &Query_RelevanceFeedback{
+			RelevanceFeedback: relevanceFeedback,
+		},
+	}
+}
+
 // Creates a *FacetValue instance from a string.
 func NewFacetValue(value string) *FacetValue {
 	return &FacetValue{

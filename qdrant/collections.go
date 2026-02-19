@@ -295,6 +295,24 @@ func (c *Client) DeleteShardKey(ctx context.Context, collectionName string, requ
 	return nil
 }
 
+// List the shard keys of a collection.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - collectionName: The name of the collection to list shard keys for.
+//
+// Returns:
+//   - error: An error if the operation fails.
+func (c *Client) ListShardKeys(ctx context.Context, collectionName string) ([]*ShardKeyDescription, error) {
+	response, err := c.GetCollectionsClient().ListShardKeys(ctx, &ListShardKeysRequest{
+		CollectionName: collectionName,
+	})
+	if err != nil {
+		return nil, newQdrantErr(err, "ListShardKeys", collectionName)
+	}
+	return response.GetShardKeys(), nil
+}
+
 // Get cluster information for a collection.
 //
 // Parameters:
