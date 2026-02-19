@@ -8,7 +8,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-const TestImage string = "qdrant/qdrant:v1.16.1"
+const TestImage string = "qdrant/qdrant:v1.17.0"
 
 // We use an instance with distributed mode enabled
 // to test methods like CreateShardKey(), DeleteShardKey().
