@@ -16,7 +16,7 @@
     <a href="https://github.com/qdrant/go-client/actions/workflows/ci.yml"><img src="https://github.com/qdrant/go-client/actions/workflows/ci.yml/badge.svg?branch=master" alt="Tests"></a>
     <a href="https://github.com/qdrant/go-client/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-success" alt="Apache 2.0 License"></a>
     <a href="https://qdrant.to/discord"><img src="https://img.shields.io/badge/Discord-Qdrant-5865F2.svg?logo=discord" alt="Discord"></a>
-    <a href="https://qdrant.to/roadmap"><img src="https://img.shields.io/badge/Roadmap-2025-bc1439.svg" alt="Roadmap 2025"></a>
+    <a href="https://qdrant.to/roadmap"><img src="https://img.shields.io/badge/Roadmap-2026-bc1439.svg" alt="Roadmap 2026"></a>
 </p>
 
 Go client library with handy utilities for interfacing with [Qdrant](https://qdrant.tech/).
