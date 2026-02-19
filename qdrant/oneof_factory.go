@@ -1264,3 +1264,12 @@ func NewUpdateCollectionClusterReplicatePoints(collectionName string, replicateP
 		},
 	}
 }
+
+// Creates a *FeedbackStrategy instance from an instance of *NaiveFeedbackStrategy.
+func NewFeedbackStrategyNaive(naive *NaiveFeedbackStrategy) *FeedbackStrategy {
+	return &FeedbackStrategy{
+		Variant: &FeedbackStrategy_Naive{
+			Naive: naive,
+		},
+	}
+}
