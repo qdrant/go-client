@@ -38,7 +38,7 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 	var grpcOptions []grpc.DialOption
 	grpcOptions = append(grpcOptions,
 		config.getTransportCreds(),
-		config.getAPIKeyInterceptor(),
+		config.getMetadataInterceptor(),
 		config.getRateLimitInterceptor(),
 		grpc.WithUserAgent(fmt.Sprintf("go-client/%s", clientVersion)),
 	)

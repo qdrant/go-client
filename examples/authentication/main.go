@@ -20,6 +20,10 @@ func main() {
 		// KeepAliveTimeout: 2,
 		// TLSConfig: &tls.Config{...},
 		// GrpcOptions: []grpc.DialOption{},
+		// Headers: map[string]string{
+		//     "x-custom-id":    "my-client-id",
+		//     "openai-api-key": "<openai-key>",
+		// },
 	})
 	if err != nil {
 		log.Fatalf("could not instantiate: %v", err)
