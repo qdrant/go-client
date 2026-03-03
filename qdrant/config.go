@@ -56,6 +56,8 @@ type Config struct {
 	// If set to 0, defaults to 2 seconds.
 	// This setting is only used if keepalive is active (see KeepAliveTime).
 	KeepAliveTimeout uint
+	// Headers specifies optional headers to send with every gRPC request.
+	Headers map[string]string
 }
 
 // Internal method.
@@ -107,12 +109,16 @@ func (c *Config) getTransportCreds() grpc.DialOption {
 // Internal method.
 //
 //nolint:lll
-func (c *Config) getAPIKeyInterceptor() grpc.DialOption {
+func (c *Config) getMetadataInterceptor() grpc.DialOption {
 	return grpc.WithUnaryInterceptor(func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		newCtx := ctx
+		var kvPairs []string
 		if c.APIKey != "" {
-			newCtx = metadata.AppendToOutgoingContext(ctx, apiKeyHeader, c.APIKey)
+			kvPairs = append(kvPairs, apiKeyHeader, c.APIKey)
 		}
+		for k, v := range c.Headers {
+			kvPairs = append(kvPairs, k, v)
+		}
+		newCtx := metadata.AppendToOutgoingContext(ctx, kvPairs...)
 		return invoker(newCtx, method, req, reply, cc, opts...)
 	})
 }
