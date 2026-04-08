@@ -11,6 +11,7 @@ func (x *Condition) UnmarshalJSON(data []byte) error {
 		Match   json.RawMessage `json:"match"`
 		Range   json.RawMessage `json:"range"`
 		IsEmpty json.RawMessage `json:"isEmpty"`
+		GeoRadius  json.RawMessage `json:"geo_radius"`
 		HasId   json.RawMessage `json:"hasId"`
 		Should  json.RawMessage `json:"should"`
 		Must    json.RawMessage `json:"must"`
@@ -21,7 +22,7 @@ func (x *Condition) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	if len(temp.Match) > 0 || len(temp.Range) > 0 || len(temp.IsEmpty) > 0 || len(temp.HasId) > 0 {
+	if len(temp.Match) > 0 || len(temp.Range) > 0 || len(temp.GeoRadius) > 0 || len(temp.IsEmpty) > 0 || len(temp.HasId) > 0{
 		var field FieldCondition
 
 		if err := json.Unmarshal(data, &field); err != nil {
