@@ -2,6 +2,9 @@ package qdrant
 
 import (
 	"context"
+	"io"
+
+	"google.golang.org/protobuf/proto"
 )
 
 // Performs insert + updates on points. If a point with a given ID already exists, it will be overwritten.
@@ -70,6 +73,24 @@ func (c *Client) Scroll(ctx context.Context, request *ScrollPoints) ([]*Retrieve
 		return nil, newQdrantErr(err, "Scroll", request.GetCollectionName())
 	}
 	return resp.GetResult(), nil
+}
+
+// Iterates over all or filtered points in a collection with offset.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - request: The ScrollPoints request specifying the scroll parameters.
+//
+// Returns:
+//   - []*RetrievedPoint: A slice of retrieved points.
+//   - *PointId: The next page offset for pagination.
+//   - error: An error if the operation fails.
+func (c *Client) ScrollAndOffset(ctx context.Context, request *ScrollPoints) ([]*RetrievedPoint, *PointId, error) {
+	resp, err := c.GetPointsClient().Scroll(ctx, request)
+	if err != nil {
+		return nil, nil, newQdrantErr(err, "ScrollAndOffset", request.GetCollectionName())
+	}
+	return resp.GetResult(), resp.GetNextPageOffset(), nil
 }
 
 // Updates vectors for points in a collection.
@@ -347,4 +368,134 @@ func (c *Client) SearchMatrixOffsets(ctx context.Context, request *SearchMatrixP
 		return nil, newQdrantErr(err, "SearchMatrixOffsets", request.GetCollectionName())
 	}
 	return resp.GetResult(), nil
+}
+
+// ScrollIterator paginates through points in a collection by repeatedly
+// calling ScrollAndOffset under the hood. Obtain one via ScrollAll.
+type ScrollIterator struct {
+	client  *Client
+	ctx     context.Context
+	request *ScrollPoints
+	done    bool
+}
+
+// ScrollAll returns a ScrollIterator that automatically paginates through
+// all points matching the given request. Call Next repeatedly to retrieve
+// successive pages. Next returns io.EOF when no more points remain.
+func (c *Client) ScrollAll(ctx context.Context, request *ScrollPoints) *ScrollIterator {
+	cloned, ok := proto.Clone(request).(*ScrollPoints)
+	if !ok {
+		cloned = request
+	}
+	return &ScrollIterator{
+		client:  c,
+		ctx:     ctx,
+		request: cloned,
+	}
+}
+
+// Next returns the next page of points. When all points have been consumed,
+// it returns nil and io.EOF. Callers should check for io.EOF to detect
+// the end of iteration.
+func (it *ScrollIterator) Next() ([]*RetrievedPoint, error) {
+	if it.done {
+		return nil, io.EOF
+	}
+	points, nextOffset, err := it.client.ScrollAndOffset(it.ctx, it.request)
+	if err != nil {
+		return nil, err
+	}
+	if nextOffset == nil {
+		it.done = true
+		if len(points) == 0 {
+			return nil, io.EOF
+		}
+		return points, nil
+	}
+	it.request.Offset = nextOffset
+	return points, nil
+}
+
+// GetDense returns the DenseVector from the VectorOutput.
+// Returns nil if no dense vector data is available.
+func (v *VectorOutput) GetDenseVector() *DenseVector {
+	if v == nil {
+		return nil
+	}
+
+	// Check deprecated data field first
+	if data := v.GetData(); len(data) > 0 {
+		return &DenseVector{Data: data}
+	}
+
+	if vector := v.GetVector(); vector != nil {
+		if dense, ok := vector.(*VectorOutput_Dense); ok && dense != nil {
+			return dense.Dense
+		}
+	}
+
+	return nil
+}
+
+// GetSparse returns the SparseVector from the VectorOutput.
+// Returns nil if no sparse vector data is available.
+func (v *VectorOutput) GetSparseVector() *SparseVector {
+	if v == nil {
+		return nil
+	}
+
+	// Check deprecated data field first
+	if data := v.GetData(); len(data) > 0 {
+		indices := v.GetIndices()
+		if indices == nil {
+			return nil
+		}
+		return &SparseVector{
+			Values:  data,
+			Indices: indices.GetData(),
+		}
+	}
+
+	if vector := v.GetVector(); vector != nil {
+		if sparse, ok := vector.(*VectorOutput_Sparse); ok && sparse != nil {
+			return sparse.Sparse
+		}
+	}
+
+	return nil
+}
+
+// GetMultiDense returns the MultiDenseVector from the VectorOutput.
+// Returns nil if no multi-dense vector data is available.
+func (v *VectorOutput) GetMultiVector() *MultiDenseVector {
+	if v == nil {
+		return nil
+	}
+
+	// Check deprecated data field first
+	if data := v.GetData(); len(data) > 0 {
+		vectorsCount := v.GetVectorsCount()
+		if vectorsCount == 0 {
+			return nil
+		}
+
+		vectorSize := len(data) / int(vectorsCount)
+		vectors := make([]*DenseVector, int(vectorsCount))
+
+		for i := range vectors {
+			start := i * vectorSize
+			end := start + vectorSize
+			vectors[i] = &DenseVector{Data: data[start:end]}
+		}
+
+		return &MultiDenseVector{Vectors: vectors}
+	}
+
+	if vector := v.GetVector(); vector != nil {
+		if multiDense, ok := vector.(*VectorOutput_MultiDense); ok && multiDense != nil {
+			return multiDense.MultiDense
+		}
+	}
+
+	return nil
 }

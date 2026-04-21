@@ -146,6 +146,38 @@ func NewMatchExceptInts(field string, values ...int64) *Condition {
 	}
 }
 
+// Creates a condition that matches a phrase.
+func NewMatchPhrase(field, phrase string) *Condition {
+	return &Condition{
+		ConditionOneOf: &Condition_Field{
+			Field: &FieldCondition{
+				Key: field,
+				Match: &Match{
+					MatchValue: &Match_Phrase{
+						Phrase: phrase,
+					},
+				},
+			},
+		},
+	}
+}
+
+// Creates a condition that matches any word in the text.
+func NewMatchTextAny(field, textAny string) *Condition {
+	return &Condition{
+		ConditionOneOf: &Condition_Field{
+			Field: &FieldCondition{
+				Key: field,
+				Match: &Match{
+					MatchValue: &Match_TextAny{
+						TextAny: textAny,
+					},
+				},
+			},
+		},
+	}
+}
+
 // Creates a condition that checks if a specified field is null.
 // See: https://qdrant.tech/documentation/concepts/filtering/#is-null
 func NewIsNull(field string) *Condition {
@@ -315,6 +347,18 @@ func NewDatetimeRange(field string, dateTimeRange *DatetimeRange) *Condition {
 			Field: &FieldCondition{
 				Key:           field,
 				DatetimeRange: dateTimeRange,
+			},
+		},
+	}
+}
+
+// Creates a condition that checks if a point has the specified vector.
+// See: https://qdrant.tech/documentation/concepts/filtering/#has-vector
+func NewHasVector(vector string) *Condition {
+	return &Condition{
+		ConditionOneOf: &Condition_HasVector{
+			HasVector: &HasVectorCondition{
+				HasVector: vector,
 			},
 		},
 	}

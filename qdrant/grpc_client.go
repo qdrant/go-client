@@ -1,6 +1,10 @@
 package qdrant
 
 import (
+	"fmt"
+	"log/slog"
+	"runtime/debug"
+
 	"google.golang.org/grpc"
 )
 
@@ -30,10 +34,22 @@ func NewDefaultGrpcClient() (*GrpcClient, error) {
 func NewGrpcClient(config *Config) (*GrpcClient, error) {
 	// We append config.GrpcOptions in the end
 	// so that user's explicit options take precedence
-	config.GrpcOptions = append([]grpc.DialOption{
+	clientVersion := getClientVersion()
+	var grpcOptions []grpc.DialOption
+	grpcOptions = append(grpcOptions,
 		config.getTransportCreds(),
 		config.getAPIKeyInterceptor(),
-	}, config.GrpcOptions...)
+		config.getRateLimitInterceptor(),
+		grpc.WithUserAgent(fmt.Sprintf("go-client/%s", clientVersion)),
+	)
+	if config.RetryConfig != nil {
+		grpcOptions = append(grpcOptions,
+			grpc.WithChainUnaryInterceptor(config.RetryConfig.retryInterceptor()),
+		)
+	}
+	grpcOptions = append(grpcOptions, config.getKeepAliveParams()...)
+
+	config.GrpcOptions = append(grpcOptions, config.GrpcOptions...)
 
 	conn, err := grpc.NewClient(config.getAddr(), config.GrpcOptions...)
 
@@ -41,7 +57,24 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 		return nil, err
 	}
 
-	return NewGrpcClientFromConn(conn), nil
+	newGrpcClientFromConn := NewGrpcClientFromConn(conn)
+
+	if !config.SkipCompatibilityCheck {
+		serverVersion := getServerVersion(newGrpcClientFromConn)
+		logger := slog.Default()
+		if serverVersion == unknownVersion {
+			logger.Warn("Failed to obtain server version. " +
+				"Unable to check client-server compatibility. " +
+				"Set SkipCompatibilityCheck=true to skip version check.")
+		} else if !IsCompatible(clientVersion, serverVersion) {
+			logger.Warn("Client version is not compatible with server version. "+
+				"Major versions should match and minor version difference must not exceed 1. "+
+				"Set SkipCompatibilityCheck=true to skip version check.",
+				"clientVersion", clientVersion, "serverVersion", serverVersion)
+		}
+	}
+
+	return newGrpcClientFromConn, nil
 }
 
 // Create a new gRPC client from existing connection.
@@ -83,4 +116,24 @@ func (c *GrpcClient) Snapshots() SnapshotsClient {
 // Tears down the *grpc.ClientConn and all underlying connections.
 func (c *GrpcClient) Close() error {
 	return c.conn.Close()
+}
+
+func getClientVersion() string {
+	packageName := "github.com/qdrant/go-client"
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		return unknownVersion
+	}
+
+	if bi.Main.Path == packageName {
+		return bi.Main.Version
+	}
+
+	for _, dep := range bi.Deps {
+		if dep.Path == packageName {
+			return dep.Version
+		}
+	}
+
+	return unknownVersion
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/amkarkhi/go-client/qdrant"
 )
 
+//nolint:mnd,gocritic // magic numbers is acceptable for this example, as well as exit with fatal.
 func main() {
 	// Create new client
 	client, err := qdrant.NewClient(&qdrant.Config{
@@ -14,6 +15,9 @@ func main() {
 		Port:   6334,
 		APIKey: "<paste-your-api-key-here>",
 		UseTLS: true,
+		// PoolSize: 3,
+		// KeepAliveTime: 10,
+		// KeepAliveTimeout: 2,
 		// TLSConfig: &tls.Config{...},
 		// GrpcOptions: []grpc.DialOption{},
 	})

@@ -7,7 +7,7 @@ import "snapshots_service.proto";
 package qdrant;
 
 service Qdrant {
-  rpc HealthCheck (HealthCheckRequest) returns (HealthCheckReply) {}
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckReply) {}
 }
 
 message HealthCheckRequest {}

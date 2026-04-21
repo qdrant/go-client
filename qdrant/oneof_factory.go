@@ -4,7 +4,9 @@
 
 package qdrant
 
-import "google.golang.org/protobuf/types/known/timestamppb"
+import (
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
 
 // Creates a *VectorsConfig instance from *VectorParams.
 func NewVectorsConfig(params *VectorParams) *VectorsConfig {
@@ -112,6 +114,17 @@ func NewQuantizationDiffDisabled() *QuantizationConfigDiff {
 	return &QuantizationConfigDiff{
 		Quantization: &QuantizationConfigDiff_Disabled{
 			Disabled: &Disabled{},
+		},
+	}
+}
+
+// Creates a *BinaryQuantizationQueryEncoding instance with a specific setting.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewBinaryQuantizationQueryEncodingSetting(setting BinaryQuantizationQueryEncoding_Setting) *BinaryQuantizationQueryEncoding {
+	return &BinaryQuantizationQueryEncoding{
+		Variant: &BinaryQuantizationQueryEncoding_Setting_{
+			Setting: setting,
 		},
 	}
 }
@@ -362,6 +375,33 @@ func NewVectorInputMulti(vectors [][]float32) *VectorInput {
 	}
 }
 
+// Creates a *VectorInput instance from a *Document for cloud inference.
+func NewVectorInputDocument(document *Document) *VectorInput {
+	return &VectorInput{
+		Variant: &VectorInput_Document{
+			Document: document,
+		},
+	}
+}
+
+// Creates a *VectorInput instance from a *Image for cloud inference.
+func NewVectorInputImage(image *Image) *VectorInput {
+	return &VectorInput{
+		Variant: &VectorInput_Image{
+			Image: image,
+		},
+	}
+}
+
+// Creates a *VectorInput instance from a *InferenceObject for cloud inference.
+func NewVectorInputObject(object *InferenceObject) *VectorInput {
+	return &VectorInput{
+		Variant: &VectorInput_Object{
+			Object: object,
+		},
+	}
+}
+
 // Creates a *WithPayloadSelector instance with payload enabled/disabled.
 // This is an alias for NewWithPayloadEnable().
 func NewWithPayload(enable bool) *WithPayloadSelector {
@@ -458,6 +498,33 @@ func NewVectorsMulti(vectors [][]float32) *Vectors {
 	}
 }
 
+// Creates a *Vectors instance from a *Document for cloud inference.
+func NewVectorsDocument(document *Document) *Vectors {
+	return &Vectors{
+		VectorsOptions: &Vectors_Vector{
+			Vector: NewVectorDocument(document),
+		},
+	}
+}
+
+// Creates a *Vectors instance from a *Image for cloud inference.
+func NewVectorsImage(image *Image) *Vectors {
+	return &Vectors{
+		VectorsOptions: &Vectors_Vector{
+			Vector: NewVectorImage(image),
+		},
+	}
+}
+
+// Creates a *Vectors instance from a *InferenceObject for cloud inference.
+func NewVectorsObject(object *InferenceObject) *Vectors {
+	return &Vectors{
+		VectorsOptions: &Vectors_Vector{
+			Vector: NewVectorObject(object),
+		},
+	}
+}
+
 // Creates a *Vectors instance for a map of named *Vector.
 func NewVectorsMap(vectors map[string]*Vector) *Vectors {
 	return &Vectors{
@@ -478,30 +545,65 @@ func NewVector(values ...float32) *Vector {
 // Creates a *Vector instance for dense vectors.
 func NewVectorDense(vector []float32) *Vector {
 	return &Vector{
-		Data: vector,
+		Vector: &Vector_Dense{
+			Dense: &DenseVector{
+				Data: vector,
+			},
+		},
 	}
 }
 
 // Creates a *Vector instance for sparse vectors.
 func NewVectorSparse(indices []uint32, values []float32) *Vector {
 	return &Vector{
-		Data: values,
-		Indices: &SparseIndices{
-			Data: indices,
+		Vector: &Vector_Sparse{
+			Sparse: &SparseVector{
+				Indices: indices,
+				Values:  values,
+			},
 		},
 	}
 }
 
 // Creates a *Vector instance for multi vectors.
 func NewVectorMulti(vectors [][]float32) *Vector {
-	vectorsCount := uint32(len(vectors))
-	var flattenedVec []float32
-	for _, vector := range vectors {
-		flattenedVec = append(flattenedVec, vector...)
+	denseVecs := make([]*DenseVector, len(vectors))
+	for i, vector := range vectors {
+		denseVecs[i] = &DenseVector{Data: vector}
 	}
 	return &Vector{
-		Data:         flattenedVec,
-		VectorsCount: &vectorsCount,
+		Vector: &Vector_MultiDense{
+			MultiDense: &MultiDenseVector{
+				Vectors: denseVecs,
+			},
+		},
+	}
+}
+
+// Creates a *Vector instance from a *Document for cloud inference.
+func NewVectorDocument(document *Document) *Vector {
+	return &Vector{
+		Vector: &Vector_Document{
+			Document: document,
+		},
+	}
+}
+
+// Creates a *Vector instance from a *Image for cloud inference.
+func NewVectorImage(image *Image) *Vector {
+	return &Vector{
+		Vector: &Vector_Image{
+			Image: image,
+		},
+	}
+}
+
+// Creates a *Vector instance from a *InferenceObject for cloud inference.
+func NewVectorObject(object *InferenceObject) *Vector {
+	return &Vector{
+		Vector: &Vector_Object{
+			Object: object,
+		},
 	}
 }
 
@@ -618,6 +720,11 @@ func NewQueryID(id *PointId) *Query {
 	return NewQueryNearest(NewVectorInputID(id))
 }
 
+// Creates a *Query instance for a nearest query from a *Document input.
+func NewQueryDocument(document *Document) *Query {
+	return NewQueryNearest(NewVectorInputDocument(document))
+}
+
 // Creates a *Query instance for recommend query from *RecommendInput.
 func NewQueryRecommend(recommend *RecommendInput) *Query {
 	return &Query{
@@ -663,11 +770,50 @@ func NewQueryFusion(fusion Fusion) *Query {
 	}
 }
 
+// Creates a *Query instance for combining prefetch results with RRF (Reciprocal Rank Fusion).
+func NewQueryRRF(rrf *Rrf) *Query {
+	return &Query{
+		Variant: &Query_Rrf{
+			Rrf: rrf,
+		},
+	}
+}
+
 // Creates a *Query instance for sampling points.
 func NewQuerySample(sample Sample) *Query {
 	return &Query{
 		Variant: &Query_Sample{
 			Sample: sample,
+		},
+	}
+}
+
+// Creates a *Query instance for score boosting via an arbitrary formula.
+func NewQueryFormula(formula *Formula) *Query {
+	return &Query{
+		Variant: &Query_Formula{
+			Formula: formula,
+		},
+	}
+}
+
+// Creates a *Query instance for re-ranking points with MMR (Maximal Marginal Relevance).
+func NewQueryMMR(nearest *VectorInput, mmr *Mmr) *Query {
+	return &Query{
+		Variant: &Query_NearestWithMmr{
+			NearestWithMmr: &NearestInputWithMmr{
+				Nearest: nearest,
+				Mmr:     mmr,
+			},
+		},
+	}
+}
+
+// Creates a *Query instance for search with feedback from some oracle.
+func NewQueryRelevanceFeedback(relevanceFeedback *RelevanceFeedbackInput) *Query {
+	return &Query{
+		Variant: &Query_RelevanceFeedback{
+			RelevanceFeedback: relevanceFeedback,
 		},
 	}
 }
@@ -824,7 +970,306 @@ func NewPointsSelectorIDs(ids []*PointId) *PointsSelector {
 	}
 }
 
-// Creates a pointer to a value of any type.
-func PtrOf[T any](t T) *T {
-	return &t
+// Creates a *MaxOptimizationThreads instance from the number of specified threads.
+func NewMaxOptimizationThreads(value uint64) *MaxOptimizationThreads {
+	return &MaxOptimizationThreads{
+		Variant: &MaxOptimizationThreads_Value{
+			Value: value,
+		},
+	}
+}
+
+// Creates a *MaxOptimizationThreads instance from the specified settings.
+func NewMaxOptimizationThreadsSetting(setting MaxOptimizationThreads_Setting) *MaxOptimizationThreads {
+	return &MaxOptimizationThreads{
+		Variant: &MaxOptimizationThreads_Setting_{
+			Setting: setting,
+		},
+	}
+}
+
+// Creates a *Expression instance from a constant.
+func NewExpressionConstant(constant float32) *Expression {
+	return &Expression{
+		Variant: &Expression_Constant{
+			Constant: constant,
+		},
+	}
+}
+
+// Creates a *Expression instance from a variable (payload key or score reference).
+func NewExpressionVariable(variable string) *Expression {
+	return &Expression{
+		Variant: &Expression_Variable{
+			Variable: variable,
+		},
+	}
+}
+
+// Creates a *Expression instance from a *Condition.
+// If true, becomes 1.0; otherwise 0.0.
+func NewExpressionCondition(condition *Condition) *Expression {
+	return &Expression{
+		Variant: &Expression_Condition{
+			Condition: condition,
+		},
+	}
+}
+
+// Creates a *Expression instance from a *GeoDistance.
+func NewExpressionGeoDistance(geoDistance *GeoDistance) *Expression {
+	return &Expression{
+		Variant: &Expression_GeoDistance{
+			GeoDistance: geoDistance,
+		},
+	}
+}
+
+// Creates a *Expression instance from a datetime constant string.
+func NewExpressionDatetime(datetime string) *Expression {
+	return &Expression{
+		Variant: &Expression_Datetime{
+			Datetime: datetime,
+		},
+	}
+}
+
+// Creates a *Expression instance from a datetime key in the payload.
+func NewExpressionDatetimeKey(datetimeKey string) *Expression {
+	return &Expression{
+		Variant: &Expression_DatetimeKey{
+			DatetimeKey: datetimeKey,
+		},
+	}
+}
+
+// Creates a *Expression instance for multiplication.
+func NewExpressionMult(mult *MultExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_Mult{
+			Mult: mult,
+		},
+	}
+}
+
+// Creates a *Expression instance for summation.
+func NewExpressionSum(sum *SumExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_Sum{
+			Sum: sum,
+		},
+	}
+}
+
+// Creates a *Expression instance for division.
+func NewExpressionDiv(div *DivExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_Div{
+			Div: div,
+		},
+	}
+}
+
+// Creates a *Expression instance to negate a value.
+func NewExpressionNeg(neg *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Neg{
+			Neg: neg,
+		},
+	}
+}
+
+// Creates a *Expression instance for absolute value.
+func NewExpressionAbs(abs *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Abs{
+			Abs: abs,
+		},
+	}
+}
+
+// Creates a *Expression instance for square root.
+func NewExpressionSqrt(sqrt *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Sqrt{
+			Sqrt: sqrt,
+		},
+	}
+}
+
+// Creates a *Expression instance for power expression.
+func NewExpressionPow(pow *PowExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_Pow{
+			Pow: pow,
+		},
+	}
+}
+
+// Creates a *Expression instance for exponential.
+func NewExpressionExp(exp *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Exp{
+			Exp: exp,
+		},
+	}
+}
+
+// Creates a *Expression instance for base-10 logarithm.
+func NewExpressionLog10(log10 *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Log10{
+			Log10: log10,
+		},
+	}
+}
+
+// Creates a *Expression instance for natural logarithm.
+func NewExpressionLn(ln *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Ln{
+			Ln: ln,
+		},
+	}
+}
+
+// Creates a *Expression instance for exponential decay.
+func NewExpressionExpDecay(expDecay *DecayParamsExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_ExpDecay{
+			ExpDecay: expDecay,
+		},
+	}
+}
+
+// Creates a *Expression instance for Gaussian decay.
+func NewExpressionGaussDecay(gaussDecay *DecayParamsExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_GaussDecay{
+			GaussDecay: gaussDecay,
+		},
+	}
+}
+
+// Creates a *Expression instance for linear decay.
+func NewExpressionLinDecay(linDecay *DecayParamsExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_LinDecay{
+			LinDecay: linDecay,
+		},
+	}
+}
+
+// Creates a *StemmingAlgorithm instance using Snowball stemmer.
+func NewStemmingAlgorithmSnowball(snowBall *SnowballParams) *StemmingAlgorithm {
+	return &StemmingAlgorithm{
+		StemmingParams: &StemmingAlgorithm_Snowball{
+			Snowball: snowBall,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to move a shard.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterMoveShard(collectionName string, moveShard *MoveShard) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_MoveShard{
+			MoveShard: moveShard,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to replicate a shard.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterReplicateShard(collectionName string, replicateShard *ReplicateShard) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_ReplicateShard{
+			ReplicateShard: replicateShard,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to abort a shard transfer.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterAbortTransfer(collectionName string, abortTransfer *AbortShardTransfer) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_AbortTransfer{
+			AbortTransfer: abortTransfer,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to drop a replica.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterDropReplica(collectionName string, dropReplica *Replica) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_DropReplica{
+			DropReplica: dropReplica,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to create a shard key.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterCreateShardKey(collectionName string, createShardKey *CreateShardKey) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_CreateShardKey{
+			CreateShardKey: createShardKey,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to delete a shard key.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterDeleteShardKey(collectionName string, deleteShardKey *DeleteShardKey) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_DeleteShardKey{
+			DeleteShardKey: deleteShardKey,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to restart a transfer.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterRestartTransfer(collectionName string, restartTransfer *RestartTransfer) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_RestartTransfer{
+			RestartTransfer: restartTransfer,
+		},
+	}
+}
+
+// Creates a *UpdateCollectionClusterSetupRequest to replicate points.
+//
+//nolint:lll	// Ignoring the long line length for naming consistency.
+func NewUpdateCollectionClusterReplicatePoints(collectionName string, replicatePoints *ReplicatePoints) *UpdateCollectionClusterSetupRequest {
+	return &UpdateCollectionClusterSetupRequest{
+		CollectionName: collectionName,
+		Operation: &UpdateCollectionClusterSetupRequest_ReplicatePoints{
+			ReplicatePoints: replicatePoints,
+		},
+	}
+}
+
+// Creates a *FeedbackStrategy instance from an instance of *NaiveFeedbackStrategy.
+func NewFeedbackStrategyNaive(naive *NaiveFeedbackStrategy) *FeedbackStrategy {
+	return &FeedbackStrategy{
+		Variant: &FeedbackStrategy_Naive{
+			Naive: naive,
+		},
+	}
 }
