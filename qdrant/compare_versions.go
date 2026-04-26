@@ -19,9 +19,9 @@ type Version struct {
 	Minor int
 }
 
-func getServerVersion(clientConn *GrpcClient) string {
+func getServerVersion(clientConn *GrpcClient, timeout time.Duration) string {
 	logger := slog.Default()
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	healthCheckResult, err := clientConn.qdrant.HealthCheck(ctx, &HealthCheckRequest{})
 	if err != nil {

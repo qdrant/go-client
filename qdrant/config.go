@@ -21,6 +21,8 @@ const (
 	apiKeyHeader = "api-key"
 	defaultHost  = "localhost"
 	defaultPort  = 6334
+	defaultVersionCheckTimeout = time.Minute
+
 )
 
 // Configuration options for the client.
@@ -56,6 +58,18 @@ type Config struct {
 	// If set to 0, defaults to 2 seconds.
 	// This setting is only used if keepalive is active (see KeepAliveTime).
 	KeepAliveTimeout uint
+	// VersionCheckTimeout specifies the timeout used when probing the server for its
+	// version during client construction (compatibility check).
+	// If 0, defaults to 1 minute.
+	VersionCheckTimeout time.Duration
+}
+
+// Internal method.
+func (c *Config) getVersionCheckTimeout() time.Duration {
+	if c.VersionCheckTimeout > 0 {
+		return c.VersionCheckTimeout
+	}
+	return defaultVersionCheckTimeout
 }
 
 // Internal method.
