@@ -34,7 +34,7 @@ func run() error {
 		// GrpcOptions: []grpc.DialOption{},
 	})
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("could not create client: %w", err)
 	}
 	defer client.Close()
 	// Get a context for a minute
