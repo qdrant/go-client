@@ -360,7 +360,7 @@ func NewVectorInputSparse(indices []uint32, values []float32) *VectorInput {
 
 // Creates a *VectorInput instance for multi vectors.
 func NewVectorInputMulti(vectors [][]float32) *VectorInput {
-	var multiVec []*DenseVector
+	multiVec := make([]*DenseVector, 0, len(vectors))
 	for _, vector := range vectors {
 		multiVec = append(multiVec, &DenseVector{
 			Data: vector,
