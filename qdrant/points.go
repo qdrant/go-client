@@ -2,6 +2,9 @@ package qdrant
 
 import (
 	"context"
+	"io"
+
+	"google.golang.org/protobuf/proto"
 )
 
 // Performs insert + updates on points. If a point with a given ID already exists, it will be overwritten.
@@ -365,6 +368,52 @@ func (c *Client) SearchMatrixOffsets(ctx context.Context, request *SearchMatrixP
 		return nil, newQdrantErr(err, "SearchMatrixOffsets", request.GetCollectionName())
 	}
 	return resp.GetResult(), nil
+}
+
+// ScrollIterator paginates through points in a collection by repeatedly
+// calling ScrollAndOffset under the hood. Obtain one via ScrollAll.
+type ScrollIterator struct {
+	client  *Client
+	ctx     context.Context
+	request *ScrollPoints
+	done    bool
+}
+
+// ScrollAll returns a ScrollIterator that automatically paginates through
+// all points matching the given request. Call Next repeatedly to retrieve
+// successive pages. Next returns io.EOF when no more points remain.
+func (c *Client) ScrollAll(ctx context.Context, request *ScrollPoints) *ScrollIterator {
+	cloned, ok := proto.Clone(request).(*ScrollPoints)
+	if !ok {
+		cloned = request
+	}
+	return &ScrollIterator{
+		client:  c,
+		ctx:     ctx,
+		request: cloned,
+	}
+}
+
+// Next returns the next page of points. When all points have been consumed,
+// it returns nil and io.EOF. Callers should check for io.EOF to detect
+// the end of iteration.
+func (it *ScrollIterator) Next() ([]*RetrievedPoint, error) {
+	if it.done {
+		return nil, io.EOF
+	}
+	points, nextOffset, err := it.client.ScrollAndOffset(it.ctx, it.request)
+	if err != nil {
+		return nil, err
+	}
+	if nextOffset == nil {
+		it.done = true
+		if len(points) == 0 {
+			return nil, io.EOF
+		}
+		return points, nil
+	}
+	it.request.Offset = nextOffset
+	return points, nil
 }
 
 // GetDense returns the DenseVector from the VectorOutput.

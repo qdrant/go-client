@@ -42,6 +42,11 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 		config.getRateLimitInterceptor(),
 		grpc.WithUserAgent(fmt.Sprintf("go-client/%s", clientVersion)),
 	)
+	if config.RetryConfig != nil {
+		grpcOptions = append(grpcOptions,
+			grpc.WithChainUnaryInterceptor(config.RetryConfig.retryInterceptor()),
+		)
+	}
 	grpcOptions = append(grpcOptions, config.getKeepAliveParams()...)
 
 	config.GrpcOptions = append(grpcOptions, config.GrpcOptions...)

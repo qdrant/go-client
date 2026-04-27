@@ -58,6 +58,10 @@ type Config struct {
 	// If set to 0, defaults to 2 seconds.
 	// This setting is only used if keepalive is active (see KeepAliveTime).
 	KeepAliveTimeout uint
+	// RetryConfig enables automatic retries with exponential backoff for
+	// transient gRPC errors (ResourceExhausted, Unavailable).
+	// If nil, no automatic retries are performed.
+	RetryConfig *RetryConfig
 	// VersionCheckTimeout specifies the timeout used when probing the server for its
 	// version during client construction (compatibility check).
 	// If 0, defaults to 1 minute.
