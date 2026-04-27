@@ -18,11 +18,10 @@ import (
 )
 
 const (
-	apiKeyHeader = "api-key"
-	defaultHost  = "localhost"
-	defaultPort  = 6334
+	apiKeyHeader               = "api-key"
+	defaultHost                = "localhost"
+	defaultPort                = 6334
 	defaultVersionCheckTimeout = time.Minute
-
 )
 
 // Configuration options for the client.
