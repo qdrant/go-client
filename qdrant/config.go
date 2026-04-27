@@ -18,9 +18,10 @@ import (
 )
 
 const (
-	apiKeyHeader = "api-key"
-	defaultHost  = "localhost"
-	defaultPort  = 6334
+	apiKeyHeader               = "api-key"
+	defaultHost                = "localhost"
+	defaultPort                = 6334
+	defaultVersionCheckTimeout = time.Minute
 )
 
 // Configuration options for the client.
@@ -60,6 +61,18 @@ type Config struct {
 	// transient gRPC errors (ResourceExhausted, Unavailable).
 	// If nil, no automatic retries are performed.
 	RetryConfig *RetryConfig
+	// VersionCheckTimeout specifies the timeout used when probing the server for its
+	// version during client construction (compatibility check).
+	// If 0, defaults to 1 minute.
+	VersionCheckTimeout time.Duration
+}
+
+// Internal method.
+func (c *Config) getVersionCheckTimeout() time.Duration {
+	if c.VersionCheckTimeout > 0 {
+		return c.VersionCheckTimeout
+	}
+	return defaultVersionCheckTimeout
 }
 
 // Internal method.

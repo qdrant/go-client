@@ -60,7 +60,7 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 	newGrpcClientFromConn := NewGrpcClientFromConn(conn)
 
 	if !config.SkipCompatibilityCheck {
-		serverVersion := getServerVersion(newGrpcClientFromConn)
+		serverVersion := getServerVersion(newGrpcClientFromConn, config.getVersionCheckTimeout())
 		logger := slog.Default()
 		if serverVersion == unknownVersion {
 			logger.Warn("Failed to obtain server version. " +
