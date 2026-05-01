@@ -35,7 +35,7 @@ func TestCollectionsClient(t *testing.T) {
 
 	client, err := qdrant.NewClient(&qdrant.Config{
 		Host:   host,
-		Port:   port.Int(),
+		Port:   int(port.Num()),
 		APIKey: apiKey,
 	})
 	require.NoError(t, err)
