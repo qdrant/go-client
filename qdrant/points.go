@@ -230,6 +230,40 @@ func (c *Client) DeleteFieldIndex(ctx context.Context, request *DeleteFieldIndex
 	return resp.GetResult(), nil
 }
 
+// Creates a new named vector on a collection.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - request: The CreateVectorNameRequest specifying the vector name and configuration.
+//
+// Returns:
+//   - *UpdateResult: The result of the operation.
+//   - error: An error if the operation fails.
+func (c *Client) CreateVectorName(ctx context.Context, request *CreateVectorNameRequest) (*UpdateResult, error) {
+	resp, err := c.GetPointsClient().CreateVectorName(ctx, request)
+	if err != nil {
+		return nil, newQdrantErr(err, "CreateVectorName", request.GetCollectionName())
+	}
+	return resp.GetResult(), nil
+}
+
+// Deletes a named vector from a collection.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - request: The DeleteVectorNameRequest specifying the vector name to delete.
+//
+// Returns:
+//   - *UpdateResult: The result of the operation.
+//   - error: An error if the operation fails.
+func (c *Client) DeleteVectorName(ctx context.Context, request *DeleteVectorNameRequest) (*UpdateResult, error) {
+	resp, err := c.GetPointsClient().DeleteVectorName(ctx, request)
+	if err != nil {
+		return nil, newQdrantErr(err, "DeleteVectorName", request.GetCollectionName())
+	}
+	return resp.GetResult(), nil
+}
+
 // Returns the number of points in a collection with given filtering conditions.
 // Gets the total count if no filter is provided.
 //

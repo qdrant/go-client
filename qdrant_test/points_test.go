@@ -309,6 +309,32 @@ func TestPointsClient(t *testing.T) {
 		require.NotNil(t, res)
 	})
 
+	t.Run("CreateVectorName", func(t *testing.T) {
+		res, err := client.CreateVectorName(ctx, &qdrant.CreateVectorNameRequest{
+			CollectionName: collectionName,
+			VectorName:     "extra",
+			VectorConfig: &qdrant.CreateVectorNameRequest_DenseConfig{
+				DenseConfig: &qdrant.DenseVectorCreationConfig{
+					Size:     vectorSize,
+					Distance: distance,
+				},
+			},
+			Wait: &wait,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, res)
+	})
+
+	t.Run("DeleteVectorName", func(t *testing.T) {
+		res, err := client.DeleteVectorName(ctx, &qdrant.DeleteVectorNameRequest{
+			CollectionName: collectionName,
+			VectorName:     "extra",
+			Wait:           &wait,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, res)
+	})
+
 	t.Run("UpdateBatch", func(t *testing.T) {
 		ops := []*qdrant.PointsUpdateOperation{
 			qdrant.NewPointsUpdateDeletePayload(&qdrant.PointsUpdateOperation_DeletePayload{
