@@ -118,6 +118,24 @@ func NewQuantizationDiffDisabled() *QuantizationConfigDiff {
 	}
 }
 
+// Creates a *QuantizationConfig instance from *TurboQuantization.
+func NewQuantizationTurbo(turbo *TurboQuantization) *QuantizationConfig {
+	return &QuantizationConfig{
+		Quantization: &QuantizationConfig_Turboquant{
+			Turboquant: turbo,
+		},
+	}
+}
+
+// Creates a *QuantizationConfigDiff instance from *TurboQuantization.
+func NewQuantizationDiffTurbo(turbo *TurboQuantization) *QuantizationConfigDiff {
+	return &QuantizationConfigDiff{
+		Quantization: &QuantizationConfigDiff_Turboquant{
+			Turboquant: turbo,
+		},
+	}
+}
+
 // Creates a *BinaryQuantizationQueryEncoding instance with a specific setting.
 //
 //nolint:lll	// Ignoring the long line length for naming consistency.
