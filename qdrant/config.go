@@ -3,6 +3,7 @@ package qdrant
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -161,13 +162,14 @@ func (c *Config) getRateLimitInterceptor() grpc.DialOption {
 			return err
 		}
 		if values := md.Get("retry-after"); len(values) > 0 {
-			parsed, err := strconv.Atoi(values[0])
-			if err == nil {
+			parsed, parseErr := strconv.Atoi(values[0])
+			if parseErr == nil {
 				return &QdrantResourceExhaustedError{
 					st.Message(),
 					parsed,
 				}
 			}
+			return errors.Join(fmt.Errorf("parse retry-after header %q: %w", values[0], parseErr), err)
 		}
 		return err
 	})
