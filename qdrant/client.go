@@ -2,6 +2,8 @@ package qdrant
 
 import (
 	"fmt"
+	"maps"
+	"sync"
 	"sync/atomic"
 
 	"google.golang.org/grpc"
@@ -11,8 +13,9 @@ import (
 // It can manage a single connection or a pool of connections, chosen by setting
 // PoolSize in the Config.
 type Client struct {
-	clients []*GrpcClient
-	next    uint32
+	clients   []*GrpcClient
+	next      uint32
+	closeOnce sync.Once
 }
 
 // NewClient creates a new Qdrant client.
@@ -22,6 +25,7 @@ type Client struct {
 func NewClient(config *Config) (*Client, error) {
 	// Ensure config is not modified for the caller by cloning.
 	cfgCopy := *config
+	cfgCopy.Headers = maps.Clone(config.Headers)
 	if cfgCopy.PoolSize == 0 {
 		cfgCopy.PoolSize = 3
 	}
@@ -102,12 +106,13 @@ func (c *Client) GetConnection() *grpc.ClientConn {
 // Close tears down all underlying connections.
 func (c *Client) Close() error {
 	var lastErr error
-	for _, client := range c.clients {
-		if err := client.Close(); err != nil {
-			lastErr = err
+	c.closeOnce.Do(func() {
+		for _, client := range c.clients {
+			if err := client.Close(); err != nil {
+				lastErr = err
+			}
 		}
-	}
-	c.clients = nil // Clear the slice
+	})
 	return lastErr
 }
 
