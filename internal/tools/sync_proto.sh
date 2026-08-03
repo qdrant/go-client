@@ -29,6 +29,7 @@ rm $CLIENT_DIR/health_check.proto
 rm $CLIENT_DIR/shard_snapshots_service.proto
 rm $CLIENT_DIR/telemetry_internal.proto
 rm $CLIENT_DIR/storage_read_service.proto
+rm $CLIENT_DIR/quota_internal.proto
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     sed -i '' '
@@ -40,6 +41,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         /shard_snapshots_service.proto/d;
         /telemetry_internal.proto/d;
         /storage_read_service.proto/d;
+        /quota_internal.proto/d;
         ' $CLIENT_DIR/qdrant.proto
 
     # Remove csharp option from proto files

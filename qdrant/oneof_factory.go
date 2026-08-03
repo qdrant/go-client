@@ -1187,6 +1187,15 @@ func NewStemmingAlgorithmSnowball(snowBall *SnowballParams) *StemmingAlgorithm {
 	}
 }
 
+// Creates a *StemmingAlgorithm instance that explicitly disables stemming.
+func NewStemmingAlgorithmDisabled() *StemmingAlgorithm {
+	return &StemmingAlgorithm{
+		StemmingParams: &StemmingAlgorithm_Disabled{
+			Disabled: &DisabledStemmer{},
+		},
+	}
+}
+
 // Creates a *UpdateCollectionClusterSetupRequest to move a shard.
 //
 //nolint:lll	// Ignoring the long line length for naming consistency.
