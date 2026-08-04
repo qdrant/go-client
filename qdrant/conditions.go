@@ -178,6 +178,23 @@ func NewMatchTextAny(field, textAny string) *Condition {
 	}
 }
 
+// Creates a condition that matches keywords starting with the given prefix.
+// The field must have a keyword index with prefix matching enabled.
+func NewMatchPrefix(field, prefix string) *Condition {
+	return &Condition{
+		ConditionOneOf: &Condition_Field{
+			Field: &FieldCondition{
+				Key: field,
+				Match: &Match{
+					MatchValue: &Match_Prefix{
+						Prefix: prefix,
+					},
+				},
+			},
+		},
+	}
+}
+
 // Creates a condition that checks if a specified field is null.
 // See: https://qdrant.tech/documentation/concepts/filtering/#is-null
 func NewIsNull(field string) *Condition {
@@ -347,6 +364,19 @@ func NewDatetimeRange(field string, dateTimeRange *DatetimeRange) *Condition {
 			Field: &FieldCondition{
 				Key:           field,
 				DatetimeRange: dateTimeRange,
+			},
+		},
+	}
+}
+
+// Creates a condition that selects one deterministic slice of the point ID space.
+// Total must be at least 1 and index must be less than total.
+func NewSlice(total, index uint32) *Condition {
+	return &Condition{
+		ConditionOneOf: &Condition_Slice{
+			Slice: &SliceCondition{
+				Total: total,
+				Index: index,
 			},
 		},
 	}
