@@ -38,8 +38,16 @@ func newQdrantErr(err error, operationName string, contexts ...string) *QdrantEr
 type QdrantResourceExhaustedError struct {
 	Reason      string
 	RetryAfterS int
+	// err is the original gRPC status error, kept so status.Code(err) and
+	// errors.As still see codes.ResourceExhausted.
+	err error
 }
 
 func (e *QdrantResourceExhaustedError) Error() string {
 	return fmt.Sprintf("ResourceExhausted: %s, retry after %d seconds", e.Reason, e.RetryAfterS)
+}
+
+// Unwrap returns the underlying gRPC status error.
+func (e *QdrantResourceExhaustedError) Unwrap() error {
+	return e.err
 }
