@@ -1,6 +1,7 @@
 package qdrant
 
 import (
+	"errors"
 	"fmt"
 	"maps"
 	"sync"
@@ -104,16 +105,17 @@ func (c *Client) GetConnection() *grpc.ClientConn {
 }
 
 // Close tears down all underlying connections.
+// If several connections fail to close, all errors are returned joined.
 func (c *Client) Close() error {
-	var lastErr error
+	var errs []error
 	c.closeOnce.Do(func() {
 		for _, client := range c.clients {
 			if err := client.Close(); err != nil {
-				lastErr = err
+				errs = append(errs, err)
 			}
 		}
 	})
-	return lastErr
+	return errors.Join(errs...)
 }
 
 // Creates a pointer to a value of any type.
