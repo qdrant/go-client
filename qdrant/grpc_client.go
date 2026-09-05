@@ -49,9 +49,9 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 	}
 	grpcOptions = append(grpcOptions, config.getKeepAliveParams()...)
 
-	config.GrpcOptions = append(grpcOptions, config.GrpcOptions...)
+	dialOptions := append(grpcOptions, config.GrpcOptions...)
 
-	conn, err := grpc.NewClient(config.getAddr(), config.GrpcOptions...)
+	conn, err := grpc.NewClient(config.getAddr(), dialOptions...)
 
 	if err != nil {
 		return nil, err
