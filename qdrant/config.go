@@ -68,6 +68,17 @@ type Config struct {
 	VersionCheckTimeout time.Duration
 	// Headers specifies optional headers to send with every gRPC request.
 	Headers map[string]string
+	// Logger used for client-side warnings such as a failed server version check.
+	// If nil, slog.Default() is used.
+	Logger *slog.Logger
+}
+
+// Internal method.
+func (c *Config) getLogger() *slog.Logger {
+	if c.Logger != nil {
+		return c.Logger
+	}
+	return slog.Default()
 }
 
 // Internal method.
@@ -119,7 +130,7 @@ func (c *Config) getTransportCreds() grpc.DialOption {
 		}
 		return grpc.WithTransportCredentials(credentials.NewTLS(c.TLSConfig))
 	} else if c.APIKey != "" {
-		slog.Default().Warn("API key is being used without TLS(HTTPS). It will be transmitted in plaintext.")
+		c.getLogger().Warn("API key is being used without TLS(HTTPS). It will be transmitted in plaintext.")
 	}
 	return grpc.WithTransportCredentials(insecure.NewCredentials())
 }

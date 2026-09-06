@@ -19,18 +19,15 @@ type Version struct {
 	Minor int
 }
 
-func getServerVersion(clientConn *GrpcClient, timeout time.Duration) string {
-	logger := slog.Default()
+func getServerVersion(clientConn *GrpcClient, timeout time.Duration) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	healthCheckResult, err := clientConn.qdrant.HealthCheck(ctx, &HealthCheckRequest{})
 	if err != nil {
-		logger.WarnContext(ctx, "Unable to get server version, use default", "err", err, "default", unknownVersion)
-		return unknownVersion
+		return "", fmt.Errorf("server health check failed: %w", err)
 	}
-	serverVersion := healthCheckResult.GetVersion()
 
-	return serverVersion
+	return healthCheckResult.GetVersion(), nil
 }
 
 func removeLeadingNonNumeric(versionStr string) string {
@@ -64,10 +61,15 @@ func ParseVersion(versionStr string) (*Version, error) {
 }
 
 func IsCompatible(clientVersion, serverVersion string) bool {
+	return isCompatible(slog.Default(), clientVersion, serverVersion)
+}
+
+// isCompatible is IsCompatible with an explicit logger, so warnings from the
+// version check reach the logger configured on Config.
+func isCompatible(logger *slog.Logger, clientVersion, serverVersion string) bool {
 	if clientVersion == serverVersion {
 		return true
 	}
-	logger := slog.Default()
 	client, err := ParseVersion(clientVersion)
 	if err != nil {
 		logger.Warn("Unable to compare versions", "err", err)
