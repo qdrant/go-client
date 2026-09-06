@@ -176,8 +176,9 @@ func (c *Config) getRateLimitInterceptor() grpc.DialOption {
 			parsed, parseErr := strconv.Atoi(values[0])
 			if parseErr == nil {
 				return &QdrantResourceExhaustedError{
-					st.Message(),
-					parsed,
+					Reason:      st.Message(),
+					RetryAfterS: parsed,
+					err:         err,
 				}
 			}
 			return errors.Join(fmt.Errorf("parse retry-after header %q: %w", values[0], parseErr), err)
