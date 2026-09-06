@@ -93,7 +93,9 @@ const backoffBase = 2.0
 // backoffDuration computes an exponential backoff with full jitter.
 func (rc *RetryConfig) backoffDuration(attempt uint) time.Duration {
 	exp := math.Pow(backoffBase, float64(attempt))
-	backoff := min(time.Duration(float64(rc.baseBackoff())*exp), rc.maxBackoff())
+	// Clamp in float64 before converting: past roughly 2^37 the product exceeds
+	// int64 and the Duration conversion would wrap to a negative value.
+	backoff := time.Duration(min(float64(rc.baseBackoff())*exp, float64(rc.maxBackoff())))
 	// Full jitter: uniform random in [0, backoff).
 	if backoff > 0 {
 		backoff = time.Duration(rand.Int64N(int64(backoff)))
