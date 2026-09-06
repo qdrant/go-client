@@ -2,7 +2,6 @@ package qdrant
 
 import (
 	"fmt"
-	"log/slog"
 	"runtime/debug"
 
 	"google.golang.org/grpc"
@@ -62,13 +61,14 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 	newGrpcClientFromConn := NewGrpcClientFromConn(conn)
 
 	if !config.SkipCompatibilityCheck {
-		serverVersion := getServerVersion(newGrpcClientFromConn, config.getVersionCheckTimeout())
-		logger := slog.Default()
-		if serverVersion == unknownVersion {
-			logger.Warn("Failed to obtain server version. " +
-				"Unable to check client-server compatibility. " +
-				"Set SkipCompatibilityCheck=true to skip version check.")
-		} else if !IsCompatible(clientVersion, serverVersion) {
+		logger := config.getLogger()
+		serverVersion, err := getServerVersion(newGrpcClientFromConn, config.getVersionCheckTimeout())
+		if err != nil {
+			logger.Warn("Failed to obtain server version. "+
+				"Unable to check client-server compatibility. "+
+				"Set SkipCompatibilityCheck=true to skip version check.",
+				"err", err)
+		} else if !isCompatible(logger, clientVersion, serverVersion) {
 			logger.Warn("Client version is not compatible with server version. "+
 				"Major versions should match and minor version difference must not exceed 1. "+
 				"Set SkipCompatibilityCheck=true to skip version check.",

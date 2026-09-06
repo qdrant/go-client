@@ -1,9 +1,19 @@
 package qdrant_test
 
 import (
+	"bytes"
+	"log/slog"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/qdrant/go-client/qdrant"
+)
+
+const (
+	// Nothing listens on port 1 locally, so the dial is refused right away.
+	unreachablePort     = 1
+	versionProbeTimeout = 100 * time.Millisecond
 )
 
 func TestParseVersion(t *testing.T) {
@@ -64,6 +74,26 @@ func TestIsCompatible(t *testing.T) {
 		result := qdrant.IsCompatible(clientVersion, serverVersion)
 		if result != test.expected {
 			t.Errorf("IsCompatible(%q, %q) = %v, want %v", clientVersion, serverVersion, result, test.expected)
+		}
+	}
+}
+
+func TestNewGrpcClientLogsVersionProbeFailure(t *testing.T) {
+	var buf bytes.Buffer
+	client, err := qdrant.NewGrpcClient(&qdrant.Config{
+		Port:                unreachablePort,
+		VersionCheckTimeout: versionProbeTimeout,
+		Logger:              slog.New(slog.NewTextHandler(&buf, nil)),
+	})
+	if err != nil {
+		t.Fatalf("NewGrpcClient() error = %v", err)
+	}
+	t.Cleanup(func() { _ = client.Close() })
+
+	got := buf.String()
+	for _, want := range []string{"Failed to obtain server version", "server health check failed"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("log output missing %q, got: %q", want, got)
 		}
 	}
 }
