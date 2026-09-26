@@ -1,156 +1,158 @@
-package qdrant
+package qdrant_test
 
 import (
 	"encoding/base64"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/qdrant/go-client/qdrant"
 )
 
 func TestNewValue_Primitives(t *testing.T) {
 	// nil
-	val, err := NewValue(nil)
+	val, err := qdrant.NewValue(nil)
 	require.NoError(t, err)
-	require.Equal(t, NullValue_NULL_VALUE, val.GetNullValue())
+	require.Equal(t, qdrant.NullValue_NULL_VALUE, val.GetNullValue())
 
 	// bool
-	val, err = NewValue(true)
+	val, err = qdrant.NewValue(true)
 	require.NoError(t, err)
 	require.True(t, val.GetBoolValue())
 
 	// signed ints
-	val, err = NewValue(int(42))
+	val, err = qdrant.NewValue(int(42))
 	require.NoError(t, err)
 	require.Equal(t, int64(42), val.GetIntegerValue())
 
-	val, err = NewValue(int8(-8))
+	val, err = qdrant.NewValue(int8(-8))
 	require.NoError(t, err)
 	require.Equal(t, int64(-8), val.GetIntegerValue())
 
-	val, err = NewValue(int16(-16))
+	val, err = qdrant.NewValue(int16(-16))
 	require.NoError(t, err)
 	require.Equal(t, int64(-16), val.GetIntegerValue())
 
-	val, err = NewValue(int32(-32))
+	val, err = qdrant.NewValue(int32(-32))
 	require.NoError(t, err)
 	require.Equal(t, int64(-32), val.GetIntegerValue())
 
-	val, err = NewValue(int64(-64))
+	val, err = qdrant.NewValue(int64(-64))
 	require.NoError(t, err)
 	require.Equal(t, int64(-64), val.GetIntegerValue())
 
 	// unsigned ints
-	val, err = NewValue(uint(100))
+	val, err = qdrant.NewValue(uint(100))
 	require.NoError(t, err)
 	require.Equal(t, int64(100), val.GetIntegerValue())
 
-	val, err = NewValue(uint8(255))
+	val, err = qdrant.NewValue(uint8(255))
 	require.NoError(t, err)
 	require.Equal(t, int64(255), val.GetIntegerValue())
 
-	val, err = NewValue(uint16(65535))
+	val, err = qdrant.NewValue(uint16(65535))
 	require.NoError(t, err)
 	require.Equal(t, int64(65535), val.GetIntegerValue())
 
-	val, err = NewValue(uint32(100000))
+	val, err = qdrant.NewValue(uint32(100000))
 	require.NoError(t, err)
 	require.Equal(t, int64(100000), val.GetIntegerValue())
 
-	val, err = NewValue(uint64(5000000))
+	val, err = qdrant.NewValue(uint64(5000000))
 	require.NoError(t, err)
 	require.Equal(t, int64(5000000), val.GetIntegerValue())
 
 	// floats
-	val, err = NewValue(float32(3.14))
+	val, err = qdrant.NewValue(float32(3.14))
 	require.NoError(t, err)
 	require.InDelta(t, float64(float32(3.14)), val.GetDoubleValue(), 0.0001)
 
-	val, err = NewValue(float64(2.71828))
+	val, err = qdrant.NewValue(float64(2.71828))
 	require.NoError(t, err)
-	require.Equal(t, 2.71828, val.GetDoubleValue())
+	require.InEpsilon(t, 2.71828, val.GetDoubleValue(), 1e-9)
 
 	// string
-	val, err = NewValue("hello world")
+	val, err = qdrant.NewValue("hello world")
 	require.NoError(t, err)
 	require.Equal(t, "hello world", val.GetStringValue())
 
 	// []byte (base64)
 	bytesInput := []byte("binary data")
-	val, err = NewValue(bytesInput)
+	val, err = qdrant.NewValue(bytesInput)
 	require.NoError(t, err)
 	require.Equal(t, base64.StdEncoding.EncodeToString(bytesInput), val.GetStringValue())
 }
 
 func TestNewValue_ProtobufPointers(t *testing.T) {
 	// *Value
-	existing := NewValueInt(123)
-	val, err := NewValue(existing)
+	existing := qdrant.NewValueInt(123)
+	val, err := qdrant.NewValue(existing)
 	require.NoError(t, err)
 	require.Same(t, existing, val)
 
-	var nilVal *Value
-	val, err = NewValue(nilVal)
+	var nilVal *qdrant.Value
+	val, err = qdrant.NewValue(nilVal)
 	require.NoError(t, err)
-	require.Equal(t, NullValue_NULL_VALUE, val.GetNullValue())
+	require.Equal(t, qdrant.NullValue_NULL_VALUE, val.GetNullValue())
 
 	// *Struct
-	existingStruct := &Struct{Fields: map[string]*Value{"k": NewValueString("v")}}
-	val, err = NewValue(existingStruct)
+	existingStruct := &qdrant.Struct{Fields: map[string]*qdrant.Value{"k": qdrant.NewValueString("v")}}
+	val, err = qdrant.NewValue(existingStruct)
 	require.NoError(t, err)
 	require.Equal(t, existingStruct, val.GetStructValue())
 
-	var nilStruct *Struct
-	val, err = NewValue(nilStruct)
+	var nilStruct *qdrant.Struct
+	val, err = qdrant.NewValue(nilStruct)
 	require.NoError(t, err)
-	require.Equal(t, NullValue_NULL_VALUE, val.GetNullValue())
+	require.Equal(t, qdrant.NullValue_NULL_VALUE, val.GetNullValue())
 
 	// *ListValue
-	existingList := &ListValue{Values: []*Value{NewValueString("item")}}
-	val, err = NewValue(existingList)
+	existingList := &qdrant.ListValue{Values: []*qdrant.Value{qdrant.NewValueString("item")}}
+	val, err = qdrant.NewValue(existingList)
 	require.NoError(t, err)
 	require.Equal(t, existingList, val.GetListValue())
 
-	var nilList *ListValue
-	val, err = NewValue(nilList)
+	var nilList *qdrant.ListValue
+	val, err = qdrant.NewValue(nilList)
 	require.NoError(t, err)
-	require.Equal(t, NullValue_NULL_VALUE, val.GetNullValue())
+	require.Equal(t, qdrant.NullValue_NULL_VALUE, val.GetNullValue())
 }
 
 func TestNewValue_Slices(t *testing.T) {
 	// []string
-	val, err := NewValue([]string{"a", "b"})
+	val, err := qdrant.NewValue([]string{"a", "b"})
 	require.NoError(t, err)
 	require.Len(t, val.GetListValue().GetValues(), 2)
 	require.Equal(t, "a", val.GetListValue().GetValues()[0].GetStringValue())
 	require.Equal(t, "b", val.GetListValue().GetValues()[1].GetStringValue())
 
 	// []bool
-	val, err = NewValue([]bool{true, false})
+	val, err = qdrant.NewValue([]bool{true, false})
 	require.NoError(t, err)
 	require.Len(t, val.GetListValue().GetValues(), 2)
 	require.True(t, val.GetListValue().GetValues()[0].GetBoolValue())
 	require.False(t, val.GetListValue().GetValues()[1].GetBoolValue())
 
 	// []int
-	val, err = NewValue([]int{1, 2, 3})
+	val, err = qdrant.NewValue([]int{1, 2, 3})
 	require.NoError(t, err)
 	require.Len(t, val.GetListValue().GetValues(), 3)
 	require.Equal(t, int64(1), val.GetListValue().GetValues()[0].GetIntegerValue())
 
 	// []int64
-	val, err = NewValue([]int64{10, 20})
+	val, err = qdrant.NewValue([]int64{10, 20})
 	require.NoError(t, err)
 	require.Len(t, val.GetListValue().GetValues(), 2)
 	require.Equal(t, int64(10), val.GetListValue().GetValues()[0].GetIntegerValue())
 
 	// []float64
-	val, err = NewValue([]float64{1.1, 2.2})
+	val, err = qdrant.NewValue([]float64{1.1, 2.2})
 	require.NoError(t, err)
 	require.Len(t, val.GetListValue().GetValues(), 2)
-	require.Equal(t, 1.1, val.GetListValue().GetValues()[0].GetDoubleValue())
+	require.InEpsilon(t, 1.1, val.GetListValue().GetValues()[0].GetDoubleValue(), 1e-9)
 
 	// []*Value
-	val, err = NewValue([]*Value{NewValueInt(7), NewValueString("eight")})
+	val, err = qdrant.NewValue([]*qdrant.Value{qdrant.NewValueInt(7), qdrant.NewValueString("eight")})
 	require.NoError(t, err)
 	require.Len(t, val.GetListValue().GetValues(), 2)
 	require.Equal(t, int64(7), val.GetListValue().GetValues()[0].GetIntegerValue())
@@ -180,8 +182,8 @@ func TestNewValueMap_Complex(t *testing.T) {
 		"nested":  map[string]any{"sub_key": "sub_value"},
 	}
 
-	vm := NewValueMap(jsonMap)
-	require.Equal(t, NullValue_NULL_VALUE, vm["null"].GetNullValue())
+	vm := qdrant.NewValueMap(jsonMap)
+	require.Equal(t, qdrant.NullValue_NULL_VALUE, vm["null"].GetNullValue())
 	require.True(t, vm["bool"].GetBoolValue())
 	require.Equal(t, int64(42), vm["int"].GetIntegerValue())
 	require.Equal(t, int64(8), vm["int8"].GetIntegerValue())
@@ -202,12 +204,12 @@ func TestNewValueMap_Complex(t *testing.T) {
 
 func TestNewValue_InvalidType(t *testing.T) {
 	type CustomStruct struct{}
-	_, err := NewValue(CustomStruct{})
+	_, err := qdrant.NewValue(CustomStruct{})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "invalid type")
 
 	invalidUTF8 := string([]byte{0xff, 0xfe, 0xfd})
-	_, err = NewValue(invalidUTF8)
+	_, err = qdrant.NewValue(invalidUTF8)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "invalid UTF-8")
 }

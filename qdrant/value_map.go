@@ -90,6 +90,38 @@ func NewValue(v any) (*Value, error) {
 		return NewValueList(v), nil
 	case bool:
 		return NewValueBool(v), nil
+	case string:
+		if !utf8.ValidString(v) {
+			return nil, fmt.Errorf("invalid UTF-8 in string: %q", v)
+		}
+		return NewValueString(v), nil
+	case []byte:
+		s := base64.StdEncoding.EncodeToString(v)
+		return NewValueString(s), nil
+	case map[string]interface{}:
+		v2, err := NewStruct(v)
+		if err != nil {
+			return nil, err
+		}
+		return NewValueStruct(v2), nil
+	case []interface{}:
+		v2, err := NewListValue(v)
+		if err != nil {
+			return nil, err
+		}
+		return NewValueList(v2), nil
+	case []*Value:
+		return NewValueFromList(v...), nil
+	default:
+		return newValueNumeric(v)
+	}
+}
+
+// newValueNumeric converts numeric scalars and typed slices into a *Value.
+// Anything else is delegated to newValueTypedSlice, which reports the
+// invalid-type error for genuinely unsupported values.
+func newValueNumeric(v any) (*Value, error) {
+	switch v := v.(type) {
 	case int:
 		return NewValueInt(int64(v)), nil
 	case int8:
@@ -114,26 +146,14 @@ func NewValue(v any) (*Value, error) {
 		return NewValueDouble(float64(v)), nil
 	case float64:
 		return NewValueDouble(v), nil
-	case string:
-		if !utf8.ValidString(v) {
-			return nil, fmt.Errorf("invalid UTF-8 in string: %q", v)
-		}
-		return NewValueString(v), nil
-	case []byte:
-		s := base64.StdEncoding.EncodeToString(v)
-		return NewValueString(s), nil
-	case map[string]interface{}:
-		v2, err := NewStruct(v)
-		if err != nil {
-			return nil, err
-		}
-		return NewValueStruct(v2), nil
-	case []interface{}:
-		v2, err := NewListValue(v)
-		if err != nil {
-			return nil, err
-		}
-		return NewValueList(v2), nil
+	default:
+		return newValueTypedSlice(v)
+	}
+}
+
+// newValueTypedSlice converts typed Go slices into a ListValue.
+func newValueTypedSlice(v any) (*Value, error) {
+	switch v := v.(type) {
 	case []string:
 		list := make([]*Value, len(v))
 		for i, item := range v {
@@ -144,82 +164,63 @@ func NewValue(v any) (*Value, error) {
 		}
 		return NewValueFromList(list...), nil
 	case []bool:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			list[i] = NewValueBool(item)
-		}
-		return NewValueFromList(list...), nil
+		return newValueBoolSlice(v), nil
 	case []int:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			list[i] = NewValueInt(int64(item))
-		}
-		return NewValueFromList(list...), nil
+		return newValueIntSlice(v), nil
 	case []int8:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			list[i] = NewValueInt(int64(item))
-		}
-		return NewValueFromList(list...), nil
+		return newValueIntSlice(v), nil
 	case []int16:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			list[i] = NewValueInt(int64(item))
-		}
-		return NewValueFromList(list...), nil
+		return newValueIntSlice(v), nil
 	case []int32:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			list[i] = NewValueInt(int64(item))
-		}
-		return NewValueFromList(list...), nil
+		return newValueIntSlice(v), nil
 	case []int64:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			list[i] = NewValueInt(item)
-		}
-		return NewValueFromList(list...), nil
+		return newValueIntSlice(v), nil
 	case []uint:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			list[i] = NewValueInt(int64(item))
-		}
-		return NewValueFromList(list...), nil
+		return newValueIntSlice(v), nil
 	case []uint16:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			list[i] = NewValueInt(int64(item))
-		}
-		return NewValueFromList(list...), nil
+		return newValueIntSlice(v), nil
 	case []uint32:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			list[i] = NewValueInt(int64(item))
-		}
-		return NewValueFromList(list...), nil
+		return newValueIntSlice(v), nil
 	case []uint64:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			list[i] = NewValueInt(int64(item))
-		}
-		return NewValueFromList(list...), nil
+		return newValueIntSlice(v), nil
 	case []float32:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			list[i] = NewValueDouble(float64(item))
-		}
-		return NewValueFromList(list...), nil
+		return newValueFloatSlice(v), nil
 	case []float64:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			list[i] = NewValueDouble(item)
-		}
-		return NewValueFromList(list...), nil
-	case []*Value:
-		return NewValueFromList(v...), nil
+		return newValueFloatSlice(v), nil
 	default:
 		return nil, fmt.Errorf("invalid type: %T", v)
 	}
+}
+
+// newValueIntSlice converts a typed integer slice into a ListValue
+// where each element is stored as an IntegerValue.
+func newValueIntSlice[T int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](
+	items []T,
+) *Value {
+	list := make([]*Value, len(items))
+	for i, item := range items {
+		list[i] = NewValueInt(int64(item))
+	}
+	return NewValueFromList(list...)
+}
+
+// newValueFloatSlice converts a typed float slice into a ListValue
+// where each element is stored as a DoubleValue.
+func newValueFloatSlice[T float32 | float64](items []T) *Value {
+	list := make([]*Value, len(items))
+	for i, item := range items {
+		list[i] = NewValueDouble(float64(item))
+	}
+	return NewValueFromList(list...)
+}
+
+// newValueBoolSlice converts a bool slice into a ListValue.
+func newValueBoolSlice(items []bool) *Value {
+	list := make([]*Value, len(items))
+	for i, item := range items {
+		list[i] = NewValueBool(item)
+	}
+	return NewValueFromList(list...)
 }
 
 // Constructs a new null Value.
