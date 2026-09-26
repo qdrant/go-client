@@ -23,6 +23,7 @@ package qdrant
 import (
 	"encoding/base64"
 	"fmt"
+	"math"
 	"unicode/utf8"
 )
 
@@ -35,16 +36,16 @@ import (
 //	║ nil                                                    │ stored as NullValue                        ║
 //	║ bool                                                   │ stored as BoolValue                        ║
 //	║ int, int8, int16, int32, int64                         │ stored as IntegerValue                     ║
-//	║ uint, uint8, uint16, uint32, uint64                    │ stored as IntegerValue                     ║
+//	║ uint, uint8, uint16, uint32, uint64                    │ stored as IntegerValue (must fit in int64) ║
 //	║ float32, float64                                       │ stored as DoubleValue                      ║
-//	║ string                                                 │ stored as StringValue; must be valid UTF-8 ║
-//	║ []byte                                                 │ stored as StringValue; base64-encoded      ║
+//	║ string                                                 │ stored as StringValue (must be valid UTF-8)║
+//	║ []byte                                                 │ stored as StringValue (base64-encoded)     ║
 //	║ *Value                                                 │ returned as-is (nil as NullValue)          ║
 //	║ *Struct                                                │ stored as StructValue                      ║
 //	║ *ListValue                                             │ stored as ListValue                        ║
 //	║ map[string]interface{}                                 │ stored as StructValue                      ║
 //	║ []interface{}, []string, []bool, []int, []int64, etc.  │ stored as ListValue                        ║
-//	║ []*Value                                               │ stored as ListValue                        ║
+//	║ []*Value                                               │ stored as ListValue (nil items as Null)    ║
 //	╚════════════════════════════════════════════════════════╧════════════════════════════════════════════╝
 func NewValueMap(inputMap map[string]any) map[string]*Value {
 	valueMap, err := TryValueMap(inputMap)
@@ -69,6 +70,8 @@ func TryValueMap(inputMap map[string]any) (map[string]*Value, error) {
 }
 
 // Constructs a *Value from a generic Go interface.
+//
+//nolint:gocyclo,cyclop,funlen // A flat type switch with one case per supported type.
 func NewValue(v any) (*Value, error) {
 	switch v := v.(type) {
 	case nil:
@@ -90,6 +93,33 @@ func NewValue(v any) (*Value, error) {
 		return NewValueList(v), nil
 	case bool:
 		return NewValueBool(v), nil
+	case int:
+		return NewValueInt(int64(v)), nil
+	case int8:
+		return NewValueInt(int64(v)), nil
+	case int16:
+		return NewValueInt(int64(v)), nil
+	case int32:
+		return NewValueInt(int64(v)), nil
+	case int64:
+		return NewValueInt(v), nil
+	case uint:
+		return NewValue(uint64(v))
+	case uint8:
+		return NewValueInt(int64(v)), nil
+	case uint16:
+		return NewValueInt(int64(v)), nil
+	case uint32:
+		return NewValueInt(int64(v)), nil
+	case uint64:
+		if v > math.MaxInt64 {
+			return nil, fmt.Errorf("uint64 value %d overflows int64", v)
+		}
+		return NewValueInt(int64(v)), nil
+	case float32:
+		return NewValueDouble(float64(v)), nil
+	case float64:
+		return NewValueDouble(v), nil
 	case string:
 		if !utf8.ValidString(v) {
 			return nil, fmt.Errorf("invalid UTF-8 in string: %q", v)
@@ -105,122 +135,51 @@ func NewValue(v any) (*Value, error) {
 		}
 		return NewValueStruct(v2), nil
 	case []interface{}:
-		v2, err := NewListValue(v)
-		if err != nil {
-			return nil, err
-		}
-		return NewValueList(v2), nil
-	case []*Value:
-		return NewValueFromList(v...), nil
-	default:
-		return newValueNumeric(v)
-	}
-}
-
-// newValueNumeric converts numeric scalars and typed slices into a *Value.
-// Anything else is delegated to newValueTypedSlice, which reports the
-// invalid-type error for genuinely unsupported values.
-func newValueNumeric(v any) (*Value, error) {
-	switch v := v.(type) {
-	case int:
-		return NewValueInt(int64(v)), nil
-	case int8:
-		return NewValueInt(int64(v)), nil
-	case int16:
-		return NewValueInt(int64(v)), nil
-	case int32:
-		return NewValueInt(int64(v)), nil
-	case int64:
-		return NewValueInt(v), nil
-	case uint:
-		return NewValueInt(int64(v)), nil
-	case uint8:
-		return NewValueInt(int64(v)), nil
-	case uint16:
-		return NewValueInt(int64(v)), nil
-	case uint32:
-		return NewValueInt(int64(v)), nil
-	case uint64:
-		return NewValueInt(int64(v)), nil
-	case float32:
-		return NewValueDouble(float64(v)), nil
-	case float64:
-		return NewValueDouble(v), nil
-	default:
-		return newValueTypedSlice(v)
-	}
-}
-
-// newValueTypedSlice converts typed Go slices into a ListValue.
-func newValueTypedSlice(v any) (*Value, error) {
-	switch v := v.(type) {
+		return newValueFromSlice(v)
 	case []string:
-		list := make([]*Value, len(v))
-		for i, item := range v {
-			if !utf8.ValidString(item) {
-				return nil, fmt.Errorf("invalid UTF-8 in string: %q", item)
-			}
-			list[i] = NewValueString(item)
-		}
-		return NewValueFromList(list...), nil
+		return newValueFromSlice(v)
 	case []bool:
-		return newValueBoolSlice(v), nil
+		return newValueFromSlice(v)
 	case []int:
-		return newValueIntSlice(v), nil
+		return newValueFromSlice(v)
 	case []int8:
-		return newValueIntSlice(v), nil
+		return newValueFromSlice(v)
 	case []int16:
-		return newValueIntSlice(v), nil
+		return newValueFromSlice(v)
 	case []int32:
-		return newValueIntSlice(v), nil
+		return newValueFromSlice(v)
 	case []int64:
-		return newValueIntSlice(v), nil
+		return newValueFromSlice(v)
 	case []uint:
-		return newValueIntSlice(v), nil
+		return newValueFromSlice(v)
 	case []uint16:
-		return newValueIntSlice(v), nil
+		return newValueFromSlice(v)
 	case []uint32:
-		return newValueIntSlice(v), nil
+		return newValueFromSlice(v)
 	case []uint64:
-		return newValueIntSlice(v), nil
+		return newValueFromSlice(v)
 	case []float32:
-		return newValueFloatSlice(v), nil
+		return newValueFromSlice(v)
 	case []float64:
-		return newValueFloatSlice(v), nil
+		return newValueFromSlice(v)
+	case []*Value:
+		return newValueFromSlice(v)
 	default:
 		return nil, fmt.Errorf("invalid type: %T", v)
 	}
 }
 
-// newValueIntSlice converts a typed integer slice into a ListValue
-// where each element is stored as an IntegerValue.
-func newValueIntSlice[T int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](
-	items []T,
-) *Value {
+// Constructs a list Value by converting each item with NewValue.
+func newValueFromSlice[T any](items []T) (*Value, error) {
 	list := make([]*Value, len(items))
 	for i, item := range items {
-		list[i] = NewValueInt(int64(item))
+		value, err := NewValue(item)
+		if err != nil {
+			return nil, err
+		}
+		list[i] = value
 	}
-	return NewValueFromList(list...)
-}
-
-// newValueFloatSlice converts a typed float slice into a ListValue
-// where each element is stored as a DoubleValue.
-func newValueFloatSlice[T float32 | float64](items []T) *Value {
-	list := make([]*Value, len(items))
-	for i, item := range items {
-		list[i] = NewValueDouble(float64(item))
-	}
-	return NewValueFromList(list...)
-}
-
-// newValueBoolSlice converts a bool slice into a ListValue.
-func newValueBoolSlice(items []bool) *Value {
-	list := make([]*Value, len(items))
-	for i, item := range items {
-		list[i] = NewValueBool(item)
-	}
-	return NewValueFromList(list...)
+	return NewValueFromList(list...), nil
 }
 
 // Constructs a new null Value.
