@@ -29,19 +29,23 @@ import (
 // Converts a map of string to any to a map of string to *grpc.Value
 // NOTE: This function panics if the conversion fails. Use TryValueMap() to have errors returned.
 //
-//	╔════════════════════════╤════════════════════════════════════════════╗
-//	║ Go type                │ Conversion                                 ║
-//	╠════════════════════════╪════════════════════════════════════════════╣
-//	║ nil                    │ stored as NullValue                        ║
-//	║ bool                   │ stored as BoolValue                        ║
-//	║ int, int32, int64      │ stored as IntegerValue                     ║
-//	║ uint, uint32, uint64   │ stored as IntegerValue                     ║
-//	║ float32, float64       │ stored as DoubleValue                      ║
-//	║ string                 │ stored as StringValue; must be valid UTF-8 ║
-//	║ []byte                 │ stored as StringValue; base64-encoded      ║
-//	║ map[string]interface{} │ stored as StructValue                      ║
-//	║ []interface{}          │ stored as ListValue                        ║
-//	╚════════════════════════╧════════════════════════════════════════════╝
+//	╔════════════════════════════════════════════════════════╤════════════════════════════════════════════╗
+//	║ Go type                                                │ Conversion                                 ║
+//	╠════════════════════════════════════════════════════════╪════════════════════════════════════════════╣
+//	║ nil                                                    │ stored as NullValue                        ║
+//	║ bool                                                   │ stored as BoolValue                        ║
+//	║ int, int8, int16, int32, int64                         │ stored as IntegerValue                     ║
+//	║ uint, uint8, uint16, uint32, uint64                    │ stored as IntegerValue                     ║
+//	║ float32, float64                                       │ stored as DoubleValue                      ║
+//	║ string                                                 │ stored as StringValue; must be valid UTF-8 ║
+//	║ []byte                                                 │ stored as StringValue; base64-encoded      ║
+//	║ *Value                                                 │ returned as-is (nil as NullValue)          ║
+//	║ *Struct                                                │ stored as StructValue                      ║
+//	║ *ListValue                                             │ stored as ListValue                        ║
+//	║ map[string]interface{}                                 │ stored as StructValue                      ║
+//	║ []interface{}, []string, []bool, []int, []int64, etc.  │ stored as ListValue                        ║
+//	║ []*Value                                               │ stored as ListValue                        ║
+//	╚════════════════════════════════════════════════════════╧════════════════════════════════════════════╝
 func NewValueMap(inputMap map[string]any) map[string]*Value {
 	valueMap, err := TryValueMap(inputMap)
 	if err != nil {
@@ -69,15 +73,38 @@ func NewValue(v any) (*Value, error) {
 	switch v := v.(type) {
 	case nil:
 		return NewValueNull(), nil
+	case *Value:
+		if v == nil {
+			return NewValueNull(), nil
+		}
+		return v, nil
+	case *Struct:
+		if v == nil {
+			return NewValueNull(), nil
+		}
+		return NewValueStruct(v), nil
+	case *ListValue:
+		if v == nil {
+			return NewValueNull(), nil
+		}
+		return NewValueList(v), nil
 	case bool:
 		return NewValueBool(v), nil
 	case int:
+		return NewValueInt(int64(v)), nil
+	case int8:
+		return NewValueInt(int64(v)), nil
+	case int16:
 		return NewValueInt(int64(v)), nil
 	case int32:
 		return NewValueInt(int64(v)), nil
 	case int64:
 		return NewValueInt(v), nil
 	case uint:
+		return NewValueInt(int64(v)), nil
+	case uint8:
+		return NewValueInt(int64(v)), nil
+	case uint16:
 		return NewValueInt(int64(v)), nil
 	case uint32:
 		return NewValueInt(int64(v)), nil
@@ -86,7 +113,7 @@ func NewValue(v any) (*Value, error) {
 	case float32:
 		return NewValueDouble(float64(v)), nil
 	case float64:
-		return NewValueDouble(float64(v)), nil
+		return NewValueDouble(v), nil
 	case string:
 		if !utf8.ValidString(v) {
 			return nil, fmt.Errorf("invalid UTF-8 in string: %q", v)
@@ -107,6 +134,89 @@ func NewValue(v any) (*Value, error) {
 			return nil, err
 		}
 		return NewValueList(v2), nil
+	case []string:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			if !utf8.ValidString(item) {
+				return nil, fmt.Errorf("invalid UTF-8 in string: %q", item)
+			}
+			list[i] = NewValueString(item)
+		}
+		return NewValueFromList(list...), nil
+	case []bool:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			list[i] = NewValueBool(item)
+		}
+		return NewValueFromList(list...), nil
+	case []int:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			list[i] = NewValueInt(int64(item))
+		}
+		return NewValueFromList(list...), nil
+	case []int8:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			list[i] = NewValueInt(int64(item))
+		}
+		return NewValueFromList(list...), nil
+	case []int16:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			list[i] = NewValueInt(int64(item))
+		}
+		return NewValueFromList(list...), nil
+	case []int32:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			list[i] = NewValueInt(int64(item))
+		}
+		return NewValueFromList(list...), nil
+	case []int64:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			list[i] = NewValueInt(item)
+		}
+		return NewValueFromList(list...), nil
+	case []uint:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			list[i] = NewValueInt(int64(item))
+		}
+		return NewValueFromList(list...), nil
+	case []uint16:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			list[i] = NewValueInt(int64(item))
+		}
+		return NewValueFromList(list...), nil
+	case []uint32:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			list[i] = NewValueInt(int64(item))
+		}
+		return NewValueFromList(list...), nil
+	case []uint64:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			list[i] = NewValueInt(int64(item))
+		}
+		return NewValueFromList(list...), nil
+	case []float32:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			list[i] = NewValueDouble(float64(item))
+		}
+		return NewValueFromList(list...), nil
+	case []float64:
+		list := make([]*Value, len(v))
+		for i, item := range v {
+			list[i] = NewValueDouble(item)
+		}
+		return NewValueFromList(list...), nil
+	case []*Value:
+		return NewValueFromList(v...), nil
 	default:
 		return nil, fmt.Errorf("invalid type: %T", v)
 	}
