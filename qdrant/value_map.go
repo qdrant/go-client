@@ -23,25 +23,30 @@ package qdrant
 import (
 	"encoding/base64"
 	"fmt"
+	"math"
 	"unicode/utf8"
 )
 
 // Converts a map of string to any to a map of string to *grpc.Value
 // NOTE: This function panics if the conversion fails. Use TryValueMap() to have errors returned.
 //
-//	╔════════════════════════╤════════════════════════════════════════════╗
-//	║ Go type                │ Conversion                                 ║
-//	╠════════════════════════╪════════════════════════════════════════════╣
-//	║ nil                    │ stored as NullValue                        ║
-//	║ bool                   │ stored as BoolValue                        ║
-//	║ int, int32, int64      │ stored as IntegerValue                     ║
-//	║ uint, uint32, uint64   │ stored as IntegerValue                     ║
-//	║ float32, float64       │ stored as DoubleValue                      ║
-//	║ string                 │ stored as StringValue; must be valid UTF-8 ║
-//	║ []byte                 │ stored as StringValue; base64-encoded      ║
-//	║ map[string]interface{} │ stored as StructValue                      ║
-//	║ []interface{}          │ stored as ListValue                        ║
-//	╚════════════════════════╧════════════════════════════════════════════╝
+//	╔════════════════════════════════════════════════════════╤════════════════════════════════════════════╗
+//	║ Go type                                                │ Conversion                                 ║
+//	╠════════════════════════════════════════════════════════╪════════════════════════════════════════════╣
+//	║ nil                                                    │ stored as NullValue                        ║
+//	║ bool                                                   │ stored as BoolValue                        ║
+//	║ int, int8, int16, int32, int64                         │ stored as IntegerValue                     ║
+//	║ uint, uint8, uint16, uint32, uint64                    │ stored as IntegerValue (must fit in int64) ║
+//	║ float32, float64                                       │ stored as DoubleValue                      ║
+//	║ string                                                 │ stored as StringValue (must be valid UTF-8)║
+//	║ []byte                                                 │ stored as StringValue (base64-encoded)     ║
+//	║ *Value                                                 │ returned as-is (nil as NullValue)          ║
+//	║ *Struct                                                │ stored as StructValue                      ║
+//	║ *ListValue                                             │ stored as ListValue                        ║
+//	║ map[string]interface{}                                 │ stored as StructValue                      ║
+//	║ []interface{}, []string, []bool, []int, []int64, etc.  │ stored as ListValue                        ║
+//	║ []*Value                                               │ stored as ListValue (nil items as Null)    ║
+//	╚════════════════════════════════════════════════════════╧════════════════════════════════════════════╝
 func NewValueMap(inputMap map[string]any) map[string]*Value {
 	valueMap, err := TryValueMap(inputMap)
 	if err != nil {
@@ -65,28 +70,56 @@ func TryValueMap(inputMap map[string]any) (map[string]*Value, error) {
 }
 
 // Constructs a *Value from a generic Go interface.
+//
+//nolint:gocyclo,cyclop,funlen // A flat type switch with one case per supported type.
 func NewValue(v any) (*Value, error) {
 	switch v := v.(type) {
 	case nil:
 		return NewValueNull(), nil
+	case *Value:
+		if v == nil {
+			return NewValueNull(), nil
+		}
+		return v, nil
+	case *Struct:
+		if v == nil {
+			return NewValueNull(), nil
+		}
+		return NewValueStruct(v), nil
+	case *ListValue:
+		if v == nil {
+			return NewValueNull(), nil
+		}
+		return NewValueList(v), nil
 	case bool:
 		return NewValueBool(v), nil
 	case int:
+		return NewValueInt(int64(v)), nil
+	case int8:
+		return NewValueInt(int64(v)), nil
+	case int16:
 		return NewValueInt(int64(v)), nil
 	case int32:
 		return NewValueInt(int64(v)), nil
 	case int64:
 		return NewValueInt(v), nil
 	case uint:
+		return NewValue(uint64(v))
+	case uint8:
+		return NewValueInt(int64(v)), nil
+	case uint16:
 		return NewValueInt(int64(v)), nil
 	case uint32:
 		return NewValueInt(int64(v)), nil
 	case uint64:
+		if v > math.MaxInt64 {
+			return nil, fmt.Errorf("uint64 value %d overflows int64", v)
+		}
 		return NewValueInt(int64(v)), nil
 	case float32:
 		return NewValueDouble(float64(v)), nil
 	case float64:
-		return NewValueDouble(float64(v)), nil
+		return NewValueDouble(v), nil
 	case string:
 		if !utf8.ValidString(v) {
 			return nil, fmt.Errorf("invalid UTF-8 in string: %q", v)
@@ -102,14 +135,51 @@ func NewValue(v any) (*Value, error) {
 		}
 		return NewValueStruct(v2), nil
 	case []interface{}:
-		v2, err := NewListValue(v)
-		if err != nil {
-			return nil, err
-		}
-		return NewValueList(v2), nil
+		return newValueFromSlice(v)
+	case []string:
+		return newValueFromSlice(v)
+	case []bool:
+		return newValueFromSlice(v)
+	case []int:
+		return newValueFromSlice(v)
+	case []int8:
+		return newValueFromSlice(v)
+	case []int16:
+		return newValueFromSlice(v)
+	case []int32:
+		return newValueFromSlice(v)
+	case []int64:
+		return newValueFromSlice(v)
+	case []uint:
+		return newValueFromSlice(v)
+	case []uint16:
+		return newValueFromSlice(v)
+	case []uint32:
+		return newValueFromSlice(v)
+	case []uint64:
+		return newValueFromSlice(v)
+	case []float32:
+		return newValueFromSlice(v)
+	case []float64:
+		return newValueFromSlice(v)
+	case []*Value:
+		return newValueFromSlice(v)
 	default:
 		return nil, fmt.Errorf("invalid type: %T", v)
 	}
+}
+
+// Constructs a list Value by converting each item with NewValue.
+func newValueFromSlice[T any](items []T) (*Value, error) {
+	list := make([]*Value, len(items))
+	for i, item := range items {
+		value, err := NewValue(item)
+		if err != nil {
+			return nil, err
+		}
+		list[i] = value
+	}
+	return NewValueFromList(list...), nil
 }
 
 // Constructs a new null Value.
