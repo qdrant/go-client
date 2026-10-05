@@ -139,7 +139,7 @@ func (c *Config) getTransportCreds() grpc.DialOption {
 //
 //nolint:lll
 func (c *Config) getMetadataInterceptor() grpc.DialOption {
-	return grpc.WithUnaryInterceptor(func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	return grpc.WithChainUnaryInterceptor(func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		var kvPairs []string
 		if c.APIKey != "" {
 			kvPairs = append(kvPairs, apiKeyHeader, c.APIKey)
@@ -151,6 +151,7 @@ func (c *Config) getMetadataInterceptor() grpc.DialOption {
 		return invoker(newCtx, method, req, reply, cc, opts...)
 	})
 }
+
 
 // Internal method.
 func (c *Config) getRateLimitInterceptor() grpc.DialOption {

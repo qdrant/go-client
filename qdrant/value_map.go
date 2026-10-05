@@ -43,7 +43,8 @@ import (
 //	║ *Value                                                 │ returned as-is (nil as NullValue)          ║
 //	║ *Struct                                                │ stored as StructValue                      ║
 //	║ *ListValue                                             │ stored as ListValue                        ║
-//	║ map[string]interface{}                                 │ stored as StructValue                      ║
+//	║ map[string]interface{}, map[string]string, etc.        │ stored as StructValue                      ║
+//	║ map[string]*Value                                      │ stored as StructValue                      ║
 //	║ []interface{}, []string, []bool, []int, []int64, etc.  │ stored as ListValue                        ║
 //	║ []*Value                                               │ stored as ListValue (nil items as Null)    ║
 //	╚════════════════════════════════════════════════════════╧════════════════════════════════════════════╝
@@ -134,6 +135,34 @@ func NewValue(v any) (*Value, error) {
 			return nil, err
 		}
 		return NewValueStruct(v2), nil
+	case map[string]*Value:
+		return NewValueFromFields(v), nil
+	case map[string]string:
+		return newValueFromMap(v)
+	case map[string]bool:
+		return newValueFromMap(v)
+	case map[string]int:
+		return newValueFromMap(v)
+	case map[string]int8:
+		return newValueFromMap(v)
+	case map[string]int16:
+		return newValueFromMap(v)
+	case map[string]int32:
+		return newValueFromMap(v)
+	case map[string]int64:
+		return newValueFromMap(v)
+	case map[string]uint:
+		return newValueFromMap(v)
+	case map[string]uint16:
+		return newValueFromMap(v)
+	case map[string]uint32:
+		return newValueFromMap(v)
+	case map[string]uint64:
+		return newValueFromMap(v)
+	case map[string]float32:
+		return newValueFromMap(v)
+	case map[string]float64:
+		return newValueFromMap(v)
 	case []interface{}:
 		return newValueFromSlice(v)
 	case []string:
@@ -180,6 +209,22 @@ func newValueFromSlice[T any](items []T) (*Value, error) {
 		list[i] = value
 	}
 	return NewValueFromList(list...), nil
+}
+
+// Constructs a struct Value by converting each map value with NewValue.
+func newValueFromMap[T any](m map[string]T) (*Value, error) {
+	fields := make(map[string]*Value, len(m))
+	for k, v := range m {
+		if !utf8.ValidString(k) {
+			return nil, fmt.Errorf("invalid UTF-8 in string: %q", k)
+		}
+		val, err := NewValue(v)
+		if err != nil {
+			return nil, err
+		}
+		fields[k] = val
+	}
+	return NewValueFromFields(fields), nil
 }
 
 // Constructs a new null Value.
@@ -262,3 +307,65 @@ func NewStruct(v map[string]interface{}) (*Struct, error) {
 	}
 	return x, nil
 }
+
+// AsInterface converts a *Value to a native Go value (nil, bool, int64, float64, string, []any, map[string]any).
+func (v *Value) AsInterface() any {
+	if v == nil {
+		return nil
+	}
+	switch k := v.Kind.(type) {
+	case *Value_NullValue:
+		return nil
+	case *Value_BoolValue:
+		return k.BoolValue
+	case *Value_IntegerValue:
+		return k.IntegerValue
+	case *Value_DoubleValue:
+		return k.DoubleValue
+	case *Value_StringValue:
+		return k.StringValue
+	case *Value_ListValue:
+		return k.ListValue.AsSlice()
+	case *Value_StructValue:
+		return k.StructValue.AsMap()
+	default:
+		return nil
+	}
+}
+
+// AsMap converts a *Struct to a native Go map[string]any.
+func (s *Struct) AsMap() map[string]any {
+	if s == nil {
+		return nil
+	}
+	res := make(map[string]any, len(s.Fields))
+	for k, v := range s.Fields {
+		res[k] = v.AsInterface()
+	}
+	return res
+}
+
+// AsSlice converts a *ListValue to a native Go []any slice.
+func (l *ListValue) AsSlice() []any {
+	if l == nil {
+		return nil
+	}
+	res := make([]any, len(l.Values))
+	for i, v := range l.Values {
+		res[i] = v.AsInterface()
+	}
+	return res
+}
+
+// ValueMapToMap converts a payload map[string]*Value to a native Go map[string]any.
+func ValueMapToMap(valueMap map[string]*Value) map[string]any {
+	if valueMap == nil {
+		return nil
+	}
+	res := make(map[string]any, len(valueMap))
+	for k, v := range valueMap {
+		res[k] = v.AsInterface()
+	}
+	return res
+}
+
