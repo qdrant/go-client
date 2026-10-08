@@ -313,7 +313,7 @@ func (v *Value) AsInterface() any {
 	if v == nil {
 		return nil
 	}
-	switch k := v.Kind.(type) {
+	switch k := v.GetKind().(type) {
 	case *Value_NullValue:
 		return nil
 	case *Value_BoolValue:
@@ -338,8 +338,8 @@ func (s *Struct) AsMap() map[string]any {
 	if s == nil {
 		return nil
 	}
-	res := make(map[string]any, len(s.Fields))
-	for k, v := range s.Fields {
+	res := make(map[string]any, len(s.GetFields()))
+	for k, v := range s.GetFields() {
 		res[k] = v.AsInterface()
 	}
 	return res
@@ -350,8 +350,8 @@ func (l *ListValue) AsSlice() []any {
 	if l == nil {
 		return nil
 	}
-	res := make([]any, len(l.Values))
-	for i, v := range l.Values {
+	res := make([]any, len(l.GetValues()))
+	for i, v := range l.GetValues() {
 		res[i] = v.AsInterface()
 	}
 	return res
@@ -368,4 +368,3 @@ func ValueMapToMap(valueMap map[string]*Value) map[string]any {
 	}
 	return res
 }
-

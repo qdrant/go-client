@@ -152,7 +152,6 @@ func (c *Config) getMetadataInterceptor() grpc.DialOption {
 	})
 }
 
-
 // Internal method.
 func (c *Config) getRateLimitInterceptor() grpc.DialOption {
 	return grpc.WithChainUnaryInterceptor(func(

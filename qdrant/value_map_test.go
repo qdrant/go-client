@@ -64,8 +64,10 @@ func TestNewValue(t *testing.T) {
 		{map[string]string{"k": "v"}, qdrant.NewValueStruct(structValue)},
 		{map[string]int{"k": 1}, qdrant.NewValueStruct(&qdrant.Struct{Fields: map[string]*qdrant.Value{"k": one}})},
 		{map[string]int64{"k": 1}, qdrant.NewValueStruct(&qdrant.Struct{Fields: map[string]*qdrant.Value{"k": one}})},
-		{map[string]float64{"k": 1.5}, qdrant.NewValueStruct(&qdrant.Struct{Fields: map[string]*qdrant.Value{"k": qdrant.NewValueDouble(1.5)}})},
-		{map[string]bool{"k": true}, qdrant.NewValueStruct(&qdrant.Struct{Fields: map[string]*qdrant.Value{"k": qdrant.NewValueBool(true)}})},
+		{map[string]float64{"k": 1.5},
+			qdrant.NewValueStruct(&qdrant.Struct{Fields: map[string]*qdrant.Value{"k": qdrant.NewValueDouble(1.5)}})},
+		{map[string]bool{"k": true},
+			qdrant.NewValueStruct(&qdrant.Struct{Fields: map[string]*qdrant.Value{"k": qdrant.NewValueBool(true)}})},
 	}
 	for _, tt := range tests {
 		got, err := qdrant.NewValue(tt.input)
@@ -85,7 +87,7 @@ func TestValue_AsInterface(t *testing.T) {
 	require.Equal(t, int64(42), valInt.AsInterface())
 
 	valDouble := qdrant.NewValueDouble(3.14)
-	require.Equal(t, 3.14, valDouble.AsInterface())
+	require.InDelta(t, 3.14, valDouble.AsInterface(), 0)
 
 	valString := qdrant.NewValueString("hello")
 	require.Equal(t, "hello", valString.AsInterface())
@@ -121,4 +123,3 @@ func TestNewValue_Errors(t *testing.T) {
 		require.Error(t, err, "%T", input)
 	}
 }
-
