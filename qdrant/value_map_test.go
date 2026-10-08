@@ -17,6 +17,9 @@ func TestNewValue(t *testing.T) {
 	listValue := &qdrant.ListValue{Values: []*qdrant.Value{qdrant.NewValueString("v")}}
 	one, two := qdrant.NewValueInt(1), qdrant.NewValueInt(2)
 	oneAndTwo := qdrant.NewValueFromList(one, two)
+	field := func(v *qdrant.Value) *qdrant.Value {
+		return qdrant.NewValueFromFields(map[string]*qdrant.Value{"k": v})
+	}
 
 	tests := []struct {
 		input any
@@ -60,14 +63,21 @@ func TestNewValue(t *testing.T) {
 		{[]float32{1.5}, qdrant.NewValueFromList(qdrant.NewValueDouble(1.5))},
 		{[]float64{1.5}, qdrant.NewValueFromList(qdrant.NewValueDouble(1.5))},
 		{[]*qdrant.Value{one, nil}, qdrant.NewValueFromList(one, null)},
-		{map[string]*qdrant.Value{"k": qdrant.NewValueString("v")}, qdrant.NewValueStruct(structValue)},
+		{map[string]*qdrant.Value{"k": nil}, field(null)},
 		{map[string]string{"k": "v"}, qdrant.NewValueStruct(structValue)},
-		{map[string]int{"k": 1}, qdrant.NewValueStruct(&qdrant.Struct{Fields: map[string]*qdrant.Value{"k": one}})},
-		{map[string]int64{"k": 1}, qdrant.NewValueStruct(&qdrant.Struct{Fields: map[string]*qdrant.Value{"k": one}})},
-		{map[string]float64{"k": 1.5},
-			qdrant.NewValueStruct(&qdrant.Struct{Fields: map[string]*qdrant.Value{"k": qdrant.NewValueDouble(1.5)}})},
-		{map[string]bool{"k": true},
-			qdrant.NewValueStruct(&qdrant.Struct{Fields: map[string]*qdrant.Value{"k": qdrant.NewValueBool(true)}})},
+		{map[string]bool{"k": true}, field(qdrant.NewValueBool(true))},
+		{map[string]int{"k": 1}, field(one)},
+		{map[string]int8{"k": 1}, field(one)},
+		{map[string]int16{"k": 1}, field(one)},
+		{map[string]int32{"k": 1}, field(one)},
+		{map[string]int64{"k": 1}, field(one)},
+		{map[string]uint{"k": 1}, field(one)},
+		{map[string]uint8{"k": 1}, field(one)},
+		{map[string]uint16{"k": 1}, field(one)},
+		{map[string]uint32{"k": 1}, field(one)},
+		{map[string]uint64{"k": 1}, field(one)},
+		{map[string]float32{"k": 1.5}, field(qdrant.NewValueDouble(1.5))},
+		{map[string]float64{"k": 1.5}, field(qdrant.NewValueDouble(1.5))},
 	}
 	for _, tt := range tests {
 		got, err := qdrant.NewValue(tt.input)
@@ -77,37 +87,22 @@ func TestNewValue(t *testing.T) {
 }
 
 func TestValue_AsInterface(t *testing.T) {
-	valNull := qdrant.NewValueNull()
-	require.Nil(t, valNull.AsInterface())
-
-	valBool := qdrant.NewValueBool(true)
-	require.Equal(t, true, valBool.AsInterface())
-
-	valInt := qdrant.NewValueInt(42)
-	require.Equal(t, int64(42), valInt.AsInterface())
-
-	valDouble := qdrant.NewValueDouble(3.14)
-	require.InDelta(t, 3.14, valDouble.AsInterface(), 0)
-
-	valString := qdrant.NewValueString("hello")
-	require.Equal(t, "hello", valString.AsInterface())
-
-	listVal := qdrant.NewValueFromList(qdrant.NewValueInt(1), qdrant.NewValueString("item"))
-	require.Equal(t, []any{int64(1), "item"}, listVal.AsInterface())
-
-	fields := map[string]*qdrant.Value{
-		"int_field": qdrant.NewValueInt(100),
-		"str_field": qdrant.NewValueString("world"),
-		"list":      listVal,
+	input := map[string]any{
+		"null":   nil,
+		"bool":   true,
+		"int":    int64(1),
+		"double": 1.5,
+		"string": "v",
+		"list":   []any{int64(1), "v"},
+		"struct": map[string]any{"k": "v"},
 	}
-	structVal := qdrant.NewValueFromFields(fields)
-	expectedMap := map[string]any{
-		"int_field": int64(100),
-		"str_field": "world",
-		"list":      []any{int64(1), "item"},
-	}
-	require.Equal(t, expectedMap, structVal.AsInterface())
-	require.Equal(t, expectedMap, qdrant.ValueMapToMap(fields))
+	value, err := qdrant.NewValue(input)
+	require.NoError(t, err)
+	require.Equal(t, input, value.AsInterface())
+	require.Equal(t, input, qdrant.ValueMapToMap(qdrant.NewValueMap(input)))
+	require.Nil(t, (&qdrant.Value{}).AsInterface())
+	require.Equal(t, []any{}, (&qdrant.Value{Kind: &qdrant.Value_ListValue{}}).AsInterface())
+	require.Equal(t, map[string]any{}, (&qdrant.Value{Kind: &qdrant.Value_StructValue{}}).AsInterface())
 }
 
 func TestNewValue_Errors(t *testing.T) {
@@ -116,10 +111,13 @@ func TestNewValue_Errors(t *testing.T) {
 		string([]byte{0xff}),
 		uint64(math.MaxUint64),
 		[]uint64{math.MaxUint64},
-		map[string]uint64{"overflow": math.MaxUint64},
+		map[string]uint64{"k": math.MaxUint64},
+		map[string]*qdrant.Value{string([]byte{0xff}): nil},
 	}
 	for _, input := range inputs {
 		_, err := qdrant.NewValue(input)
 		require.Error(t, err, "%T", input)
 	}
+	_, err := qdrant.TryValueMap(map[string]any{string([]byte{0xff}): 1})
+	require.Error(t, err)
 }

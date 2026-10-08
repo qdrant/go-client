@@ -43,8 +43,8 @@ import (
 //	║ *Value                                                 │ returned as-is (nil as NullValue)          ║
 //	║ *Struct                                                │ stored as StructValue                      ║
 //	║ *ListValue                                             │ stored as ListValue                        ║
-//	║ map[string]interface{}, map[string]string, etc.        │ stored as StructValue                      ║
-//	║ map[string]*Value                                      │ stored as StructValue                      ║
+//	║ map[string]interface{}, map[string]*Value              │ stored as StructValue                      ║
+//	║ map[string]T, T = bool, string, int*, uint*, float*    │ stored as StructValue                      ║
 //	║ []interface{}, []string, []bool, []int, []int64, etc.  │ stored as ListValue                        ║
 //	║ []*Value                                               │ stored as ListValue (nil items as Null)    ║
 //	╚════════════════════════════════════════════════════════╧════════════════════════════════════════════╝
@@ -59,15 +59,8 @@ func NewValueMap(inputMap map[string]any) map[string]*Value {
 // Converts a map of string to any to a map of string to *grpc.Value
 // Returns an error if the conversion fails.
 func TryValueMap(inputMap map[string]any) (map[string]*Value, error) {
-	valueMap := make(map[string]*Value)
-	for key, val := range inputMap {
-		value, err := NewValue(val)
-		if err != nil {
-			return nil, err
-		}
-		valueMap[key] = value
-	}
-	return valueMap, nil
+	s, err := NewStruct(inputMap)
+	return s.GetFields(), err
 }
 
 // Constructs a *Value from a generic Go interface.
@@ -130,13 +123,9 @@ func NewValue(v any) (*Value, error) {
 		s := base64.StdEncoding.EncodeToString(v)
 		return NewValueString(s), nil
 	case map[string]interface{}:
-		v2, err := NewStruct(v)
-		if err != nil {
-			return nil, err
-		}
-		return NewValueStruct(v2), nil
+		return newValueFromMap(v)
 	case map[string]*Value:
-		return NewValueFromFields(v), nil
+		return newValueFromMap(v)
 	case map[string]string:
 		return newValueFromMap(v)
 	case map[string]bool:
@@ -152,6 +141,8 @@ func NewValue(v any) (*Value, error) {
 	case map[string]int64:
 		return newValueFromMap(v)
 	case map[string]uint:
+		return newValueFromMap(v)
+	case map[string]uint8:
 		return newValueFromMap(v)
 	case map[string]uint16:
 		return newValueFromMap(v)
@@ -279,43 +270,22 @@ func NewValueFromList(values ...*Value) *Value {
 // Constructs a ListValue from a general-purpose Go slice.
 // The slice elements are converted using NewValue().
 func NewListValue(v []interface{}) (*ListValue, error) {
-	x := &ListValue{Values: make([]*Value, len(v))}
-	for i, v := range v {
-		var err error
-		x.Values[i], err = NewValue(v)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return x, nil
+	value, err := newValueFromSlice(v)
+	return value.GetListValue(), err
 }
 
 // Constructs a Struct from a general-purpose Go map.
 // The map keys must be valid UTF-8.
 // The map values are converted using NewValue().
 func NewStruct(v map[string]interface{}) (*Struct, error) {
-	x := &Struct{Fields: make(map[string]*Value, len(v))}
-	for k, v := range v {
-		if !utf8.ValidString(k) {
-			return nil, fmt.Errorf("invalid UTF-8 in string: %q", k)
-		}
-		var err error
-		x.Fields[k], err = NewValue(v)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return x, nil
+	value, err := newValueFromMap(v)
+	return value.GetStructValue(), err
 }
 
-// AsInterface converts a *Value to a native Go value (nil, bool, int64, float64, string, []any, map[string]any).
+// AsInterface converts a *Value to a native Go value: bool, int64, float64, string, []any or map[string]any.
+// Returns nil for null, nil or kind-less values. Nil lists and structs are returned empty.
 func (v *Value) AsInterface() any {
-	if v == nil {
-		return nil
-	}
 	switch k := v.GetKind().(type) {
-	case *Value_NullValue:
-		return nil
 	case *Value_BoolValue:
 		return k.BoolValue
 	case *Value_IntegerValue:
@@ -335,21 +305,11 @@ func (v *Value) AsInterface() any {
 
 // AsMap converts a *Struct to a native Go map[string]any.
 func (s *Struct) AsMap() map[string]any {
-	if s == nil {
-		return nil
-	}
-	res := make(map[string]any, len(s.GetFields()))
-	for k, v := range s.GetFields() {
-		res[k] = v.AsInterface()
-	}
-	return res
+	return ValueMapToMap(s.GetFields())
 }
 
 // AsSlice converts a *ListValue to a native Go []any slice.
 func (l *ListValue) AsSlice() []any {
-	if l == nil {
-		return nil
-	}
 	res := make([]any, len(l.GetValues()))
 	for i, v := range l.GetValues() {
 		res[i] = v.AsInterface()
@@ -359,9 +319,6 @@ func (l *ListValue) AsSlice() []any {
 
 // ValueMapToMap converts a payload map[string]*Value to a native Go map[string]any.
 func ValueMapToMap(valueMap map[string]*Value) map[string]any {
-	if valueMap == nil {
-		return nil
-	}
 	res := make(map[string]any, len(valueMap))
 	for k, v := range valueMap {
 		res[k] = v.AsInterface()
