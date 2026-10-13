@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 PROJECT_ROOT="$(pwd)/$(dirname "$0")/../"
 
 QDRANT_PROTO_DIR='proto'
@@ -47,3 +49,16 @@ protoc \
     $PROTO_DIR/points.proto \
     $PROTO_DIR/snapshots_service.proto \
     $PROTO_DIR/qdrant.proto \
+
+SERVERLESS_PACKAGE_NAME="github.com/qdrant/go-client/qdrant/serverless;serverless"
+
+protoc \
+    --experimental_allow_proto3_optional \
+    --proto_path=$PROTO_DIR/ \
+    --go_out=$OUT_DIR/serverless \
+    --go-grpc_out=$OUT_DIR/serverless \
+    --go_opt=paths=source_relative \
+    --go-grpc_opt=paths=source_relative \
+    --go_opt=Mserverless_collections.proto=$SERVERLESS_PACKAGE_NAME \
+    --go-grpc_opt=Mserverless_collections.proto=$SERVERLESS_PACKAGE_NAME \
+    $PROTO_DIR/serverless_collections.proto
