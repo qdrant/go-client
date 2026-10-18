@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"strconv"
 	"time"
 
@@ -95,11 +96,15 @@ func (c *Config) getAddr() string {
 	if host == "" {
 		host = defaultHost
 	}
+	// Accept already-bracketed IPv6 addresses as well as bare hosts.
+	if len(host) > 1 && host[0] == '[' && host[len(host)-1] == ']' {
+		host = host[1 : len(host)-1]
+	}
 	port := c.Port
 	if port == 0 {
 		port = defaultPort
 	}
-	return fmt.Sprintf("%s:%d", host, port)
+	return net.JoinHostPort(host, strconv.Itoa(port))
 }
 
 // Internal method.
