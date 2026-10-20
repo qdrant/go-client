@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"strconv"
 	"time"
 
@@ -27,7 +28,7 @@ const (
 
 // Configuration options for the client.
 type Config struct {
-	// Hostname of the Qdrant server. Defaults to "localhost".
+	// Hostname or IP address of the Qdrant server. Defaults to "localhost".
 	Host string
 	// gRPC port of the Qdrant server. Defaults to 6334.
 	Port int
@@ -98,6 +99,10 @@ func (c *Config) getAddr() string {
 	port := c.Port
 	if port == 0 {
 		port = defaultPort
+	}
+	// Bare IPv6 addresses need brackets.
+	if net.ParseIP(host) != nil {
+		return net.JoinHostPort(host, strconv.Itoa(port))
 	}
 	return fmt.Sprintf("%s:%d", host, port)
 }
