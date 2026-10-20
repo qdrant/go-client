@@ -28,7 +28,7 @@ const (
 
 // Configuration options for the client.
 type Config struct {
-	// Hostname of the Qdrant server. Defaults to "localhost".
+	// Hostname or IP address of the Qdrant server. Defaults to "localhost".
 	Host string
 	// gRPC port of the Qdrant server. Defaults to 6334.
 	Port int
@@ -100,12 +100,11 @@ func (c *Config) getAddr() string {
 	if port == 0 {
 		port = defaultPort
 	}
-	portString := strconv.Itoa(port)
-	// Accept already-bracketed IPv6 addresses as well as bare hosts.
-	if parsedHost, _, err := net.SplitHostPort(host + ":" + portString); err == nil {
-		host = parsedHost
+	// Bare IPv6 addresses need brackets.
+	if net.ParseIP(host) != nil {
+		return net.JoinHostPort(host, strconv.Itoa(port))
 	}
-	return net.JoinHostPort(host, portString)
+	return fmt.Sprintf("%s:%d", host, port)
 }
 
 // Internal method.
