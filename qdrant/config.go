@@ -96,15 +96,16 @@ func (c *Config) getAddr() string {
 	if host == "" {
 		host = defaultHost
 	}
-	// Accept already-bracketed IPv6 addresses as well as bare hosts.
-	if len(host) > 1 && host[0] == '[' && host[len(host)-1] == ']' {
-		host = host[1 : len(host)-1]
-	}
 	port := c.Port
 	if port == 0 {
 		port = defaultPort
 	}
-	return net.JoinHostPort(host, strconv.Itoa(port))
+	portString := strconv.Itoa(port)
+	// Accept already-bracketed IPv6 addresses as well as bare hosts.
+	if parsedHost, _, err := net.SplitHostPort(host + ":" + portString); err == nil {
+		host = parsedHost
+	}
+	return net.JoinHostPort(host, portString)
 }
 
 // Internal method.
