@@ -88,6 +88,29 @@ func TestCollectionsClient(t *testing.T) {
 		require.Equal(t, threshold, collInfo.GetConfig().GetOptimizerConfig().GetIndexingThreshold())
 	})
 
+	t.Run("CreateCollectionWithIdTracker", func(t *testing.T) {
+		name := collectionName + "_id_tracker"
+		err := client.CreateCollection(ctx, &qdrant.CreateCollection{
+			CollectionName: name,
+			VectorsConfig: qdrant.NewVectorsConfig(&qdrant.VectorParams{
+				Size:     vectorSize,
+				Distance: distance,
+			}),
+			IdTracker: &qdrant.IdTrackerParams{
+				Memory: qdrant.Memory_Cached.Enum(),
+			},
+		})
+		require.NoError(t, err)
+
+		collInfo, err := client.GetCollectionInfo(ctx, name)
+		require.NoError(t, err)
+		require.Equal(t, qdrant.Memory_Cached, collInfo.GetConfig().GetParams().GetIdTracker().GetMemory())
+		require.NotNil(t, collInfo.GetCreatedAt())
+
+		err = client.DeleteCollection(ctx, name)
+		require.NoError(t, err)
+	})
+
 	t.Run("AliasOperations", func(t *testing.T) {
 		aliasName := "test_alias"
 		newAliasName := "new_test_alias"

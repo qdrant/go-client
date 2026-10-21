@@ -836,6 +836,25 @@ func NewQueryRelevanceFeedback(relevanceFeedback *RelevanceFeedbackInput) *Query
 	}
 }
 
+// Creates a *Query instance for a BM25 text query from *TextQuery.
+func NewQueryText(text *TextQuery) *Query {
+	return &Query{
+		Variant: &Query_Text{
+			Text: text,
+		},
+	}
+}
+
+// Creates a *TextQuery instance with *Bm25Params.
+func NewTextQueryBM25(query string, bm25 *Bm25Params) *TextQuery {
+	return &TextQuery{
+		Query: query,
+		Scoring: &TextQuery_Bm25{
+			Bm25: bm25,
+		},
+	}
+}
+
 // Creates a *FacetValue instance from a string.
 func NewFacetValue(value string) *FacetValue {
 	return &FacetValue{
@@ -1174,6 +1193,33 @@ func NewExpressionLinDecay(linDecay *DecayParamsExpression) *Expression {
 	return &Expression{
 		Variant: &Expression_LinDecay{
 			LinDecay: linDecay,
+		},
+	}
+}
+
+// Creates a *Expression instance for inverse hyperbolic cosine.
+func NewExpressionAcosh(acosh *Expression) *Expression {
+	return &Expression{
+		Variant: &Expression_Acosh{
+			Acosh: acosh,
+		},
+	}
+}
+
+// Creates a *Expression instance for the maximum of expressions.
+func NewExpressionMax(maxExpression *MaxExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_Max{
+			Max: maxExpression,
+		},
+	}
+}
+
+// Creates a *Expression instance for the minimum of expressions.
+func NewExpressionMin(minExpression *MinExpression) *Expression {
+	return &Expression{
+		Variant: &Expression_Min{
+			Min: minExpression,
 		},
 	}
 }
