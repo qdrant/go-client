@@ -3870,8 +3870,8 @@ type CreateCollection struct {
 	WalConfig *WalConfigDiff `protobuf:"bytes,5,opt,name=wal_config,json=walConfig,proto3,oneof" json:"wal_config,omitempty"`
 	// Configuration of the optimizers
 	OptimizersConfig *OptimizersConfigDiff `protobuf:"bytes,6,opt,name=optimizers_config,json=optimizersConfig,proto3,oneof" json:"optimizers_config,omitempty"`
-	// Number of shards in the collection, default is 1 for standalone, otherwise
-	// equal to the number of nodes. Minimum is 1
+	// Number of shards in the collection. If not specified, selected
+	// automatically. Minimum is 1
 	ShardNumber *uint32 `protobuf:"varint,7,opt,name=shard_number,json=shardNumber,proto3,oneof" json:"shard_number,omitempty"`
 	// Deprecated: use `payload.memory` instead.
 	// If true - point's payload will not be stored in memory
