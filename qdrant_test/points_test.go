@@ -192,6 +192,32 @@ func TestPointsClient(t *testing.T) {
 		require.Empty(t, groups)
 	})
 
+	t.Run("QueryFormula", func(t *testing.T) {
+		score := qdrant.NewExpressionVariable("$score")
+		res, err := client.Query(ctx, &qdrant.QueryPoints{
+			CollectionName: collectionName,
+			Prefetch: []*qdrant.PrefetchQuery{
+				{Query: qdrant.NewQuery(0.1, 0.2, 0.3, 0.4)},
+			},
+			Query: qdrant.NewQueryFormula(&qdrant.Formula{
+				Expression: qdrant.NewExpressionSum(&qdrant.SumExpression{
+					Sum: []*qdrant.Expression{
+						qdrant.NewExpressionMax(&qdrant.MaxExpression{
+							Max: []*qdrant.Expression{score, qdrant.NewExpressionConstant(2)},
+						}),
+						qdrant.NewExpressionMin(&qdrant.MinExpression{
+							Min: []*qdrant.Expression{score, qdrant.NewExpressionConstant(0)},
+						}),
+						qdrant.NewExpressionAcosh(qdrant.NewExpressionConstant(1)),
+					},
+				}),
+			}),
+		})
+		require.NoError(t, err)
+		require.Len(t, res, 1)
+		require.InDelta(t, 2, res[0].GetScore(), 1e-6)
+	})
+
 	t.Run("Facet", func(t *testing.T) {
 		res, err := client.Facet(ctx, &qdrant.FacetCounts{
 			CollectionName: collectionName,
