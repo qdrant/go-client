@@ -195,6 +195,22 @@ func NewMatchPrefix(field, prefix string) *Condition {
 	}
 }
 
+// Creates a condition that matches keywords containing the given substring.
+func NewMatchSubstring(field, substring string) *Condition {
+	return &Condition{
+		ConditionOneOf: &Condition_Field{
+			Field: &FieldCondition{
+				Key: field,
+				Match: &Match{
+					MatchValue: &Match_Substring{
+						Substring: substring,
+					},
+				},
+			},
+		},
+	}
+}
+
 // Creates a condition that checks if a specified field is null.
 // See: https://qdrant.tech/documentation/concepts/filtering/#is-null
 func NewIsNull(field string) *Condition {
