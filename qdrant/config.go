@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net"
 	"strconv"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -100,9 +101,17 @@ func (c *Config) getAddr() string {
 	if port == 0 {
 		port = defaultPort
 	}
-	// Bare IPv6 addresses need brackets.
-	if net.ParseIP(host) != nil {
-		return net.JoinHostPort(host, strconv.Itoa(port))
+	// Bare IPv6 addresses need brackets. Link-local addresses may carry a zone
+	// identifier (e.g. "fe80::1%eth0"), which net.ParseIP rejects, so strip it
+	// before parsing.
+	ipHost := host
+	if zone := strings.LastIndexByte(ipHost, '%'); zone >= 0 {
+		ipHost = ipHost[:zone]
+	}
+	if net.ParseIP(ipHost) != nil {
+		// gRPC parses the target as a URI, so the zone separator must be
+		// percent-encoded.
+		return strings.ReplaceAll(net.JoinHostPort(host, strconv.Itoa(port)), "%", "%25")
 	}
 	return fmt.Sprintf("%s:%d", host, port)
 }
