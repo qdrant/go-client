@@ -59,8 +59,8 @@ func (rc *RetryConfig) retryInterceptor() grpc.UnaryClientInterceptor {
 		// Count attempts without computing MaxRetries+1, which wraps to 0 for math.MaxUint.
 		for attempt := uint(0); ; attempt++ {
 			var trailer metadata.MD
-			// Cap opts so append copies instead of writing into the caller's slice.
-			callOpts := append(opts[:len(opts):len(opts)], grpc.Trailer(&trailer))
+			// A new slice, so the caller's opts are never written to.
+			callOpts := append([]grpc.CallOption{grpc.Trailer(&trailer)}, opts...)
 			err := invoker(ctx, method, req, reply, cc, callOpts...)
 			if err == nil {
 				return nil
