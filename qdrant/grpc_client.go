@@ -100,12 +100,12 @@ func (c *GrpcClient) Qdrant() QdrantClient {
 	return c.qdrant
 }
 
-// Get the Collections service interface.
+// Get the Points service interface.
 func (c *GrpcClient) Points() PointsClient {
 	return c.points
 }
 
-// Get the Points service interface.
+// Get the Collections service interface.
 func (c *GrpcClient) Collections() CollectionsClient {
 	return c.collections
 }
