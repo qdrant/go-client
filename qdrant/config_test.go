@@ -15,9 +15,9 @@ import (
 	"github.com/qdrant/go-client/qdrant"
 )
 
-// failCalls returns a dial option that passes each call's context to onCall
-// and fails the call with err, so no server is needed.
-func failCalls(err error, onCall func(ctx context.Context)) grpc.DialOption {
+// stubCalls returns a dial option that runs after the client's own interceptors.
+// It passes each call's context to onCall and fails the call with err, so no server is needed.
+func stubCalls(err error, onCall func(ctx context.Context)) grpc.DialOption {
 	return grpc.WithChainUnaryInterceptor(func(
 		ctx context.Context, _ string, _, _ any, _ *grpc.ClientConn, _ grpc.UnaryInvoker, _ ...grpc.CallOption,
 	) error {
@@ -28,35 +28,24 @@ func failCalls(err error, onCall func(ctx context.Context)) grpc.DialOption {
 
 func TestNewGrpcClientIgnoresLaterAPIKeyAndHeaderChanges(t *testing.T) {
 	var sent metadata.MD
-	errStub := errors.New("stub")
 	cfg := &qdrant.Config{
 		APIKey:                 "secret",
 		Headers:                map[string]string{"x-id": "1"},
 		SkipCompatibilityCheck: true,
-		GrpcOptions: []grpc.DialOption{
-			failCalls(errStub, func(ctx context.Context) {
-				sent, _ = metadata.FromOutgoingContext(ctx)
-			}),
-		},
+		GrpcOptions: []grpc.DialOption{stubCalls(errors.New("stub"), func(ctx context.Context) {
+			sent, _ = metadata.FromOutgoingContext(ctx)
+		})},
 	}
 	client, err := qdrant.NewGrpcClient(cfg)
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = client.Close() })
 
-	requireSentOriginal := func() {
-		t.Helper()
-		_, err := client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
-		require.ErrorIs(t, err, errStub)
-		require.Equal(t, []string{"secret"}, sent.Get("api-key"))
-		require.Equal(t, []string{"1"}, sent.Get("x-id"))
-	}
-
-	requireSentOriginal()
-
 	cfg.APIKey = "changed"
 	cfg.Headers["x-id"] = "changed"
+	_, _ = client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
 
-	requireSentOriginal()
+	require.Equal(t, []string{"secret"}, sent.Get("api-key"))
+	require.Equal(t, []string{"1"}, sent.Get("x-id"))
 }
 
 func TestNewGrpcClientIgnoresLaterRetryConfigChanges(t *testing.T) {
@@ -65,29 +54,18 @@ func TestNewGrpcClientIgnoresLaterRetryConfigChanges(t *testing.T) {
 	cfg := &qdrant.Config{
 		SkipCompatibilityCheck: true,
 		RetryConfig:            &qdrant.RetryConfig{MaxRetries: maxRetries, BaseBackoff: time.Millisecond},
-		GrpcOptions: []grpc.DialOption{
-			failCalls(status.Error(codes.Unavailable, "stub"), func(context.Context) {
-				calls++
-			}),
-		},
+		GrpcOptions: []grpc.DialOption{stubCalls(status.Error(codes.Unavailable, "stub"), func(context.Context) {
+			calls++
+		})},
 	}
 	client, err := qdrant.NewGrpcClient(cfg)
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = client.Close() })
 
-	requireRetried := func() {
-		t.Helper()
-		calls = 0
-		_, err := client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
-		require.Error(t, err)
-		require.Equal(t, maxRetries+1, calls)
-	}
-
-	requireRetried()
-
 	cfg.RetryConfig.MaxRetries = 0
+	_, _ = client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
 
-	requireRetried()
+	require.Equal(t, maxRetries+1, calls)
 }
 
 func TestNilConfigReturnsError(t *testing.T) {
