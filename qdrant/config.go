@@ -146,14 +146,14 @@ func (c *Config) getTransportCreds() grpc.DialOption {
 //
 //nolint:lll
 func (c *Config) getMetadataInterceptor() grpc.DialOption {
+	var kvPairs []string
+	if c.APIKey != "" {
+		kvPairs = append(kvPairs, apiKeyHeader, c.APIKey)
+	}
+	for k, v := range c.Headers {
+		kvPairs = append(kvPairs, k, v)
+	}
 	return grpc.WithChainUnaryInterceptor(func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		var kvPairs []string
-		if c.APIKey != "" {
-			kvPairs = append(kvPairs, apiKeyHeader, c.APIKey)
-		}
-		for k, v := range c.Headers {
-			kvPairs = append(kvPairs, k, v)
-		}
 		newCtx := metadata.AppendToOutgoingContext(ctx, kvPairs...)
 		return invoker(newCtx, method, req, reply, cc, opts...)
 	})

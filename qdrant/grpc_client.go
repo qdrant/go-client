@@ -45,8 +45,10 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 		grpc.WithUserAgent(fmt.Sprintf("go-client/%s", clientVersion)),
 	)
 	if config.RetryConfig != nil {
+		// Copy it so later changes to the caller's RetryConfig don't affect running requests.
+		retryConfig := *config.RetryConfig
 		grpcOptions = append(grpcOptions,
-			grpc.WithChainUnaryInterceptor(config.RetryConfig.retryInterceptor()),
+			grpc.WithChainUnaryInterceptor(retryConfig.retryInterceptor()),
 		)
 	}
 	grpcOptions = append(grpcOptions, config.getKeepAliveParams()...)
