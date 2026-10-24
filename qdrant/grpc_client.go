@@ -31,6 +31,9 @@ func NewDefaultGrpcClient() (*GrpcClient, error) {
 
 // Create a new gRPC client with custom configuration.
 func NewGrpcClient(config *Config) (*GrpcClient, error) {
+	if config == nil {
+		return nil, errNilConfig
+	}
 	// We append config.GrpcOptions in the end
 	// so that user's explicit options take precedence
 	clientVersion := getClientVersion()

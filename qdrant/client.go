@@ -24,6 +24,9 @@ type Client struct {
 // or a pool of clients. If PoolSize > 1, requests are distributed across
 // the connections in a round-robin fashion.
 func NewClient(config *Config) (*Client, error) {
+	if config == nil {
+		return nil, errNilConfig
+	}
 	// Ensure config is not modified for the caller by cloning.
 	cfgCopy := *config
 	cfgCopy.Headers = maps.Clone(config.Headers)

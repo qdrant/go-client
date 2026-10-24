@@ -8,6 +8,16 @@ import (
 	"github.com/qdrant/go-client/qdrant"
 )
 
+func TestNilConfigReturnsError(t *testing.T) {
+	client, err := qdrant.NewClient(nil)
+	require.Error(t, err)
+	require.Nil(t, client)
+
+	grpcClient, err := qdrant.NewGrpcClient(nil)
+	require.Error(t, err)
+	require.Nil(t, grpcClient)
+}
+
 func TestClientHostAddress(t *testing.T) {
 	for _, tt := range []struct {
 		host string
