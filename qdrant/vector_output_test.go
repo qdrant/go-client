@@ -44,7 +44,9 @@ func TestVectorOutputAccessorsPreferTypedVector(t *testing.T) {
 			vector: &qdrant.VectorOutput{
 				Data:         []float32{9, 9},
 				VectorsCount: func() *uint32 { value := uint32(1); return &value }(),
-				Vector:       &qdrant.VectorOutput_MultiDense{MultiDense: &qdrant.MultiDenseVector{Vectors: []*qdrant.DenseVector{{Data: []float32{1, 2}}}}},
+				Vector: &qdrant.VectorOutput_MultiDense{
+					MultiDense: &qdrant.MultiDenseVector{Vectors: []*qdrant.DenseVector{{Data: []float32{1, 2}}}},
+				},
 			},
 			wantMulti: &qdrant.MultiDenseVector{Vectors: []*qdrant.DenseVector{{Data: []float32{1, 2}}}},
 		},
