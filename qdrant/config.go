@@ -23,6 +23,7 @@ import (
 
 const (
 	apiKeyHeader               = "api-key"
+	retryAfterHeader           = "retry-after"
 	defaultHost                = "localhost"
 	defaultPort                = 6334
 	defaultVersionCheckTimeout = time.Minute
@@ -183,7 +184,7 @@ func (c *Config) getRateLimitInterceptor() grpc.DialOption {
 		if !ok || st.Code() != codes.ResourceExhausted {
 			return err
 		}
-		if values := md.Get("retry-after"); len(values) > 0 {
+		if values := md.Get(retryAfterHeader); len(values) > 0 {
 			parsed, parseErr := strconv.Atoi(values[0])
 			if parseErr == nil {
 				return &QdrantResourceExhaustedError{
