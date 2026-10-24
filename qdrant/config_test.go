@@ -1,12 +1,94 @@
 package qdrant_test
 
 import (
+	"context"
+	"errors"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 
 	"github.com/qdrant/go-client/qdrant"
 )
+
+// failCalls returns a dial option that passes each call's context to onCall
+// and fails the call with err, so no server is needed.
+func failCalls(err error, onCall func(ctx context.Context)) grpc.DialOption {
+	return grpc.WithChainUnaryInterceptor(func(
+		ctx context.Context, _ string, _, _ any, _ *grpc.ClientConn, _ grpc.UnaryInvoker, _ ...grpc.CallOption,
+	) error {
+		onCall(ctx)
+		return err
+	})
+}
+
+func TestNewGrpcClientIgnoresLaterAPIKeyAndHeaderChanges(t *testing.T) {
+	var sent metadata.MD
+	errStub := errors.New("stub")
+	cfg := &qdrant.Config{
+		APIKey:                 "secret",
+		Headers:                map[string]string{"x-id": "1"},
+		SkipCompatibilityCheck: true,
+		GrpcOptions: []grpc.DialOption{
+			failCalls(errStub, func(ctx context.Context) {
+				sent, _ = metadata.FromOutgoingContext(ctx)
+			}),
+		},
+	}
+	client, err := qdrant.NewGrpcClient(cfg)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = client.Close() })
+
+	requireSentOriginal := func() {
+		t.Helper()
+		_, err := client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
+		require.ErrorIs(t, err, errStub)
+		require.Equal(t, []string{"secret"}, sent.Get("api-key"))
+		require.Equal(t, []string{"1"}, sent.Get("x-id"))
+	}
+
+	requireSentOriginal()
+
+	cfg.APIKey = "changed"
+	cfg.Headers["x-id"] = "changed"
+
+	requireSentOriginal()
+}
+
+func TestNewGrpcClientIgnoresLaterRetryConfigChanges(t *testing.T) {
+	const maxRetries = 2
+	calls := 0
+	cfg := &qdrant.Config{
+		SkipCompatibilityCheck: true,
+		RetryConfig:            &qdrant.RetryConfig{MaxRetries: maxRetries, BaseBackoff: time.Millisecond},
+		GrpcOptions: []grpc.DialOption{
+			failCalls(status.Error(codes.Unavailable, "stub"), func(context.Context) {
+				calls++
+			}),
+		},
+	}
+	client, err := qdrant.NewGrpcClient(cfg)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = client.Close() })
+
+	requireRetried := func() {
+		t.Helper()
+		calls = 0
+		_, err := client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
+		require.Error(t, err)
+		require.Equal(t, maxRetries+1, calls)
+	}
+
+	requireRetried()
+
+	cfg.RetryConfig.MaxRetries = 0
+
+	requireRetried()
+}
 
 func TestNilConfigReturnsError(t *testing.T) {
 	client, err := qdrant.NewClient(nil)
