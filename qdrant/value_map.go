@@ -1,5 +1,5 @@
 // This file contains methods to convert a generic map to map of string to *grpc.Value(Qdrant's payload type).
-// This is a custom implementatation based on "google.golang.org/protobuf/types/known/structpb".
+// This is a custom implementation based on "google.golang.org/protobuf/types/known/structpb".
 // It extends the original implementation to support IntegerValue and DoubleValue instead of a single NumberValue.
 // https://github.com/qdrant/qdrant/blob/master/lib/api/src/grpc/proto/json_with_int.proto
 //
