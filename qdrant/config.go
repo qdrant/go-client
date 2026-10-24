@@ -146,13 +146,17 @@ func (c *Config) getTransportCreds() grpc.DialOption {
 //
 //nolint:lll
 func (c *Config) getMetadataInterceptor() grpc.DialOption {
+	// The headers are fixed when the client is created, so build them once.
+	kvPairs := make([]string, 0, 2*(len(c.Headers)+1))
+	if c.APIKey != "" {
+		kvPairs = append(kvPairs, apiKeyHeader, c.APIKey)
+	}
+	for k, v := range c.Headers {
+		kvPairs = append(kvPairs, k, v)
+	}
 	return grpc.WithChainUnaryInterceptor(func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		var kvPairs []string
-		if c.APIKey != "" {
-			kvPairs = append(kvPairs, apiKeyHeader, c.APIKey)
-		}
-		for k, v := range c.Headers {
-			kvPairs = append(kvPairs, k, v)
+		if len(kvPairs) == 0 {
+			return invoker(ctx, method, req, reply, cc, opts...)
 		}
 		newCtx := metadata.AppendToOutgoingContext(ctx, kvPairs...)
 		return invoker(newCtx, method, req, reply, cc, opts...)
