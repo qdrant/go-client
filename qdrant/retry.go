@@ -4,10 +4,12 @@ import (
 	"context"
 	"math"
 	"math/rand/v2"
+	"strconv"
 	"time"
 
 	"google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	status "google.golang.org/grpc/status"
 )
 
@@ -27,7 +29,7 @@ type RetryConfig struct {
 	// Defaults to 100ms if zero.
 	BaseBackoff time.Duration
 	// MaxBackoff caps the backoff duration between retries.
-	// Defaults to 5s if zero.
+	// Defaults to 5s if zero. A retry-after Header from the server can exceed it.
 	MaxBackoff time.Duration
 }
 
@@ -56,7 +58,10 @@ func (rc *RetryConfig) retryInterceptor() grpc.UnaryClientInterceptor {
 	) error {
 		var err error
 		for attempt := range rc.MaxRetries + 1 {
-			err = invoker(ctx, method, req, reply, cc, opts...)
+			var trailer metadata.MD
+			// Cap opts so append copies instead of writing into the caller's slice.
+			callOpts := append(opts[:len(opts):len(opts)], grpc.Trailer(&trailer))
+			err = invoker(ctx, method, req, reply, cc, callOpts...)
 			if err == nil {
 				return nil
 			}
@@ -66,7 +71,7 @@ func (rc *RetryConfig) retryInterceptor() grpc.UnaryClientInterceptor {
 			if !isRetryable(err) {
 				return err
 			}
-			backoff := rc.backoffDuration(attempt)
+			backoff := max(rc.backoffDuration(attempt), retryAfter(err, trailer))
 			timer := time.NewTimer(backoff)
 			select {
 			case <-ctx.Done():
@@ -86,6 +91,23 @@ func isRetryable(err error) bool {
 	}
 	code := st.Code()
 	return code == codes.ResourceExhausted || code == codes.Unavailable
+}
+
+// retryAfter returns the wait the server asked for in the retry-after header
+// of a ResourceExhausted response, or zero if there is none.
+func retryAfter(err error, trailer metadata.MD) time.Duration {
+	if status.Code(err) != codes.ResourceExhausted {
+		return 0
+	}
+	values := trailer.Get(retryAfterHeader)
+	if len(values) == 0 {
+		return 0
+	}
+	seconds, parseErr := strconv.Atoi(values[0])
+	if parseErr != nil || seconds < 0 {
+		return 0
+	}
+	return time.Duration(seconds) * time.Second
 }
 
 const backoffBase = 2.0
