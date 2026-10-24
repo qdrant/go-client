@@ -147,7 +147,7 @@ func (c *Config) getTransportCreds() grpc.DialOption {
 //nolint:lll
 func (c *Config) getMetadataInterceptor() grpc.DialOption {
 	// The headers are fixed when the client is created, so build them once.
-	kvPairs := make([]string, 0, 2*(len(c.Headers)+1))
+	var kvPairs []string
 	if c.APIKey != "" {
 		kvPairs = append(kvPairs, apiKeyHeader, c.APIKey)
 	}

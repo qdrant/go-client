@@ -18,7 +18,10 @@ type metadataRecorder struct {
 	last metadata.MD
 }
 
-func (m *metadataRecorder) HealthCheck(ctx context.Context, _ *qdrant.HealthCheckRequest) (*qdrant.HealthCheckReply, error) {
+func (m *metadataRecorder) HealthCheck(
+	ctx context.Context,
+	_ *qdrant.HealthCheckRequest,
+) (*qdrant.HealthCheckReply, error) {
 	m.last, _ = metadata.FromIncomingContext(ctx)
 	return &qdrant.HealthCheckReply{}, nil
 }
