@@ -2,6 +2,7 @@ package qdrant
 
 import (
 	"fmt"
+	"math"
 	"runtime/debug"
 
 	"google.golang.org/grpc"
@@ -43,6 +44,7 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 		config.getMetadataInterceptor(),
 		config.getRateLimitInterceptor(),
 		grpc.WithUserAgent(fmt.Sprintf("go-client/%s", clientVersion)),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(math.MaxInt)),
 	)
 	if config.RetryConfig != nil {
 		// Copy it so later changes to the caller's RetryConfig don't affect running requests.
