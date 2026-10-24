@@ -26,6 +26,8 @@ const (
 	defaultVersionCheckTimeout = time.Minute
 )
 
+var errNilConfig = errors.New("qdrant: config must not be nil")
+
 // Configuration options for the client.
 type Config struct {
 	// Hostname or IP address of the Qdrant server. Defaults to "localhost".
