@@ -457,15 +457,16 @@ func (v *VectorOutput) GetDenseVector() *DenseVector {
 		return nil
 	}
 
-	// Check deprecated data field first
-	if data := v.GetData(); len(data) > 0 {
-		return &DenseVector{Data: data}
-	}
-
 	if vector := v.GetVector(); vector != nil {
-		if dense, ok := vector.(*VectorOutput_Dense); ok && dense != nil {
+		if dense, ok := vector.(*VectorOutput_Dense); ok {
 			return dense.Dense
 		}
+		return nil
+	}
+
+	// Fall back to deprecated vector fields
+	if data := v.GetData(); len(data) > 0 {
+		return &DenseVector{Data: data}
 	}
 
 	return nil
@@ -478,7 +479,14 @@ func (v *VectorOutput) GetSparseVector() *SparseVector {
 		return nil
 	}
 
-	// Check deprecated data field first
+	if vector := v.GetVector(); vector != nil {
+		if sparse, ok := vector.(*VectorOutput_Sparse); ok {
+			return sparse.Sparse
+		}
+		return nil
+	}
+
+	// Fall back to deprecated vector fields
 	if data := v.GetData(); len(data) > 0 {
 		indices := v.GetIndices()
 		if indices == nil {
@@ -487,12 +495,6 @@ func (v *VectorOutput) GetSparseVector() *SparseVector {
 		return &SparseVector{
 			Values:  data,
 			Indices: indices.GetData(),
-		}
-	}
-
-	if vector := v.GetVector(); vector != nil {
-		if sparse, ok := vector.(*VectorOutput_Sparse); ok && sparse != nil {
-			return sparse.Sparse
 		}
 	}
 
@@ -506,7 +508,14 @@ func (v *VectorOutput) GetMultiVector() *MultiDenseVector {
 		return nil
 	}
 
-	// Check deprecated data field first
+	if vector := v.GetVector(); vector != nil {
+		if multiDense, ok := vector.(*VectorOutput_MultiDense); ok {
+			return multiDense.MultiDense
+		}
+		return nil
+	}
+
+	// Fall back to deprecated vector fields
 	if data := v.GetData(); len(data) > 0 {
 		vectorsCount := v.GetVectorsCount()
 		if vectorsCount == 0 {
@@ -523,12 +532,6 @@ func (v *VectorOutput) GetMultiVector() *MultiDenseVector {
 		}
 
 		return &MultiDenseVector{Vectors: vectors}
-	}
-
-	if vector := v.GetVector(); vector != nil {
-		if multiDense, ok := vector.(*VectorOutput_MultiDense); ok && multiDense != nil {
-			return multiDense.MultiDense
-		}
 	}
 
 	return nil
