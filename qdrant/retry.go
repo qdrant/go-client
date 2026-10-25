@@ -55,12 +55,12 @@ func (rc *RetryConfig) retryInterceptor() grpc.UnaryClientInterceptor {
 		opts ...grpc.CallOption,
 	) error {
 		var err error
-		for attempt := range rc.MaxRetries + 1 {
+		for attempt := uint(0); ; attempt++ {
 			err = invoker(ctx, method, req, reply, cc, opts...)
 			if err == nil {
 				return nil
 			}
-			if attempt == rc.MaxRetries {
+			if attempt >= rc.MaxRetries {
 				break
 			}
 			if !isRetryable(err) {
