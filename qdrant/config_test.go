@@ -89,6 +89,7 @@ func TestClientHostAddress(t *testing.T) {
 		{host: "127.0.0.1", want: "127.0.0.1:6334"},
 		{host: "::1", want: "[::1]:6334"},
 		{host: "[::1]", want: "[::1]:6334"},
+		{host: "fe80::1%lo0", want: "[fe80::1%25lo0]:6334"},
 	} {
 		client, err := qdrant.NewClient(&qdrant.Config{
 			Host: tt.host, Port: tt.port, PoolSize: 1, SkipCompatibilityCheck: true,
