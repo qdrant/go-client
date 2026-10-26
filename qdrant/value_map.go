@@ -37,7 +37,7 @@ import (
 //	║ bool                                                   │ stored as BoolValue                        ║
 //	║ int, int8, int16, int32, int64                         │ stored as IntegerValue                     ║
 //	║ uint, uint8, uint16, uint32, uint64                    │ stored as IntegerValue (must fit in int64) ║
-//	║ float32, float64                                       │ stored as DoubleValue                      ║
+//	║ float32, float64                                       │ stored as DoubleValue (must not be NaN/Inf)║
 //	║ string                                                 │ stored as StringValue (must be valid UTF-8)║
 //	║ []byte                                                 │ stored as StringValue (base64-encoded)     ║
 //	║ *Value                                                 │ returned as-is (nil as NullValue)          ║
@@ -111,9 +111,9 @@ func NewValue(v any) (*Value, error) {
 		}
 		return NewValueInt(int64(v)), nil
 	case float32:
-		return NewValueDouble(float64(v)), nil
+		return newValueFromFloat(float64(v))
 	case float64:
-		return NewValueDouble(v), nil
+		return newValueFromFloat(v)
 	case string:
 		if !utf8.ValidString(v) {
 			return nil, fmt.Errorf("invalid UTF-8 in string: %q", v)
@@ -187,6 +187,14 @@ func NewValue(v any) (*Value, error) {
 	default:
 		return nil, fmt.Errorf("invalid type: %T", v)
 	}
+}
+
+// Constructs a double Value, rejecting NaN and ±Inf, which payloads stored as JSON cannot hold.
+func newValueFromFloat(v float64) (*Value, error) {
+	if math.IsNaN(v) || math.IsInf(v, 0) {
+		return nil, fmt.Errorf("float value %v is not a valid JSON number", v)
+	}
+	return NewValueDouble(v), nil
 }
 
 // Constructs a list Value by converting each item with NewValue.

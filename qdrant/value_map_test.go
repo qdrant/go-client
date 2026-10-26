@@ -113,11 +113,21 @@ func TestNewValue_Errors(t *testing.T) {
 		[]uint64{math.MaxUint64},
 		map[string]uint64{"k": math.MaxUint64},
 		map[string]*qdrant.Value{string([]byte{0xff}): nil},
+		math.NaN(),
+		math.Inf(1),
+		math.Inf(-1),
+		float32(math.NaN()),
+		float32(math.Inf(1)),
+		[]float64{1.5, math.NaN()},
+		map[string]float32{"k": float32(math.Inf(-1))},
+		[]any{map[string]any{"k": math.NaN()}},
 	}
 	for _, input := range inputs {
 		_, err := qdrant.NewValue(input)
 		require.Error(t, err, "%T", input)
 	}
 	_, err := qdrant.TryValueMap(map[string]any{string([]byte{0xff}): 1})
+	require.Error(t, err)
+	_, err = qdrant.TryValueMap(map[string]any{"score": math.NaN()})
 	require.Error(t, err)
 }
