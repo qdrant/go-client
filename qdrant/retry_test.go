@@ -1,4 +1,4 @@
-package qdrant
+package qdrant_test
 
 import (
 	"context"
@@ -12,20 +12,22 @@ import (
 	"google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+
+	"github.com/qdrant/go-client/qdrant"
 )
 
 func TestRetryInterceptor_MaxUintDoesNotSkip(t *testing.T) {
-	rc := &RetryConfig{
+	rc := &qdrant.RetryConfig{
 		MaxRetries:  math.MaxUint,
 		BaseBackoff: 1 * time.Millisecond,
 		MaxBackoff:  2 * time.Millisecond,
 	}
 
-	interceptor := rc.retryInterceptor()
+	interceptor := rc.RetryInterceptor()
 	called := 0
 	expectedErr := errors.New("non-retryable error")
 
-	invoker := func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
+	invoker := func(_ context.Context, _ string, _, _ any, _ *grpc.ClientConn, _ ...grpc.CallOption) error {
 		called++
 		return expectedErr
 	}
@@ -36,14 +38,14 @@ func TestRetryInterceptor_MaxUintDoesNotSkip(t *testing.T) {
 }
 
 func TestRetryInterceptor_Success(t *testing.T) {
-	rc := &RetryConfig{
+	rc := &qdrant.RetryConfig{
 		MaxRetries: 3,
 	}
 
-	interceptor := rc.retryInterceptor()
+	interceptor := rc.RetryInterceptor()
 	called := 0
 
-	invoker := func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
+	invoker := func(_ context.Context, _ string, _, _ any, _ *grpc.ClientConn, _ ...grpc.CallOption) error {
 		called++
 		return nil
 	}
@@ -54,17 +56,17 @@ func TestRetryInterceptor_Success(t *testing.T) {
 }
 
 func TestRetryInterceptor_RetriesExhausted(t *testing.T) {
-	rc := &RetryConfig{
+	rc := &qdrant.RetryConfig{
 		MaxRetries:  2,
 		BaseBackoff: 1 * time.Millisecond,
 		MaxBackoff:  2 * time.Millisecond,
 	}
 
-	interceptor := rc.retryInterceptor()
+	interceptor := rc.RetryInterceptor()
 	called := 0
 	retryableErr := status.Error(codes.Unavailable, "service unavailable")
 
-	invoker := func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
+	invoker := func(_ context.Context, _ string, _, _ any, _ *grpc.ClientConn, _ ...grpc.CallOption) error {
 		called++
 		return retryableErr
 	}
@@ -75,18 +77,18 @@ func TestRetryInterceptor_RetriesExhausted(t *testing.T) {
 }
 
 func TestRetryInterceptor_ContextCanceled(t *testing.T) {
-	rc := &RetryConfig{
+	rc := &qdrant.RetryConfig{
 		MaxRetries:  5,
 		BaseBackoff: 50 * time.Millisecond,
 		MaxBackoff:  100 * time.Millisecond,
 	}
 
-	interceptor := rc.retryInterceptor()
+	interceptor := rc.RetryInterceptor()
 	ctx, cancel := context.WithCancel(context.Background())
 	called := 0
 	retryableErr := status.Error(codes.Unavailable, "service unavailable")
 
-	invoker := func(c context.Context, method string, req, reply any, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
+	invoker := func(_ context.Context, _ string, _, _ any, _ *grpc.ClientConn, _ ...grpc.CallOption) error {
 		called++
 		cancel()
 		return retryableErr
