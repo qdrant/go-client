@@ -29,6 +29,7 @@ import (
 
 // Converts a map of string to any to a map of string to *grpc.Value
 // NOTE: This function panics if the conversion fails. Use TryValueMap() to have errors returned.
+// Unlike TryValueMap(), it does not reject NaN or ±Inf floats; Qdrant rejects them when the payload is sent.
 //
 //	╔════════════════════════════════════════════════════════╤════════════════════════════════════════════╗
 //	║ Go type                                                │ Conversion                                 ║
@@ -37,7 +38,7 @@ import (
 //	║ bool                                                   │ stored as BoolValue                        ║
 //	║ int, int8, int16, int32, int64                         │ stored as IntegerValue                     ║
 //	║ uint, uint8, uint16, uint32, uint64                    │ stored as IntegerValue (must fit in int64) ║
-//	║ float32, float64                                       │ stored as DoubleValue (must not be NaN/Inf)║
+//	║ float32, float64                                       │ stored as DoubleValue                      ║
 //	║ string                                                 │ stored as StringValue (must be valid UTF-8)║
 //	║ []byte                                                 │ stored as StringValue (base64-encoded)     ║
 //	║ *Value                                                 │ returned as-is (nil as NullValue)          ║
@@ -49,24 +50,37 @@ import (
 //	║ []*Value                                               │ stored as ListValue (nil items as Null)    ║
 //	╚════════════════════════════════════════════════════════╧════════════════════════════════════════════╝
 func NewValueMap(inputMap map[string]any) map[string]*Value {
-	valueMap, err := TryValueMap(inputMap)
+	value, err := newValueFromMap(inputMap)
 	if err != nil {
 		panic(err)
 	}
-	return valueMap
+	return value.GetStructValue().GetFields()
 }
 
 // Converts a map of string to any to a map of string to *grpc.Value
-// Returns an error if the conversion fails.
+// Returns an error if the conversion fails, or if any value is a NaN or ±Inf float.
 func TryValueMap(inputMap map[string]any) (map[string]*Value, error) {
 	s, err := NewStruct(inputMap)
 	return s.GetFields(), err
 }
 
 // Constructs a *Value from a generic Go interface.
+// Returns an error if v contains a NaN or ±Inf float anywhere, including inside *Value, *Struct and *ListValue inputs.
+func NewValue(v any) (*Value, error) {
+	value, err := newValue(v)
+	if err != nil {
+		return nil, err
+	}
+	if err := checkFinite(value); err != nil {
+		return nil, err
+	}
+	return value, nil
+}
+
+// Converts v without checking its floats.
 //
 //nolint:gocyclo,cyclop,funlen // A flat type switch with one case per supported type.
-func NewValue(v any) (*Value, error) {
+func newValue(v any) (*Value, error) {
 	switch v := v.(type) {
 	case nil:
 		return NewValueNull(), nil
@@ -98,7 +112,7 @@ func NewValue(v any) (*Value, error) {
 	case int64:
 		return NewValueInt(v), nil
 	case uint:
-		return NewValue(uint64(v))
+		return newValue(uint64(v))
 	case uint8:
 		return NewValueInt(int64(v)), nil
 	case uint16:
@@ -111,9 +125,9 @@ func NewValue(v any) (*Value, error) {
 		}
 		return NewValueInt(int64(v)), nil
 	case float32:
-		return newValueFromFloat(float64(v))
+		return NewValueDouble(float64(v)), nil
 	case float64:
-		return newValueFromFloat(v)
+		return NewValueDouble(v), nil
 	case string:
 		if !utf8.ValidString(v) {
 			return nil, fmt.Errorf("invalid UTF-8 in string: %q", v)
@@ -189,19 +203,34 @@ func NewValue(v any) (*Value, error) {
 	}
 }
 
-// Constructs a double Value, rejecting NaN and ±Inf, which payloads stored as JSON cannot hold.
-func newValueFromFloat(v float64) (*Value, error) {
-	if math.IsNaN(v) || math.IsInf(v, 0) {
-		return nil, fmt.Errorf("float value %v is not a valid JSON number", v)
+// Returns an error if v contains a NaN or ±Inf double, which payloads stored as JSON cannot hold.
+func checkFinite(v *Value) error {
+	switch k := v.GetKind().(type) {
+	case *Value_DoubleValue:
+		if math.IsNaN(k.DoubleValue) || math.IsInf(k.DoubleValue, 0) {
+			return fmt.Errorf("float value %v is not a valid JSON number", k.DoubleValue)
+		}
+	case *Value_ListValue:
+		for i, item := range k.ListValue.GetValues() {
+			if err := checkFinite(item); err != nil {
+				return fmt.Errorf("item %d: %w", i, err)
+			}
+		}
+	case *Value_StructValue:
+		for key, field := range k.StructValue.GetFields() {
+			if err := checkFinite(field); err != nil {
+				return fmt.Errorf("field %q: %w", key, err)
+			}
+		}
 	}
-	return NewValueDouble(v), nil
+	return nil
 }
 
-// Constructs a list Value by converting each item with NewValue.
+// Constructs a list Value by converting each item with newValue.
 func newValueFromSlice[T any](items []T) (*Value, error) {
 	list := make([]*Value, len(items))
 	for i, item := range items {
-		value, err := NewValue(item)
+		value, err := newValue(item)
 		if err != nil {
 			return nil, err
 		}
@@ -210,14 +239,14 @@ func newValueFromSlice[T any](items []T) (*Value, error) {
 	return NewValueFromList(list...), nil
 }
 
-// Constructs a struct Value by converting each map value with NewValue.
+// Constructs a struct Value by converting each map value with newValue.
 func newValueFromMap[T any](m map[string]T) (*Value, error) {
 	fields := make(map[string]*Value, len(m))
 	for k, v := range m {
 		if !utf8.ValidString(k) {
 			return nil, fmt.Errorf("invalid UTF-8 in string: %q", k)
 		}
-		val, err := NewValue(v)
+		val, err := newValue(v)
 		if err != nil {
 			return nil, err
 		}
@@ -278,7 +307,7 @@ func NewValueFromList(values ...*Value) *Value {
 // Constructs a ListValue from a general-purpose Go slice.
 // The slice elements are converted using NewValue().
 func NewListValue(v []interface{}) (*ListValue, error) {
-	value, err := newValueFromSlice(v)
+	value, err := NewValue(v)
 	return value.GetListValue(), err
 }
 
@@ -286,7 +315,7 @@ func NewListValue(v []interface{}) (*ListValue, error) {
 // The map keys must be valid UTF-8.
 // The map values are converted using NewValue().
 func NewStruct(v map[string]interface{}) (*Struct, error) {
-	value, err := newValueFromMap(v)
+	value, err := NewValue(v)
 	return value.GetStructValue(), err
 }
 

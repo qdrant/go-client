@@ -106,6 +106,7 @@ func TestValue_AsInterface(t *testing.T) {
 }
 
 func TestNewValue_Errors(t *testing.T) {
+	nan := qdrant.NewValueDouble(math.NaN())
 	inputs := []any{
 		struct{}{},
 		string([]byte{0xff}),
@@ -121,6 +122,12 @@ func TestNewValue_Errors(t *testing.T) {
 		[]float64{1.5, math.NaN()},
 		map[string]float32{"k": float32(math.Inf(-1))},
 		[]any{map[string]any{"k": math.NaN()}},
+		nan,
+		&qdrant.Struct{Fields: map[string]*qdrant.Value{"k": nan}},
+		&qdrant.ListValue{Values: []*qdrant.Value{nan}},
+		map[string]*qdrant.Value{"k": nan},
+		[]*qdrant.Value{nan},
+		map[string]any{"k": qdrant.NewValueFromList(qdrant.NewValueDouble(math.Inf(1)))},
 	}
 	for _, input := range inputs {
 		_, err := qdrant.NewValue(input)
@@ -128,6 +135,22 @@ func TestNewValue_Errors(t *testing.T) {
 	}
 	_, err := qdrant.TryValueMap(map[string]any{string([]byte{0xff}): 1})
 	require.Error(t, err)
-	_, err = qdrant.TryValueMap(map[string]any{"score": math.NaN()})
+	_, err = qdrant.NewListValue([]any{nan})
 	require.Error(t, err)
+	_, err = qdrant.NewStruct(map[string]any{"k": nan})
+	require.Error(t, err)
+
+	_, err = qdrant.TryValueMap(map[string]any{"outer": map[string]any{"score": math.NaN()}})
+	require.ErrorContains(t, err, `field "outer": field "score": float value NaN is not a valid JSON number`)
+	_, err = qdrant.TryValueMap(map[string]any{"scores": []float64{1.5, math.Inf(-1)}})
+	require.ErrorContains(t, err, `field "scores": item 1: float value -Inf is not a valid JSON number`)
+}
+
+func TestNewValueMap_AllowsNonFiniteFloats(t *testing.T) {
+	var valueMap map[string]*qdrant.Value
+	require.NotPanics(t, func() {
+		valueMap = qdrant.NewValueMap(map[string]any{"nan": math.NaN(), "inf": math.Inf(1)})
+	})
+	require.True(t, math.IsNaN(valueMap["nan"].GetDoubleValue()))
+	require.True(t, math.IsInf(valueMap["inf"].GetDoubleValue(), 1))
 }
