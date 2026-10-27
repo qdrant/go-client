@@ -54,16 +54,13 @@ func (rc *RetryConfig) retryInterceptor() grpc.UnaryClientInterceptor {
 		invoker grpc.UnaryInvoker,
 		opts ...grpc.CallOption,
 	) error {
-		var err error
-		for attempt := range rc.MaxRetries + 1 {
-			err = invoker(ctx, method, req, reply, cc, opts...)
+		// Count attempts without computing MaxRetries+1, which wraps to 0 for math.MaxUint.
+		for attempt := uint(0); ; attempt++ {
+			err := invoker(ctx, method, req, reply, cc, opts...)
 			if err == nil {
 				return nil
 			}
-			if attempt == rc.MaxRetries {
-				break
-			}
-			if !isRetryable(err) {
+			if attempt == rc.MaxRetries || !isRetryable(err) {
 				return err
 			}
 			backoff := rc.backoffDuration(attempt)
@@ -75,7 +72,6 @@ func (rc *RetryConfig) retryInterceptor() grpc.UnaryClientInterceptor {
 			case <-timer.C:
 			}
 		}
-		return err
 	}
 }
 

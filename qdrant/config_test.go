@@ -3,6 +3,7 @@ package qdrant_test
 import (
 	"context"
 	"errors"
+	"math"
 	"testing"
 	"time"
 
@@ -66,6 +67,24 @@ func TestNewGrpcClientIgnoresLaterRetryConfigChanges(t *testing.T) {
 	_, _ = client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
 
 	require.Equal(t, maxRetries+1, calls)
+}
+
+func TestRetryInterceptorWithMaxUintRetries(t *testing.T) {
+	calls := 0
+	client, err := qdrant.NewGrpcClient(&qdrant.Config{
+		SkipCompatibilityCheck: true,
+		RetryConfig:            &qdrant.RetryConfig{MaxRetries: math.MaxUint},
+		GrpcOptions: []grpc.DialOption{stubCalls(status.Error(codes.InvalidArgument, "stub"), func(context.Context) {
+			calls++
+		})},
+	})
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = client.Close() })
+
+	_, err = client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
+
+	require.Equal(t, codes.InvalidArgument, status.Code(err))
+	require.Equal(t, 1, calls)
 }
 
 func TestNilConfigReturnsError(t *testing.T) {
