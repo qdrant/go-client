@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"net/netip"
 	"strconv"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -102,9 +104,11 @@ func (c *Config) getAddr() string {
 	if port == 0 {
 		port = defaultPort
 	}
-	// Bare IPv6 addresses need brackets.
-	if net.ParseIP(host) != nil {
-		return net.JoinHostPort(host, strconv.Itoa(port))
+	// netip.ParseAddr accepts bare IPs, including IPv6 addresses with a zone
+	// identifier (for example "fe80::1%eth0"). gRPC parses the target as a URI,
+	// so the zone separator must be percent-encoded.
+	if _, err := netip.ParseAddr(host); err == nil {
+		return strings.ReplaceAll(net.JoinHostPort(host, strconv.Itoa(port)), "%", "%25")
 	}
 	return fmt.Sprintf("%s:%d", host, port)
 }
