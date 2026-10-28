@@ -409,7 +409,9 @@ func (c *Client) SearchMatrixOffsets(ctx context.Context, request *SearchMatrixP
 // request passed to ScrollAll uses order_by. The server does not return a
 // pagination cursor for ordered scrolls, so ScrollAll cannot continue past the
 // first page and fails instead of silently returning a partial result.
-var ErrScrollAllOrderByUnsupported = errors.New("qdrant: ScrollAll does not support order_by, because ordered scrolls have no pagination cursor")
+var ErrScrollAllOrderByUnsupported = errors.New(
+	"qdrant: ScrollAll does not support order_by, because ordered scrolls have no pagination cursor",
+)
 
 // ScrollIterator paginates through points in a collection by repeatedly
 // calling ScrollAndOffset under the hood. Obtain one via ScrollAll.
