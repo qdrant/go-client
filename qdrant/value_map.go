@@ -48,6 +48,7 @@ import (
 //	║ map[string]T, T = bool, string, int*, uint*, float*    │ stored as StructValue                      ║
 //	║ []interface{}, []string, []bool, []int, []int64, etc.  │ stored as ListValue                        ║
 //	║ []*Value                                               │ stored as ListValue (nil items as Null)    ║
+//	║ []map[string]interface{}                               │ stored as ListValue of StructValue         ║
 //	╚════════════════════════════════════════════════════════╧════════════════════════════════════════════╝
 func NewValueMap(inputMap map[string]any) map[string]*Value {
 	value, err := newValueFromMap(inputMap)
@@ -197,6 +198,8 @@ func newValue(v any) (*Value, error) {
 	case []float64:
 		return newValueFromSlice(v)
 	case []*Value:
+		return newValueFromSlice(v)
+	case []map[string]interface{}:
 		return newValueFromSlice(v)
 	default:
 		return nil, fmt.Errorf("invalid type: %T", v)
