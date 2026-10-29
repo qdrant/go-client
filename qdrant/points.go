@@ -423,7 +423,7 @@ type ScrollIterator struct {
 // all points matching the given request. Call Next repeatedly to retrieve
 // successive pages. Next returns io.EOF when no more points remain.
 //
-// next returns ErrScrollAllOrderByUnsupported if the request uses order_by.
+// Next returns ErrScrollAllOrderByUnsupported if the request uses order_by.
 func (c *Client) ScrollAll(ctx context.Context, request *ScrollPoints) *ScrollIterator {
 	cloned, ok := proto.Clone(request).(*ScrollPoints)
 	if !ok {
