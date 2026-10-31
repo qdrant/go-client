@@ -83,6 +83,16 @@ Since the API reference is published at <https://pkg.go.dev/github.com/qdrant/go
 
 6. Submit your pull request and get those approvals.
 
+### Qdrant Serverless
+
+[`qdrant/serverless`](https://github.com/qdrant/go-client/tree/master/qdrant/serverless) uses a copy of the [serverless collections proto](https://github.com/qdrant/qdrant-cloud-public-api/blob/main/proto/qdrant/serverless/collections.proto) in `internal/proto`. To update it and regenerate the stubs:
+
+```bash
+sh internal/tools/sync_serverless_proto.sh
+```
+
+Its tests run against a live serverless space when `QDRANT_SERVERLESS_URL` and `QDRANT_SERVERLESS_API_KEY` are set, and are skipped otherwise.
+
 ### Releasing a New Version
 
 Once the new Qdrant version is live:
