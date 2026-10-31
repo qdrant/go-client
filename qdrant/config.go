@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"net"
 	"net/netip"
 	"strconv"
@@ -26,6 +27,7 @@ const (
 	defaultHost                = "localhost"
 	defaultPort                = 6334
 	defaultVersionCheckTimeout = time.Minute
+	defaultMaxRecvMsgSize      = 64 << 20 // 64MB
 )
 
 var errNilConfig = errors.New("qdrant: config must not be nil")
@@ -76,6 +78,20 @@ type Config struct {
 	// Logger used for client-side warnings such as a failed server version check.
 	// If nil, slog.Default() is used.
 	Logger *slog.Logger
+	// MaxRecvMsgSize is the largest response, in bytes, the client accepts.
+	// Larger responses fail with a ResourceExhausted error.
+	// If 0, defaults to 64MB.
+	// A grpc.MaxCallRecvMsgSize call option in GrpcOptions takes precedence.
+	MaxRecvMsgSize uint
+}
+
+// Internal method.
+func (c *Config) getMaxRecvMsgSize() int {
+	if c.MaxRecvMsgSize == 0 {
+		return defaultMaxRecvMsgSize
+	}
+	// gRPC takes an int, so cap the value to avoid wrapping to a negative limit.
+	return int(min(c.MaxRecvMsgSize, uint(math.MaxInt)))
 }
 
 // Internal method.
