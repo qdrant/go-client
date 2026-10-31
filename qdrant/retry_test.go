@@ -55,7 +55,7 @@ func TestRetryWaitsForRetryAfterBeyondMaxBackoff(t *testing.T) {
 	require.GreaterOrEqual(t, time.Since(start), time.Second)
 }
 
-func TestRetryAfterWaitStopsAtContextDeadline(t *testing.T) {
+func TestRetryAfterPastContextDeadlineReturnsError(t *testing.T) {
 	const timeout = 50 * time.Millisecond
 	calls := 0
 	client, err := qdrant.NewGrpcClient(&qdrant.Config{
@@ -77,7 +77,34 @@ func TestRetryAfterWaitStopsAtContextDeadline(t *testing.T) {
 	start := time.Now()
 	_, err = client.Qdrant().HealthCheck(ctx, &qdrant.HealthCheckRequest{})
 
-	require.ErrorIs(t, err, context.DeadlineExceeded)
-	require.Less(t, time.Since(start), time.Second)
+	var rateLimitErr *qdrant.QdrantResourceExhaustedError
+	require.ErrorAs(t, err, &rateLimitErr)
+	require.Less(t, time.Since(start), timeout)
+	require.Equal(t, 1, calls)
+}
+
+func TestLargeRetryAfterDoesNotOverflow(t *testing.T) {
+	calls := 0
+	client, err := qdrant.NewGrpcClient(&qdrant.Config{
+		SkipCompatibilityCheck: true,
+		RetryConfig: &qdrant.RetryConfig{
+			MaxRetries:  1,
+			BaseBackoff: time.Millisecond,
+			MaxBackoff:  time.Millisecond,
+		},
+		// Without capping, seconds * time.Second overflows to a negative wait and the call is retried.
+		GrpcOptions: []grpc.DialOption{rateLimitCalls("9223372036854775807", func() {
+			calls++
+		})},
+	})
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = client.Close() })
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	t.Cleanup(cancel)
+	_, err = client.Qdrant().HealthCheck(ctx, &qdrant.HealthCheckRequest{})
+
+	var rateLimitErr *qdrant.QdrantResourceExhaustedError
+	require.ErrorAs(t, err, &rateLimitErr)
 	require.Equal(t, 1, calls)
 }

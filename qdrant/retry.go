@@ -16,6 +16,7 @@ import (
 const (
 	defaultBaseBackoff = 100 * time.Millisecond
 	defaultMaxBackoff  = 5 * time.Second
+	maxRetryAfter      = 30 * time.Second
 )
 
 // RetryConfig controls automatic retry behavior for transient gRPC failures.
@@ -68,7 +69,11 @@ func (rc *RetryConfig) retryInterceptor() grpc.UnaryClientInterceptor {
 			if attempt == rc.MaxRetries || !isRetryable(err) {
 				return err
 			}
-			backoff := max(rc.backoffDuration(attempt), retryAfter(err, trailer))
+			serverWait := retryAfter(err, trailer)
+			if deadline, ok := ctx.Deadline(); ok && time.Until(deadline) < serverWait {
+				return err
+			}
+			backoff := max(rc.backoffDuration(attempt), serverWait)
 			timer := time.NewTimer(backoff)
 			select {
 			case <-ctx.Done():
@@ -90,7 +95,7 @@ func isRetryable(err error) bool {
 }
 
 // retryAfter returns the wait the server asked for in the retry-after header
-// of a ResourceExhausted response, or zero if there is none.
+// of a ResourceExhausted response, capped at maxRetryAfter, or zero if there is none.
 func retryAfter(err error, trailer metadata.MD) time.Duration {
 	if status.Code(err) != codes.ResourceExhausted {
 		return 0
@@ -102,6 +107,10 @@ func retryAfter(err error, trailer metadata.MD) time.Duration {
 	seconds, parseErr := strconv.Atoi(values[0])
 	if parseErr != nil || seconds < 0 {
 		return 0
+	}
+	// Cap before multiplying, so a large value can't overflow.
+	if seconds > int(maxRetryAfter.Seconds()) {
+		return maxRetryAfter
 	}
 	return time.Duration(seconds) * time.Second
 }
