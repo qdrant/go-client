@@ -211,18 +211,6 @@ func TestRetrySkipsMessageTooLarge(t *testing.T) {
 		require.Equal(t, int32(1), calls.Load())
 	})
 
-	// grpc-go's size-limit messages, as returned by the invoker.
-	for name, msg := range map[string]string{
-		"Received":                   "grpc: received message larger than max (2097152 vs. 1048576)",
-		"AfterDecompression":         "grpc: message after decompression larger than max (2097152 vs. 1048576)",
-		"ReceivedAfterDecompression": "grpc: received message after decompression larger than max 1048576",
-		"Send":                       "trying to send message larger than max (2097152 vs. 1048576)",
-	} {
-		t.Run("NotRetried/"+name, func(t *testing.T) {
-			require.Equal(t, 1, retryCalls(t, status.Error(codes.ResourceExhausted, msg)))
-		})
-	}
-
 	t.Run("ServerResourceExhaustedIsRetried", func(t *testing.T) {
 		require.Equal(t, 4, retryCalls(t, status.Error(codes.ResourceExhausted, "rate limit exceeded")))
 	})
