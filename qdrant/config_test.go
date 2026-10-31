@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"math"
+	"net"
+	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -12,6 +15,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/test/bufconn"
 
 	"github.com/qdrant/go-client/qdrant"
 )
@@ -118,4 +122,129 @@ func TestClientHostAddress(t *testing.T) {
 		require.Equal(t, tt.want, client.GetGrpcClient().Conn().Target())
 		require.NoError(t, client.Close())
 	}
+}
+
+// largeReplyServer answers HealthCheck with a title of titleSize bytes.
+type largeReplyServer struct {
+	qdrant.UnimplementedQdrantServer
+	titleSize int
+	calls     *atomic.Int32
+}
+
+func (s largeReplyServer) HealthCheck(context.Context, *qdrant.HealthCheckRequest) (*qdrant.HealthCheckReply, error) {
+	s.calls.Add(1)
+	return &qdrant.HealthCheckReply{Title: strings.Repeat("x", s.titleSize)}, nil
+}
+
+// newInMemoryClient starts an in-memory server that replies with titleSize bytes
+// and returns a client connected to it, plus a count of the calls the server received.
+func newInMemoryClient(t *testing.T, titleSize int, cfg *qdrant.Config) (*qdrant.GrpcClient, *atomic.Int32) {
+	t.Helper()
+	calls := &atomic.Int32{}
+	lis := bufconn.Listen(1 << 20)
+	srv := grpc.NewServer(grpc.MaxSendMsgSize(math.MaxInt))
+	qdrant.RegisterQdrantServer(srv, largeReplyServer{titleSize: titleSize, calls: calls})
+	go func() { _ = srv.Serve(lis) }()
+	t.Cleanup(srv.Stop)
+
+	cfg.SkipCompatibilityCheck = true
+	cfg.GrpcOptions = append(cfg.GrpcOptions, grpc.WithContextDialer(
+		func(ctx context.Context, _ string) (net.Conn, error) { return lis.DialContext(ctx) },
+	))
+	client, err := qdrant.NewGrpcClient(cfg)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = client.Close() })
+	return client, calls
+}
+
+func TestMaxRecvMsgSize(t *testing.T) {
+	const mb = 1 << 20
+
+	t.Run("DefaultAcceptsResponseOver4MB", func(t *testing.T) {
+		client, _ := newInMemoryClient(t, 5*mb, &qdrant.Config{})
+		reply, err := client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
+		require.NoError(t, err)
+		require.Len(t, reply.GetTitle(), 5*mb)
+	})
+
+	t.Run("DefaultRejectsResponseOver64MB", func(t *testing.T) {
+		client, _ := newInMemoryClient(t, 65*mb, &qdrant.Config{})
+		_, err := client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
+		require.Equal(t, codes.ResourceExhausted, status.Code(err))
+	})
+
+	t.Run("MaxUintIsCappedNotWrapped", func(t *testing.T) {
+		client, _ := newInMemoryClient(t, 5*mb, &qdrant.Config{MaxRecvMsgSize: math.MaxUint})
+		reply, err := client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
+		require.NoError(t, err)
+		require.Len(t, reply.GetTitle(), 5*mb)
+	})
+
+	t.Run("CustomLimitRejectsLargerResponse", func(t *testing.T) {
+		client, _ := newInMemoryClient(t, 2*mb, &qdrant.Config{MaxRecvMsgSize: mb})
+		_, err := client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
+		require.Equal(t, codes.ResourceExhausted, status.Code(err))
+	})
+
+	t.Run("GrpcOptionsOverrideConfig", func(t *testing.T) {
+		client, _ := newInMemoryClient(t, 2*mb, &qdrant.Config{
+			MaxRecvMsgSize: mb,
+			GrpcOptions:    []grpc.DialOption{grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(8 * mb))},
+		})
+		reply, err := client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
+		require.NoError(t, err)
+		require.Len(t, reply.GetTitle(), 2*mb)
+	})
+}
+
+func TestRetrySkipsMessageTooLarge(t *testing.T) {
+	const mb = 1 << 20
+
+	t.Run("ResponseOverLimitIsNotRetried", func(t *testing.T) {
+		client, calls := newInMemoryClient(t, 2*mb, &qdrant.Config{
+			MaxRecvMsgSize: mb,
+			RetryConfig:    &qdrant.RetryConfig{MaxRetries: 3, BaseBackoff: time.Millisecond},
+		})
+		_, err := client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
+		require.Equal(t, codes.ResourceExhausted, status.Code(err))
+		require.Contains(t, status.Convert(err).Message(), "larger than max")
+		require.Equal(t, int32(1), calls.Load())
+	})
+
+	// grpc-go's size-limit messages, as returned by the invoker.
+	for name, msg := range map[string]string{
+		"Received":                   "grpc: received message larger than max (2097152 vs. 1048576)",
+		"AfterDecompression":         "grpc: message after decompression larger than max (2097152 vs. 1048576)",
+		"ReceivedAfterDecompression": "grpc: received message after decompression larger than max 1048576",
+		"Send":                       "trying to send message larger than max (2097152 vs. 1048576)",
+	} {
+		t.Run("NotRetried/"+name, func(t *testing.T) {
+			require.Equal(t, 1, retryCalls(t, status.Error(codes.ResourceExhausted, msg)))
+		})
+	}
+
+	t.Run("ServerResourceExhaustedIsRetried", func(t *testing.T) {
+		require.Equal(t, 4, retryCalls(t, status.Error(codes.ResourceExhausted, "rate limit exceeded")))
+	})
+
+	t.Run("UnavailableIsRetried", func(t *testing.T) {
+		require.Equal(t, 4, retryCalls(t, status.Error(codes.Unavailable, "unavailable")))
+	})
+}
+
+// retryCalls makes one call that always fails with err, with up to 3 retries,
+// and returns how many times the call was attempted.
+func retryCalls(t *testing.T, err error) int {
+	t.Helper()
+	calls := 0
+	client, newErr := qdrant.NewGrpcClient(&qdrant.Config{
+		SkipCompatibilityCheck: true,
+		RetryConfig:            &qdrant.RetryConfig{MaxRetries: 3, BaseBackoff: time.Millisecond},
+		GrpcOptions:            []grpc.DialOption{stubCalls(err, func(context.Context) { calls++ })},
+	})
+	require.NoError(t, newErr)
+	t.Cleanup(func() { _ = client.Close() })
+
+	_, _ = client.Qdrant().HealthCheck(context.Background(), &qdrant.HealthCheckRequest{})
+	return calls
 }

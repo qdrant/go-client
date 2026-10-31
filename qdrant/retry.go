@@ -4,6 +4,7 @@ import (
 	"context"
 	"math"
 	"math/rand/v2"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -19,6 +20,8 @@ const (
 // RetryConfig controls automatic retry behavior for transient gRPC failures.
 // When set on Config, a unary interceptor is registered that retries calls
 // receiving ResourceExhausted or Unavailable status codes.
+// A ResourceExhausted error for a message over the size limit is not retried,
+// because the same request would fail again.
 type RetryConfig struct {
 	// MaxRetries is the maximum number of retry attempts.
 	// Zero means no retries.
@@ -80,8 +83,25 @@ func isRetryable(err error) bool {
 	if !ok {
 		return false
 	}
-	code := st.Code()
-	return code == codes.ResourceExhausted || code == codes.Unavailable
+	switch st.Code() {
+	case codes.Unavailable:
+		return true
+	case codes.ResourceExhausted:
+		return !isMessageTooLarge(st.Message())
+	default:
+		return false
+	}
+}
+
+// grpc-go reports a message over the size limit as ResourceExhausted, the same code
+// the server uses for rate limiting. It has no typed error for it, so match the text
+// shared by its messages, for example:
+//   - "grpc: received message larger than max (...)"
+//   - "grpc: message after decompression larger than max (...)"
+//   - "grpc: received message after decompression larger than max ..."
+//   - "trying to send message larger than max (...)"
+func isMessageTooLarge(msg string) bool {
+	return strings.Contains(msg, "larger than max")
 }
 
 const backoffBase = 2.0
