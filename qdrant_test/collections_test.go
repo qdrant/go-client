@@ -6,6 +6,8 @@ import (
 
 	"github.com/qdrant/go-client/qdrant"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestCollectionsClient(t *testing.T) {
@@ -207,5 +209,6 @@ func TestCollectionsClient(t *testing.T) {
 	t.Run("DeleteNonExistentCollection", func(t *testing.T) {
 		err := client.DeleteCollection(ctx, "non_existent_collection")
 		require.Error(t, err)
+		require.Equal(t, codes.NotFound, status.Code(err))
 	})
 }
