@@ -31,6 +31,9 @@ func NewDefaultGrpcClient() (*GrpcClient, error) {
 
 // Create a new gRPC client with custom configuration.
 func NewGrpcClient(config *Config) (*GrpcClient, error) {
+	if config == nil {
+		return nil, errNilConfig
+	}
 	// We append config.GrpcOptions in the end
 	// so that user's explicit options take precedence
 	clientVersion := getClientVersion()
@@ -42,8 +45,10 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 		grpc.WithUserAgent(fmt.Sprintf("go-client/%s", clientVersion)),
 	)
 	if config.RetryConfig != nil {
+		// Copy it so later changes to the caller's RetryConfig don't affect running requests.
+		retryConfig := *config.RetryConfig
 		grpcOptions = append(grpcOptions,
-			grpc.WithChainUnaryInterceptor(config.RetryConfig.retryInterceptor()),
+			grpc.WithChainUnaryInterceptor(retryConfig.retryInterceptor()),
 		)
 	}
 	grpcOptions = append(grpcOptions, config.getKeepAliveParams()...)
@@ -100,12 +105,12 @@ func (c *GrpcClient) Qdrant() QdrantClient {
 	return c.qdrant
 }
 
-// Get the Collections service interface.
+// Get the Points service interface.
 func (c *GrpcClient) Points() PointsClient {
 	return c.points
 }
 
-// Get the Points service interface.
+// Get the Collections service interface.
 func (c *GrpcClient) Collections() CollectionsClient {
 	return c.collections
 }

@@ -2,6 +2,7 @@ package qdrant
 
 import (
 	"context"
+	"errors"
 	"io"
 
 	"google.golang.org/protobuf/proto"
@@ -404,6 +405,10 @@ func (c *Client) SearchMatrixOffsets(ctx context.Context, request *SearchMatrixP
 	return resp.GetResult(), nil
 }
 
+var ErrScrollAllOrderByUnsupported = errors.New(
+	"qdrant: ScrollAll does not support order_by, because ordered scrolls have no pagination cursor",
+)
+
 // ScrollIterator paginates through points in a collection by repeatedly
 // calling ScrollAndOffset under the hood. Obtain one via ScrollAll.
 type ScrollIterator struct {
@@ -411,27 +416,37 @@ type ScrollIterator struct {
 	ctx     context.Context
 	request *ScrollPoints
 	done    bool
+	err     error
 }
 
 // ScrollAll returns a ScrollIterator that automatically paginates through
 // all points matching the given request. Call Next repeatedly to retrieve
 // successive pages. Next returns io.EOF when no more points remain.
+//
+// Next returns ErrScrollAllOrderByUnsupported if the request uses order_by.
 func (c *Client) ScrollAll(ctx context.Context, request *ScrollPoints) *ScrollIterator {
 	cloned, ok := proto.Clone(request).(*ScrollPoints)
 	if !ok {
 		cloned = request
 	}
-	return &ScrollIterator{
+	it := &ScrollIterator{
 		client:  c,
 		ctx:     ctx,
 		request: cloned,
 	}
+	if cloned.GetOrderBy() != nil {
+		it.err = newQdrantErr(ErrScrollAllOrderByUnsupported, "ScrollAll", cloned.GetCollectionName())
+	}
+	return it
 }
 
 // Next returns the next page of points. When all points have been consumed,
 // it returns nil and io.EOF. Callers should check for io.EOF to detect
 // the end of iteration.
 func (it *ScrollIterator) Next() ([]*RetrievedPoint, error) {
+	if it.err != nil {
+		return nil, it.err
+	}
 	if it.done {
 		return nil, io.EOF
 	}

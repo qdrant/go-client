@@ -2,7 +2,9 @@ package qdrant
 
 import (
 	"context"
-	"errors"
+
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 )
 
 // Checks the existence of a collection.
@@ -111,7 +113,10 @@ func (c *Client) DeleteCollection(ctx context.Context, collectionName string) er
 		return newQdrantErr(err, "DeleteCollection", collectionName)
 	}
 	if !res.GetResult() {
-		return newQdrantErr(errors.New("failed to delete collection"), "DeleteCollection", collectionName)
+		return newQdrantErr(
+			status.Errorf(codes.NotFound, "collection %q does not exist", collectionName),
+			"DeleteCollection", collectionName,
+		)
 	}
 	return nil
 }

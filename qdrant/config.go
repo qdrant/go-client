@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"net/netip"
 	"strconv"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -25,6 +27,8 @@ const (
 	defaultPort                = 6334
 	defaultVersionCheckTimeout = time.Minute
 )
+
+var errNilConfig = errors.New("qdrant: config must not be nil")
 
 // Configuration options for the client.
 type Config struct {
@@ -100,9 +104,11 @@ func (c *Config) getAddr() string {
 	if port == 0 {
 		port = defaultPort
 	}
-	// Bare IPv6 addresses need brackets.
-	if net.ParseIP(host) != nil {
-		return net.JoinHostPort(host, strconv.Itoa(port))
+	// netip.ParseAddr accepts bare IPs, including IPv6 addresses with a zone
+	// identifier (for example "fe80::1%eth0"). gRPC parses the target as a URI,
+	// so the zone separator must be percent-encoded.
+	if _, err := netip.ParseAddr(host); err == nil {
+		return strings.ReplaceAll(net.JoinHostPort(host, strconv.Itoa(port)), "%", "%25")
 	}
 	return fmt.Sprintf("%s:%d", host, port)
 }
@@ -144,14 +150,14 @@ func (c *Config) getTransportCreds() grpc.DialOption {
 //
 //nolint:lll
 func (c *Config) getMetadataInterceptor() grpc.DialOption {
+	var kvPairs []string
+	if c.APIKey != "" {
+		kvPairs = append(kvPairs, apiKeyHeader, c.APIKey)
+	}
+	for k, v := range c.Headers {
+		kvPairs = append(kvPairs, k, v)
+	}
 	return grpc.WithChainUnaryInterceptor(func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		var kvPairs []string
-		if c.APIKey != "" {
-			kvPairs = append(kvPairs, apiKeyHeader, c.APIKey)
-		}
-		for k, v := range c.Headers {
-			kvPairs = append(kvPairs, k, v)
-		}
 		newCtx := metadata.AppendToOutgoingContext(ctx, kvPairs...)
 		return invoker(newCtx, method, req, reply, cc, opts...)
 	})
