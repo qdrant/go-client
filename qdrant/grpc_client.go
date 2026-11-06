@@ -43,6 +43,7 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 		config.getMetadataInterceptor(),
 		config.getRateLimitInterceptor(),
 		grpc.WithUserAgent(fmt.Sprintf("go-client/%s", clientVersion)),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(config.getMaxRecvMsgSize())),
 	)
 	if config.RetryConfig != nil {
 		// Copy it so later changes to the caller's RetryConfig don't affect running requests.
@@ -85,6 +86,12 @@ func NewGrpcClient(config *Config) (*GrpcClient, error) {
 }
 
 // Create a new gRPC client from existing connection.
+//
+// The connection keeps the options it was created with. Unlike NewGrpcClient, which
+// accepts responses up to Config.MaxRecvMsgSize (64MB by default), the connection uses
+// gRPC's default limit of 4MB unless it was created with a different one, for example:
+//
+//	grpc.NewClient(addr, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(64<<20)))
 func NewGrpcClientFromConn(conn *grpc.ClientConn) *GrpcClient {
 	return &GrpcClient{
 		conn:        conn,

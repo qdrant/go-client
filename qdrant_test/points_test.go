@@ -377,6 +377,47 @@ func TestPointsClient(t *testing.T) {
 		require.NotNil(t, res)
 	})
 
+	t.Run("ScrollResponseOver4MB", func(t *testing.T) {
+		// 1000 points x 1536 float32 values is about 6MB, over gRPC's default 4MB receive limit.
+		const largeVectorSize, largePointCount = 1536, 1000
+		largeCollection := collectionName + "Large"
+		err := client.CreateCollection(ctx, &qdrant.CreateCollection{
+			CollectionName: largeCollection,
+			VectorsConfig: qdrant.NewVectorsConfig(&qdrant.VectorParams{
+				Size:     largeVectorSize,
+				Distance: distance,
+			}),
+		})
+		require.NoError(t, err)
+
+		points := make([]*qdrant.PointStruct, largePointCount)
+		for i := range points {
+			vector := make([]float32, largeVectorSize)
+			vector[i%largeVectorSize] = 1
+			points[i] = &qdrant.PointStruct{
+				Id:      qdrant.NewIDNum(uint64(i + 1)),
+				Vectors: qdrant.NewVectorsDense(vector),
+			}
+		}
+		_, err = client.Upsert(ctx, &qdrant.UpsertPoints{
+			CollectionName: largeCollection,
+			Points:         points,
+			Wait:           &wait,
+		})
+		require.NoError(t, err)
+
+		got, err := client.Scroll(ctx, &qdrant.ScrollPoints{
+			CollectionName: largeCollection,
+			Limit:          qdrant.PtrOf(uint32(largePointCount)),
+			WithVectors:    qdrant.NewWithVectors(true),
+		})
+		require.NoError(t, err)
+		require.Len(t, got, largePointCount)
+
+		err = client.DeleteCollection(ctx, largeCollection)
+		require.NoError(t, err)
+	})
+
 	t.Run("DeletePoints", func(t *testing.T) {
 		res, err := client.Delete(ctx, &qdrant.DeletePoints{
 			CollectionName: collectionName,
