@@ -93,14 +93,13 @@ func isRetryable(err error) bool {
 	if !ok {
 		return false
 	}
-	switch st.Code() {
-	case codes.Unavailable:
+	if st.Code() == codes.Unavailable {
 		return true
-	case codes.ResourceExhausted:
-		return !isMessageTooLarge(st.Message())
-	default:
-		return false
 	}
+	if st.Code() == codes.ResourceExhausted {
+		return !isMessageTooLarge(st.Message())
+	}
+	return false
 }
 
 // grpc-go reports a message over the size limit as ResourceExhausted, the same code
