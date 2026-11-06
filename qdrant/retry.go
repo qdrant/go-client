@@ -4,16 +4,19 @@ import (
 	"context"
 	"math"
 	"math/rand/v2"
+	"strconv"
 	"time"
 
 	"google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	status "google.golang.org/grpc/status"
 )
 
 const (
 	defaultBaseBackoff = 100 * time.Millisecond
 	defaultMaxBackoff  = 5 * time.Second
+	maxRetryAfter      = 30 * time.Second
 )
 
 // RetryConfig controls automatic retry behavior for transient gRPC failures.
@@ -27,7 +30,7 @@ type RetryConfig struct {
 	// Defaults to 100ms if zero.
 	BaseBackoff time.Duration
 	// MaxBackoff caps the backoff duration between retries.
-	// Defaults to 5s if zero.
+	// Defaults to 5s if zero. A retry-after Header from the server can exceed it.
 	MaxBackoff time.Duration
 }
 
@@ -56,14 +59,21 @@ func (rc *RetryConfig) retryInterceptor() grpc.UnaryClientInterceptor {
 	) error {
 		// Count attempts without computing MaxRetries+1, which wraps to 0 for math.MaxUint.
 		for attempt := uint(0); ; attempt++ {
-			err := invoker(ctx, method, req, reply, cc, opts...)
+			var trailer metadata.MD
+			// A new slice, so the caller's opts are never written to.
+			callOpts := append([]grpc.CallOption{grpc.Trailer(&trailer)}, opts...)
+			err := invoker(ctx, method, req, reply, cc, callOpts...)
 			if err == nil {
 				return nil
 			}
 			if attempt == rc.MaxRetries || !isRetryable(err) {
 				return err
 			}
-			backoff := rc.backoffDuration(attempt)
+			serverWait := retryAfter(err, trailer)
+			if deadline, ok := ctx.Deadline(); ok && time.Until(deadline) < serverWait {
+				return err
+			}
+			backoff := max(rc.backoffDuration(attempt), serverWait)
 			timer := time.NewTimer(backoff)
 			select {
 			case <-ctx.Done():
@@ -82,6 +92,27 @@ func isRetryable(err error) bool {
 	}
 	code := st.Code()
 	return code == codes.ResourceExhausted || code == codes.Unavailable
+}
+
+// retryAfter returns the wait the server asked for in the retry-after header
+// of a ResourceExhausted response, capped at maxRetryAfter, or zero if there is none.
+func retryAfter(err error, trailer metadata.MD) time.Duration {
+	if status.Code(err) != codes.ResourceExhausted {
+		return 0
+	}
+	values := trailer.Get(retryAfterHeader)
+	if len(values) == 0 {
+		return 0
+	}
+	seconds, parseErr := strconv.Atoi(values[0])
+	if parseErr != nil || seconds < 0 {
+		return 0
+	}
+	// Cap before multiplying, so a large value can't overflow.
+	if seconds > int(maxRetryAfter.Seconds()) {
+		return maxRetryAfter
+	}
+	return time.Duration(seconds) * time.Second
 }
 
 const backoffBase = 2.0
