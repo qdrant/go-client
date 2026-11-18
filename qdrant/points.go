@@ -472,8 +472,11 @@ func (v *VectorOutput) GetDenseVector() *DenseVector {
 		return nil
 	}
 
-	// Check deprecated data field first
-	if data := v.GetData(); len(data) > 0 {
+	// The deprecated data field is shared by dense, sparse and multi vectors: sparse
+	// vectors also set indices, multi vectors also set vectors_count. Only treat it as
+	// dense when neither discriminator is present, otherwise its values would be
+	// reinterpreted as a single dense vector.
+	if data := v.GetData(); len(data) > 0 && v.GetIndices() == nil && v.GetVectorsCount() == 0 {
 		return &DenseVector{Data: data}
 	}
 
