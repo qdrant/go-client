@@ -25,6 +25,11 @@ func (e *QdrantError) Unwrap() error {
 	return e.err
 }
 
+// NewQdrantError wraps err as a *QdrantError. The contexts are joined into the message.
+func NewQdrantError(err error, operationName string, contexts ...string) *QdrantError {
+	return newQdrantErr(err, operationName, contexts...)
+}
+
 func newQdrantErr(err error, operationName string, contexts ...string) *QdrantError {
 	combinedContext := strings.Join(contexts, ": ")
 	return &QdrantError{
