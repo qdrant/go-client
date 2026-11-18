@@ -1,6 +1,7 @@
 package qdrant
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"maps"
@@ -17,6 +18,7 @@ type Client struct {
 	clients   []*GrpcClient
 	next      uint32
 	closeOnce sync.Once
+	headers   map[string]string
 }
 
 // NewClient creates a new Qdrant client.
@@ -36,6 +38,7 @@ func NewClient(config *Config) (*Client, error) {
 	// Create the client, with an inner connection pool of go grpc clients
 	client := &Client{
 		clients: make([]*GrpcClient, 0, cfgCopy.PoolSize),
+		headers: make(map[string]string),
 	}
 	// Iterate over the pool size to create the individual client.
 	for i := range cfgCopy.PoolSize {
@@ -119,6 +122,51 @@ func (c *Client) Close() error {
 		}
 	})
 	return errors.Join(errs...)
+}
+
+// WithHeader returns a shallow copy of the Client configured with an additional
+// outgoing gRPC metadata header sent on all requests made through this client.
+func (c *Client) WithHeader(key, value string) *Client {
+	if c == nil {
+		return nil
+	}
+	newHeaders := make(map[string]string, len(c.headers)+1)
+	maps.Copy(newHeaders, c.headers)
+	newHeaders[key] = value
+	return &Client{
+		clients: c.clients,
+		next:    c.next,
+		headers: newHeaders,
+	}
+}
+
+// WithHeaders returns a shallow copy of the Client configured with additional
+// outgoing gRPC metadata headers sent on all requests made through this client.
+func (c *Client) WithHeaders(headers map[string]string) *Client {
+	if c == nil {
+		return nil
+	}
+	newHeaders := make(map[string]string, len(c.headers)+len(headers))
+	maps.Copy(newHeaders, c.headers)
+	maps.Copy(newHeaders, headers)
+	return &Client{
+		clients: c.clients,
+		next:    c.next,
+		headers: newHeaders,
+	}
+}
+
+// OutgoingContext returns a context enriched with the client's custom metadata headers,
+// as well as any existing outgoing metadata.
+func (c *Client) OutgoingContext(ctx context.Context) context.Context {
+	return c.withOutgoingContext(ctx)
+}
+
+func (c *Client) withOutgoingContext(ctx context.Context) context.Context {
+	if c == nil || len(c.headers) == 0 {
+		return ctx
+	}
+	return WithHeaders(ctx, c.headers)
 }
 
 // Creates a pointer to a value of any type.

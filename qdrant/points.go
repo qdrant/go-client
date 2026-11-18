@@ -5,8 +5,56 @@ import (
 	"errors"
 	"io"
 
+	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )
+
+// pointConfig holds request-level options for point operations.
+type pointConfig struct {
+	ctx      context.Context
+	grpcOpts []grpc.CallOption
+}
+
+// PointOption configures point operations, such as attaching custom gRPC metadata headers
+// or call options.
+type PointOption func(*pointConfig)
+
+// WithPointHeader returns a PointOption that sets a custom gRPC metadata header
+// on the outgoing request context for the point operation.
+func WithPointHeader(key, value string) PointOption {
+	return func(cfg *pointConfig) {
+		cfg.ctx = WithHeader(cfg.ctx, key, value)
+	}
+}
+
+// WithPointHeaders returns a PointOption that sets multiple custom gRPC metadata headers
+// on the outgoing request context for the point operation.
+func WithPointHeaders(headers map[string]string) PointOption {
+	return func(cfg *pointConfig) {
+		cfg.ctx = WithHeaders(cfg.ctx, headers)
+	}
+}
+
+// WithPointGrpcOption returns a PointOption that appends a grpc.CallOption to the call.
+func WithPointGrpcOption(opt grpc.CallOption) PointOption {
+	return func(cfg *pointConfig) {
+		if opt != nil {
+			cfg.grpcOpts = append(cfg.grpcOpts, opt)
+		}
+	}
+}
+
+func (c *Client) applyPointOptions(ctx context.Context, opts ...PointOption) (context.Context, []grpc.CallOption) {
+	cfg := &pointConfig{
+		ctx: c.withOutgoingContext(ctx),
+	}
+	for _, opt := range opts {
+		if opt != nil {
+			opt(cfg)
+		}
+	}
+	return cfg.ctx, cfg.grpcOpts
+}
 
 // Performs insert + updates on points. If a point with a given ID already exists, it will be overwritten.
 //
@@ -17,8 +65,9 @@ import (
 // Returns:
 //   - *UpdateResult: The result of the upsert operation.
 //   - error: An error if the operation fails.
-func (c *Client) Upsert(ctx context.Context, request *UpsertPoints) (*UpdateResult, error) {
-	resp, err := c.GetPointsClient().Upsert(ctx, request)
+func (c *Client) Upsert(ctx context.Context, request *UpsertPoints, opts ...PointOption) (*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().Upsert(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "Upsert", request.GetCollectionName())
 	}
@@ -34,8 +83,9 @@ func (c *Client) Upsert(ctx context.Context, request *UpsertPoints) (*UpdateResu
 // Returns:
 //   - *UpdateResult: The result of the delete operation.
 //   - error: An error if the operation fails.
-func (c *Client) Delete(ctx context.Context, request *DeletePoints) (*UpdateResult, error) {
-	resp, err := c.GetPointsClient().Delete(ctx, request)
+func (c *Client) Delete(ctx context.Context, request *DeletePoints, opts ...PointOption) (*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().Delete(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "Delete", request.GetCollectionName())
 	}
@@ -51,8 +101,9 @@ func (c *Client) Delete(ctx context.Context, request *DeletePoints) (*UpdateResu
 // Returns:
 //   - []*RetrievedPoint: A slice of retrieved points.
 //   - error: An error if the operation fails.
-func (c *Client) Get(ctx context.Context, request *GetPoints) ([]*RetrievedPoint, error) {
-	resp, err := c.GetPointsClient().Get(ctx, request)
+func (c *Client) Get(ctx context.Context, request *GetPoints, opts ...PointOption) ([]*RetrievedPoint, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().Get(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "Get", request.GetCollectionName())
 	}
@@ -68,8 +119,9 @@ func (c *Client) Get(ctx context.Context, request *GetPoints) ([]*RetrievedPoint
 // Returns:
 //   - []*RetrievedPoint: A slice of retrieved points.
 //   - error: An error if the operation fails.
-func (c *Client) Scroll(ctx context.Context, request *ScrollPoints) ([]*RetrievedPoint, error) {
-	resp, err := c.GetPointsClient().Scroll(ctx, request)
+func (c *Client) Scroll(ctx context.Context, request *ScrollPoints, opts ...PointOption) ([]*RetrievedPoint, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().Scroll(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "Scroll", request.GetCollectionName())
 	}
@@ -86,8 +138,13 @@ func (c *Client) Scroll(ctx context.Context, request *ScrollPoints) ([]*Retrieve
 //   - []*RetrievedPoint: A slice of retrieved points.
 //   - *PointId: The next page offset for pagination.
 //   - error: An error if the operation fails.
-func (c *Client) ScrollAndOffset(ctx context.Context, request *ScrollPoints) ([]*RetrievedPoint, *PointId, error) {
-	resp, err := c.GetPointsClient().Scroll(ctx, request)
+func (c *Client) ScrollAndOffset(
+	ctx context.Context,
+	request *ScrollPoints,
+	opts ...PointOption,
+) ([]*RetrievedPoint, *PointId, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().Scroll(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, nil, newQdrantErr(err, "ScrollAndOffset", request.GetCollectionName())
 	}
@@ -103,8 +160,13 @@ func (c *Client) ScrollAndOffset(ctx context.Context, request *ScrollPoints) ([]
 // Returns:
 //   - *UpdateResult: The result of the update operation.
 //   - error: An error if the operation fails.
-func (c *Client) UpdateVectors(ctx context.Context, request *UpdatePointVectors) (*UpdateResult, error) {
-	resp, err := c.GetPointsClient().UpdateVectors(ctx, request)
+func (c *Client) UpdateVectors(
+	ctx context.Context,
+	request *UpdatePointVectors,
+	opts ...PointOption,
+) (*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().UpdateVectors(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "UpdateVectors", request.GetCollectionName())
 	}
@@ -120,8 +182,13 @@ func (c *Client) UpdateVectors(ctx context.Context, request *UpdatePointVectors)
 // Returns:
 //   - *UpdateResult: The result of the delete operation.
 //   - error: An error if the operation fails.
-func (c *Client) DeleteVectors(ctx context.Context, request *DeletePointVectors) (*UpdateResult, error) {
-	resp, err := c.GetPointsClient().DeleteVectors(ctx, request)
+func (c *Client) DeleteVectors(
+	ctx context.Context,
+	request *DeletePointVectors,
+	opts ...PointOption,
+) (*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().DeleteVectors(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "DeleteVectors", request.GetCollectionName())
 	}
@@ -138,8 +205,13 @@ func (c *Client) DeleteVectors(ctx context.Context, request *DeletePointVectors)
 // Returns:
 //   - *UpdateResult: The result of the set operation.
 //   - error: An error if the operation fails.
-func (c *Client) SetPayload(ctx context.Context, request *SetPayloadPoints) (*UpdateResult, error) {
-	resp, err := c.GetPointsClient().SetPayload(ctx, request)
+func (c *Client) SetPayload(
+	ctx context.Context,
+	request *SetPayloadPoints,
+	opts ...PointOption,
+) (*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().SetPayload(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "SetPayload", request.GetCollectionName())
 	}
@@ -155,8 +227,13 @@ func (c *Client) SetPayload(ctx context.Context, request *SetPayloadPoints) (*Up
 // Returns:
 //   - *UpdateResult: The result of the overwrite operation.
 //   - error: An error if the operation fails.
-func (c *Client) OverwritePayload(ctx context.Context, request *SetPayloadPoints) (*UpdateResult, error) {
-	resp, err := c.GetPointsClient().OverwritePayload(ctx, request)
+func (c *Client) OverwritePayload(
+	ctx context.Context,
+	request *SetPayloadPoints,
+	opts ...PointOption,
+) (*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().OverwritePayload(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "OverwritePayload", request.GetCollectionName())
 	}
@@ -172,8 +249,13 @@ func (c *Client) OverwritePayload(ctx context.Context, request *SetPayloadPoints
 // Returns:
 //   - *UpdateResult: The result of the delete operation.
 //   - error: An error if the operation fails.
-func (c *Client) DeletePayload(ctx context.Context, request *DeletePayloadPoints) (*UpdateResult, error) {
-	resp, err := c.GetPointsClient().DeletePayload(ctx, request)
+func (c *Client) DeletePayload(
+	ctx context.Context,
+	request *DeletePayloadPoints,
+	opts ...PointOption,
+) (*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().DeletePayload(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "DeletePayload", request.GetCollectionName())
 	}
@@ -189,8 +271,13 @@ func (c *Client) DeletePayload(ctx context.Context, request *DeletePayloadPoints
 // Returns:
 //   - *UpdateResult: The result of the clear operation.
 //   - error: An error if the operation fails.
-func (c *Client) ClearPayload(ctx context.Context, request *ClearPayloadPoints) (*UpdateResult, error) {
-	resp, err := c.GetPointsClient().ClearPayload(ctx, request)
+func (c *Client) ClearPayload(
+	ctx context.Context,
+	request *ClearPayloadPoints,
+	opts ...PointOption,
+) (*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().ClearPayload(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "ClearPayload", request.GetCollectionName())
 	}
@@ -206,8 +293,13 @@ func (c *Client) ClearPayload(ctx context.Context, request *ClearPayloadPoints) 
 // Returns:
 //   - *UpdateResult: The result of the index creation operation.
 //   - error: An error if the operation fails.
-func (c *Client) CreateFieldIndex(ctx context.Context, request *CreateFieldIndexCollection) (*UpdateResult, error) {
-	resp, err := c.GetPointsClient().CreateFieldIndex(ctx, request)
+func (c *Client) CreateFieldIndex(
+	ctx context.Context,
+	request *CreateFieldIndexCollection,
+	opts ...PointOption,
+) (*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().CreateFieldIndex(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "CreateFieldIndex", request.GetCollectionName())
 	}
@@ -223,8 +315,13 @@ func (c *Client) CreateFieldIndex(ctx context.Context, request *CreateFieldIndex
 // Returns:
 //   - *UpdateResult: The result of the index deletion operation.
 //   - error: An error if the operation fails.
-func (c *Client) DeleteFieldIndex(ctx context.Context, request *DeleteFieldIndexCollection) (*UpdateResult, error) {
-	resp, err := c.GetPointsClient().DeleteFieldIndex(ctx, request)
+func (c *Client) DeleteFieldIndex(
+	ctx context.Context,
+	request *DeleteFieldIndexCollection,
+	opts ...PointOption,
+) (*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().DeleteFieldIndex(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "DeleteFieldIndex", request.GetCollectionName())
 	}
@@ -240,8 +337,13 @@ func (c *Client) DeleteFieldIndex(ctx context.Context, request *DeleteFieldIndex
 // Returns:
 //   - *UpdateResult: The result of the operation.
 //   - error: An error if the operation fails.
-func (c *Client) CreateVectorName(ctx context.Context, request *CreateVectorNameRequest) (*UpdateResult, error) {
-	resp, err := c.GetPointsClient().CreateVectorName(ctx, request)
+func (c *Client) CreateVectorName(
+	ctx context.Context,
+	request *CreateVectorNameRequest,
+	opts ...PointOption,
+) (*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().CreateVectorName(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "CreateVectorName", request.GetCollectionName())
 	}
@@ -257,8 +359,13 @@ func (c *Client) CreateVectorName(ctx context.Context, request *CreateVectorName
 // Returns:
 //   - *UpdateResult: The result of the operation.
 //   - error: An error if the operation fails.
-func (c *Client) DeleteVectorName(ctx context.Context, request *DeleteVectorNameRequest) (*UpdateResult, error) {
-	resp, err := c.GetPointsClient().DeleteVectorName(ctx, request)
+func (c *Client) DeleteVectorName(
+	ctx context.Context,
+	request *DeleteVectorNameRequest,
+	opts ...PointOption,
+) (*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().DeleteVectorName(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "DeleteVectorName", request.GetCollectionName())
 	}
@@ -275,8 +382,9 @@ func (c *Client) DeleteVectorName(ctx context.Context, request *DeleteVectorName
 // Returns:
 //   - uint64: The count of points matching the conditions.
 //   - error: An error if the operation fails.
-func (c *Client) Count(ctx context.Context, request *CountPoints) (uint64, error) {
-	resp, err := c.GetPointsClient().Count(ctx, request)
+func (c *Client) Count(ctx context.Context, request *CountPoints, opts ...PointOption) (uint64, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().Count(ctx, request, grpcOpts...)
 	if err != nil {
 		return 0, newQdrantErr(err, "Count", request.GetCollectionName())
 	}
@@ -292,8 +400,13 @@ func (c *Client) Count(ctx context.Context, request *CountPoints) (uint64, error
 // Returns:
 //   - []*UpdateResult: A slice of results for each update operation.
 //   - error: An error if the operation fails.
-func (c *Client) UpdateBatch(ctx context.Context, request *UpdateBatchPoints) ([]*UpdateResult, error) {
-	resp, err := c.GetPointsClient().UpdateBatch(ctx, request)
+func (c *Client) UpdateBatch(
+	ctx context.Context,
+	request *UpdateBatchPoints,
+	opts ...PointOption,
+) ([]*UpdateResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().UpdateBatch(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "UpdateBatch", request.GetCollectionName())
 	}
@@ -311,8 +424,9 @@ func (c *Client) UpdateBatch(ctx context.Context, request *UpdateBatchPoints) ([
 // Returns:
 //   - []*ScoredPoint: A slice of scored points matching the query.
 //   - error: An error if the operation fails.
-func (c *Client) Query(ctx context.Context, request *QueryPoints) ([]*ScoredPoint, error) {
-	resp, err := c.GetPointsClient().Query(ctx, request)
+func (c *Client) Query(ctx context.Context, request *QueryPoints, opts ...PointOption) ([]*ScoredPoint, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().Query(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "Query", request.GetCollectionName())
 	}
@@ -330,8 +444,13 @@ func (c *Client) Query(ctx context.Context, request *QueryPoints) ([]*ScoredPoin
 // Returns:
 //   - []*BatchResult: A slice of batch results for each query.
 //   - error: An error if the operation fails.
-func (c *Client) QueryBatch(ctx context.Context, request *QueryBatchPoints) ([]*BatchResult, error) {
-	resp, err := c.GetPointsClient().QueryBatch(ctx, request)
+func (c *Client) QueryBatch(
+	ctx context.Context,
+	request *QueryBatchPoints,
+	opts ...PointOption,
+) ([]*BatchResult, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().QueryBatch(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "QueryBatch", request.GetCollectionName())
 	}
@@ -349,8 +468,13 @@ func (c *Client) QueryBatch(ctx context.Context, request *QueryBatchPoints) ([]*
 // Returns:
 //   - []*PointGroup: A slice of point groups matching the query.
 //   - error: An error if the operation fails.
-func (c *Client) QueryGroups(ctx context.Context, request *QueryPointGroups) ([]*PointGroup, error) {
-	resp, err := c.GetPointsClient().QueryGroups(ctx, request)
+func (c *Client) QueryGroups(
+	ctx context.Context,
+	request *QueryPointGroups,
+	opts ...PointOption,
+) ([]*PointGroup, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().QueryGroups(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "QueryGroups", request.GetCollectionName())
 	}
@@ -365,8 +489,9 @@ func (c *Client) QueryGroups(ctx context.Context, request *QueryPointGroups) ([]
 //
 // Returns:
 //   - []*FacetHit: A slice of facet hits matching the query. Each hit contains the value and the count for this value
-func (c *Client) Facet(ctx context.Context, request *FacetCounts) ([]*FacetHit, error) {
-	resp, err := c.GetPointsClient().Facet(ctx, request)
+func (c *Client) Facet(ctx context.Context, request *FacetCounts, opts ...PointOption) ([]*FacetHit, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().Facet(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "Facet", request.GetCollectionName())
 	}
@@ -381,8 +506,13 @@ func (c *Client) Facet(ctx context.Context, request *FacetCounts) ([]*FacetHit, 
 //
 // Returns:
 //   - *SearchMatrixPairs: Pairwise representation of distances.
-func (c *Client) SearchMatrixPairs(ctx context.Context, request *SearchMatrixPoints) (*SearchMatrixPairs, error) {
-	resp, err := c.GetPointsClient().SearchMatrixPairs(ctx, request)
+func (c *Client) SearchMatrixPairs(
+	ctx context.Context,
+	request *SearchMatrixPoints,
+	opts ...PointOption,
+) (*SearchMatrixPairs, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().SearchMatrixPairs(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "SearchMatrixPairs", request.GetCollectionName())
 	}
@@ -397,8 +527,13 @@ func (c *Client) SearchMatrixPairs(ctx context.Context, request *SearchMatrixPoi
 //
 // Returns:
 //   - *SearchMatrixOffsets: Parallel lists of offsets within an id list, and the distance between them.
-func (c *Client) SearchMatrixOffsets(ctx context.Context, request *SearchMatrixPoints) (*SearchMatrixOffsets, error) {
-	resp, err := c.GetPointsClient().SearchMatrixOffsets(ctx, request)
+func (c *Client) SearchMatrixOffsets(
+	ctx context.Context,
+	request *SearchMatrixPoints,
+	opts ...PointOption,
+) (*SearchMatrixOffsets, error) {
+	ctx, grpcOpts := c.applyPointOptions(ctx, opts...)
+	resp, err := c.GetPointsClient().SearchMatrixOffsets(ctx, request, grpcOpts...)
 	if err != nil {
 		return nil, newQdrantErr(err, "SearchMatrixOffsets", request.GetCollectionName())
 	}
@@ -417,6 +552,7 @@ type ScrollIterator struct {
 	request *ScrollPoints
 	done    bool
 	err     error
+	opts    []PointOption
 }
 
 // ScrollAll returns a ScrollIterator that automatically paginates through
@@ -424,7 +560,7 @@ type ScrollIterator struct {
 // successive pages. Next returns io.EOF when no more points remain.
 //
 // Next returns ErrScrollAllOrderByUnsupported if the request uses order_by.
-func (c *Client) ScrollAll(ctx context.Context, request *ScrollPoints) *ScrollIterator {
+func (c *Client) ScrollAll(ctx context.Context, request *ScrollPoints, opts ...PointOption) *ScrollIterator {
 	cloned, ok := proto.Clone(request).(*ScrollPoints)
 	if !ok {
 		cloned = request
@@ -433,6 +569,7 @@ func (c *Client) ScrollAll(ctx context.Context, request *ScrollPoints) *ScrollIt
 		client:  c,
 		ctx:     ctx,
 		request: cloned,
+		opts:    opts,
 	}
 	if cloned.GetOrderBy() != nil {
 		it.err = newQdrantErr(ErrScrollAllOrderByUnsupported, "ScrollAll", cloned.GetCollectionName())
@@ -450,7 +587,7 @@ func (it *ScrollIterator) Next() ([]*RetrievedPoint, error) {
 	if it.done {
 		return nil, io.EOF
 	}
-	points, nextOffset, err := it.client.ScrollAndOffset(it.ctx, it.request)
+	points, nextOffset, err := it.client.ScrollAndOffset(it.ctx, it.request, it.opts...)
 	if err != nil {
 		return nil, err
 	}
