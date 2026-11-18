@@ -105,15 +105,9 @@ func (c *Config) getAddr() string {
 	if port == 0 {
 		port = defaultPort
 	}
-	// netip.ParseAddr accepts bare IPs, including IPv6 addresses with a zone
-	// identifier (for example "fe80::1%eth0"). Strip surrounding brackets so a
-	// bracketed IPv6 address such as "[fe80::1%eth0]" takes the same path.
-	// gRPC parses the target as a URI, so the zone separator must be
-	// percent-encoded.
-	addrHost := host
-	if strings.HasPrefix(host, "[") && strings.HasSuffix(host, "]") {
-		addrHost = host[1 : len(host)-1]
-	}
+	// Accept bare and bracketed IPs. gRPC parses the target as a URI,
+	// so percent-encode the IPv6 zone separator.
+	addrHost := strings.Trim(host, "[]")
 	if _, err := netip.ParseAddr(addrHost); err == nil {
 		return strings.ReplaceAll(net.JoinHostPort(addrHost, strconv.Itoa(port)), "%", "%25")
 	}
