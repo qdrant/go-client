@@ -8,9 +8,10 @@ cd "$PROJECT_ROOT"
 PROTO_FILE="internal/proto/serverless_collections.proto"
 
 # buf.validate is server-side only and would need an extra proto dependency. Only plain
-# single-option lists are stripped. Anything else is left in place and fails the check.
+# single-option lists and brace-delimited message options are stripped. Anything else is
+# left in place and fails the check.
 PROTO=$(curl -fsSL https://raw.githubusercontent.com/qdrant/qdrant-cloud-public-api/main/proto/qdrant/serverless/collections.proto |
-    perl -0pe 's|import "buf/validate/validate.proto";\n||; s/\s*\[\(buf\.validate\.[^\[\]"\x27,]*\]//g')
+    perl -0pe 's|import "buf/validate/validate.proto";\n||; s/\s*\[\(buf\.validate\.[^\[\]"\x27,]*\]//g; s/\n[ \t]*option \(buf\.validate\.[\w.]+\)[\w.]* = \{[^{}]*\};//g')
 if grep -qE 'buf[./]validate' <<< "$PROTO"; then
     echo "unexpected serverless proto, update $0" >&2
     exit 1

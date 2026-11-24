@@ -91,11 +91,11 @@ func TestServerlessCollections(t *testing.T) {
 		PayloadIndexes: map[string]*serverless.PayloadIndexConfig{
 			"color":   serverless.NewPayloadIndexConfigKeyword(nil),
 			"age":     serverless.NewPayloadIndexConfigInteger(&serverless.IntegerIndex{Range: qdrant.PtrOf(false)}),
-			"price":   serverless.NewPayloadIndexConfigFloat(),
-			"user_id": serverless.NewPayloadIndexConfigUUID(),
-			"created": serverless.NewPayloadIndexConfigDatetime(),
-			"geo":     serverless.NewPayloadIndexConfigGeo(),
-			"active":  serverless.NewPayloadIndexConfigBool(),
+			"price":   serverless.NewPayloadIndexConfigFloat(nil),
+			"user_id": serverless.NewPayloadIndexConfigUUID(nil),
+			"created": serverless.NewPayloadIndexConfigDatetime(nil),
+			"geo":     serverless.NewPayloadIndexConfigGeo(nil),
+			"active":  serverless.NewPayloadIndexConfigBool(nil),
 			"title": serverless.NewPayloadIndexConfigText(&serverless.TextIndex{
 				Tokenizer: serverless.Tokenizer_WORD.Enum(),
 				Stopwords: &serverless.StopwordsSet{Languages: []string{"english"}},
@@ -103,6 +103,11 @@ func TestServerlessCollections(t *testing.T) {
 			}),
 			"body": serverless.NewPayloadIndexConfigText(&serverless.TextIndex{
 				Stemmer: serverless.NewStemmingAlgorithmDisabled(),
+				Scoring: &serverless.TextScoringParams{Type: serverless.TextScoringType_BM25.Enum()},
+			}),
+			"source": serverless.NewPayloadIndexConfigText(&serverless.TextIndex{
+				Tokenizer: serverless.Tokenizer_CODE.Enum(),
+				Scoring:   &serverless.TextScoringParams{},
 			}),
 		},
 	}

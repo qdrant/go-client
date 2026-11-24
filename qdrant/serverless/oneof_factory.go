@@ -26,29 +26,41 @@ func NewPayloadIndexConfigInteger(params *IntegerIndex) *PayloadIndexConfig {
 	}
 }
 
-// Creates a *PayloadIndexConfig instance for a float index.
-func NewPayloadIndexConfigFloat() *PayloadIndexConfig {
+// Creates a *PayloadIndexConfig instance from *FloatIndex.
+// A nil params uses the defaults.
+func NewPayloadIndexConfigFloat(params *FloatIndex) *PayloadIndexConfig {
+	if params == nil {
+		params = &FloatIndex{}
+	}
 	return &PayloadIndexConfig{
 		Index: &PayloadIndexConfig_Float{
-			Float: &FloatIndex{},
+			Float: params,
 		},
 	}
 }
 
-// Creates a *PayloadIndexConfig instance for a UUID index.
-func NewPayloadIndexConfigUUID() *PayloadIndexConfig {
+// Creates a *PayloadIndexConfig instance from *UuidIndex.
+// A nil params uses the defaults.
+func NewPayloadIndexConfigUUID(params *UuidIndex) *PayloadIndexConfig {
+	if params == nil {
+		params = &UuidIndex{}
+	}
 	return &PayloadIndexConfig{
 		Index: &PayloadIndexConfig_Uuid{
-			Uuid: &UuidIndex{},
+			Uuid: params,
 		},
 	}
 }
 
-// Creates a *PayloadIndexConfig instance for a datetime index.
-func NewPayloadIndexConfigDatetime() *PayloadIndexConfig {
+// Creates a *PayloadIndexConfig instance from *DatetimeIndex.
+// A nil params uses the defaults.
+func NewPayloadIndexConfigDatetime(params *DatetimeIndex) *PayloadIndexConfig {
+	if params == nil {
+		params = &DatetimeIndex{}
+	}
 	return &PayloadIndexConfig{
 		Index: &PayloadIndexConfig_Datetime{
-			Datetime: &DatetimeIndex{},
+			Datetime: params,
 		},
 	}
 }
@@ -66,20 +78,28 @@ func NewPayloadIndexConfigText(params *TextIndex) *PayloadIndexConfig {
 	}
 }
 
-// Creates a *PayloadIndexConfig instance for a geo index.
-func NewPayloadIndexConfigGeo() *PayloadIndexConfig {
+// Creates a *PayloadIndexConfig instance from *GeoIndex.
+// A nil params uses the defaults.
+func NewPayloadIndexConfigGeo(params *GeoIndex) *PayloadIndexConfig {
+	if params == nil {
+		params = &GeoIndex{}
+	}
 	return &PayloadIndexConfig{
 		Index: &PayloadIndexConfig_Geo{
-			Geo: &GeoIndex{},
+			Geo: params,
 		},
 	}
 }
 
-// Creates a *PayloadIndexConfig instance for a bool index.
-func NewPayloadIndexConfigBool() *PayloadIndexConfig {
+// Creates a *PayloadIndexConfig instance from *BoolIndex.
+// A nil params uses the defaults.
+func NewPayloadIndexConfigBool(params *BoolIndex) *PayloadIndexConfig {
+	if params == nil {
+		params = &BoolIndex{}
+	}
 	return &PayloadIndexConfig{
 		Index: &PayloadIndexConfig_Bool{
-			Bool: &BoolIndex{},
+			Bool: params,
 		},
 	}
 }
