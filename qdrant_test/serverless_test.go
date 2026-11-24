@@ -168,9 +168,9 @@ func TestServerlessPoints(t *testing.T) {
 		require.Eventually(t, condition, time.Minute, 250*time.Millisecond)
 	}
 	name := serverlessCollection(t, client, &serverless.CollectionConfig{
-		DenseVectors: map[string]*serverless.DenseVectorConfig{
-			"": {Size: 4, Distance: serverless.Distance_DOT},
-		},
+		DenseVectors: serverless.NewDenseVectors(&serverless.DenseVectorConfig{
+			Size: 4, Distance: serverless.Distance_DOT,
+		}),
 		PayloadIndexes: map[string]*serverless.PayloadIndexConfig{
 			"color": serverless.NewPayloadIndexConfigKeyword(nil),
 		},

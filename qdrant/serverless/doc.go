@@ -11,9 +11,9 @@ Point operations take the same requests as [qdrant.Client]:
 	})
 	...
 	_, err = client.CreateCollection(ctx, "my-collection", &serverless.CollectionConfig{
-		DenseVectors: map[string]*serverless.DenseVectorConfig{
-			"": {Size: 1536, Distance: serverless.Distance_COSINE},
-		},
+		DenseVectors: serverless.NewDenseVectors(&serverless.DenseVectorConfig{
+			Size: 1536, Distance: serverless.Distance_COSINE,
+		}),
 	})
 
 The generated types use the same proto names as the Go stubs of

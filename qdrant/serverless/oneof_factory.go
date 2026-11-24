@@ -1,5 +1,11 @@
 package serverless
 
+// Creates DenseVectors with a single unnamed (default) vector, the one point operations
+// use when no vector name is given.
+func NewDenseVectors(config *DenseVectorConfig) map[string]*DenseVectorConfig {
+	return map[string]*DenseVectorConfig{"": config}
+}
+
 // Creates a *PayloadIndexConfig instance from *KeywordIndex.
 // A nil params uses the defaults.
 func NewPayloadIndexConfigKeyword(params *KeywordIndex) *PayloadIndexConfig {

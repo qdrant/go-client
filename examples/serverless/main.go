@@ -43,9 +43,9 @@ func createCollection(ctx context.Context, client *serverless.Client, collection
 	}
 
 	created, err := client.CreateCollection(ctx, collectionName, &serverless.CollectionConfig{
-		DenseVectors: map[string]*serverless.DenseVectorConfig{
-			"": {Size: 4, Distance: serverless.Distance_COSINE},
-		},
+		DenseVectors: serverless.NewDenseVectors(&serverless.DenseVectorConfig{
+			Size: 4, Distance: serverless.Distance_COSINE,
+		}),
 		PayloadIndexes: map[string]*serverless.PayloadIndexConfig{
 			"color": serverless.NewPayloadIndexConfigKeyword(nil),
 		},
