@@ -172,31 +172,31 @@ func newValue(v any) (*Value, error) {
 	case []interface{}:
 		return newValueFromSlice(v)
 	case []string:
-		return newValueFromSlice(v)
+		return newValueFromStrings(v)
 	case []bool:
-		return newValueFromSlice(v)
+		return newValueFromBools(v)
 	case []int:
-		return newValueFromSlice(v)
+		return newValueFromInts(v)
 	case []int8:
-		return newValueFromSlice(v)
+		return newValueFromInts(v)
 	case []int16:
-		return newValueFromSlice(v)
+		return newValueFromInts(v)
 	case []int32:
-		return newValueFromSlice(v)
+		return newValueFromInts(v)
 	case []int64:
-		return newValueFromSlice(v)
+		return newValueFromInts(v)
 	case []uint:
-		return newValueFromSlice(v)
+		return newValueFromUints(v)
 	case []uint16:
-		return newValueFromSlice(v)
+		return newValueFromUints(v)
 	case []uint32:
-		return newValueFromSlice(v)
+		return newValueFromUints(v)
 	case []uint64:
-		return newValueFromSlice(v)
+		return newValueFromUints(v)
 	case []float32:
-		return newValueFromSlice(v)
+		return newValueFromFloats(v)
 	case []float64:
-		return newValueFromSlice(v)
+		return newValueFromFloats(v)
 	case []*Value:
 		return newValueFromSlice(v)
 	case []map[string]interface{}:
@@ -240,6 +240,72 @@ func newValueFromSlice[T any](items []T) (*Value, error) {
 		list[i] = value
 	}
 	return NewValueFromList(list...), nil
+}
+
+// Constructs a list Value of n elements, allocating the elements and their kinds as one array each
+// instead of separately per element. Keeping any one element reachable keeps all n in memory.
+func newBatchedList[K any, PK interface {
+	*K
+	isValue_Kind
+}](n int, fill func(i int, kind *K) error) (*Value, error) {
+	list := make([]*Value, n)
+	values := make([]Value, n)
+	kinds := make([]K, n)
+	for i := range n {
+		if err := fill(i, &kinds[i]); err != nil {
+			return nil, err
+		}
+		values[i].Kind = PK(&kinds[i])
+		list[i] = &values[i]
+	}
+	return NewValueFromList(list...), nil
+}
+
+// Constructs a list Value of doubles.
+func newValueFromFloats[T ~float32 | ~float64](items []T) (*Value, error) {
+	return newBatchedList(len(items), func(i int, kind *Value_DoubleValue) error {
+		kind.DoubleValue = float64(items[i])
+		return nil
+	})
+}
+
+// Constructs a list Value of integers.
+func newValueFromInts[T ~int | ~int8 | ~int16 | ~int32 | ~int64](items []T) (*Value, error) {
+	return newBatchedList(len(items), func(i int, kind *Value_IntegerValue) error {
+		kind.IntegerValue = int64(items[i])
+		return nil
+	})
+}
+
+// Constructs a list Value of integers from unsigned values, which must fit in int64.
+func newValueFromUints[T ~uint | ~uint16 | ~uint32 | ~uint64](items []T) (*Value, error) {
+	return newBatchedList(len(items), func(i int, kind *Value_IntegerValue) error {
+		v := uint64(items[i])
+		if v > math.MaxInt64 {
+			return fmt.Errorf("uint64 value %d overflows int64", v)
+		}
+		kind.IntegerValue = int64(v)
+		return nil
+	})
+}
+
+// Constructs a list Value of strings, which must be valid UTF-8.
+func newValueFromStrings(items []string) (*Value, error) {
+	return newBatchedList(len(items), func(i int, kind *Value_StringValue) error {
+		if !utf8.ValidString(items[i]) {
+			return fmt.Errorf("invalid UTF-8 in string: %q", items[i])
+		}
+		kind.StringValue = items[i]
+		return nil
+	})
+}
+
+// Constructs a list Value of booleans.
+func newValueFromBools(items []bool) (*Value, error) {
+	return newBatchedList(len(items), func(i int, kind *Value_BoolValue) error {
+		kind.BoolValue = items[i]
+		return nil
+	})
 }
 
 // Constructs a struct Value by converting each map value with newValue.

@@ -79,6 +79,8 @@ func TestNewValue(t *testing.T) {
 		{map[string]uint64{"k": 1}, field(one)},
 		{map[string]float32{"k": 1.5}, field(qdrant.NewValueDouble(1.5))},
 		{map[string]float64{"k": 1.5}, field(qdrant.NewValueDouble(1.5))},
+		{[]float64(nil), qdrant.NewValueFromList()},
+		{[]string{"a", "b"}, qdrant.NewValueFromList(qdrant.NewValueString("a"), qdrant.NewValueString("b"))},
 	}
 	for _, tt := range tests {
 		got, err := qdrant.NewValue(tt.input)
@@ -113,6 +115,8 @@ func TestNewValue_Errors(t *testing.T) {
 		string([]byte{0xff}),
 		uint64(math.MaxUint64),
 		[]uint64{math.MaxUint64},
+		[]uint{1, math.MaxUint},
+		[]string{"v", string([]byte{0xff})},
 		map[string]uint64{"k": math.MaxUint64},
 		map[string]*qdrant.Value{string([]byte{0xff}): nil},
 		math.NaN(),
@@ -155,4 +159,17 @@ func TestNewValueMap_AllowsNonFiniteFloats(t *testing.T) {
 	})
 	require.True(t, math.IsNaN(valueMap["nan"].GetDoubleValue()))
 	require.True(t, math.IsInf(valueMap["inf"].GetDoubleValue(), 1))
+}
+
+func BenchmarkNewValue_Float64Slice(b *testing.B) {
+	embedding := make([]float64, 1536)
+	for i := range embedding {
+		embedding[i] = float64(i) + 0.5
+	}
+	b.ReportAllocs()
+	for b.Loop() {
+		if _, err := qdrant.NewValue(embedding); err != nil {
+			b.Fatal(err)
+		}
+	}
 }
