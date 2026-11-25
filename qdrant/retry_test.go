@@ -2,6 +2,8 @@ package qdrant_test
 
 import (
 	"context"
+	"net"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -107,4 +109,71 @@ func TestLargeRetryAfterDoesNotOverflow(t *testing.T) {
 	var rateLimitErr *qdrant.QdrantResourceExhaustedError
 	require.ErrorAs(t, err, &rateLimitErr)
 	require.Equal(t, 1, calls)
+}
+
+type rateLimitHealthServer struct {
+	qdrant.UnimplementedQdrantServer
+	calls atomic.Int32
+}
+
+func (s *rateLimitHealthServer) HealthCheck(
+	ctx context.Context, _ *qdrant.HealthCheckRequest,
+) (*qdrant.HealthCheckReply, error) {
+	call := s.calls.Add(1)
+	retryAfter := "1"
+	if call > 1 {
+		retryAfter = "2"
+	}
+	if err := grpc.SetTrailer(ctx, metadata.Pairs("retry-after", retryAfter)); err != nil {
+		return nil, err
+	}
+	return nil, status.Error(codes.ResourceExhausted, "rate limited")
+}
+
+func TestRetryHonorsRealServerRetryAfterTrailer(t *testing.T) {
+	const (
+		maxRetries          = 1
+		expectedCalls       = 2
+		expectedRetryAfterS = 2
+	)
+	lis, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = lis.Close() })
+
+	srv := grpc.NewServer()
+	healthSrv := &rateLimitHealthServer{}
+	qdrant.RegisterQdrantServer(srv, healthSrv)
+	go func() { _ = srv.Serve(lis) }()
+	t.Cleanup(srv.Stop)
+
+	addr, ok := lis.Addr().(*net.TCPAddr)
+	require.True(t, ok)
+
+	client, err := qdrant.NewGrpcClient(&qdrant.Config{
+		Host:                   addr.IP.String(),
+		Port:                   addr.Port,
+		SkipCompatibilityCheck: true,
+		RetryConfig: &qdrant.RetryConfig{
+			MaxRetries:  maxRetries,
+			BaseBackoff: time.Millisecond,
+			MaxBackoff:  time.Millisecond,
+		},
+	})
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = client.Close() })
+
+	var callerTrailer metadata.MD
+	start := time.Now()
+	_, err = client.Qdrant().HealthCheck(
+		context.Background(),
+		&qdrant.HealthCheckRequest{},
+		grpc.Trailer(&callerTrailer),
+	)
+
+	var rateLimitErr *qdrant.QdrantResourceExhaustedError
+	require.ErrorAs(t, err, &rateLimitErr)
+	require.Equal(t, expectedRetryAfterS, rateLimitErr.RetryAfterS)
+	require.Equal(t, []string{"2"}, callerTrailer.Get("retry-after"))
+	require.Equal(t, int32(expectedCalls), healthSrv.calls.Load())
+	require.GreaterOrEqual(t, time.Since(start), time.Second)
 }

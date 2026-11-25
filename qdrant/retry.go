@@ -60,9 +60,13 @@ func (rc *RetryConfig) retryInterceptor() grpc.UnaryClientInterceptor {
 		// Count attempts without computing MaxRetries+1, which wraps to 0 for math.MaxUint.
 		for attempt := uint(0); ; attempt++ {
 			var trailer metadata.MD
-			// A new slice, so the caller's opts are never written to.
-			callOpts := append([]grpc.CallOption{grpc.Trailer(&trailer)}, opts...)
+			// Place our Trailer option last because grpc-go keeps only the last
+			// TrailerCallOption, then propagate trailers back to caller options.
+			callOpts := make([]grpc.CallOption, len(opts)+1)
+			copy(callOpts, opts)
+			callOpts[len(opts)] = grpc.Trailer(&trailer)
 			err := invoker(ctx, method, req, reply, cc, callOpts...)
+			propagateTrailer(opts, trailer)
 			if err == nil {
 				return nil
 			}
@@ -128,4 +132,16 @@ func (rc *RetryConfig) backoffDuration(attempt uint) time.Duration {
 		backoff = time.Duration(rand.Int64N(int64(backoff)))
 	}
 	return backoff
+}
+
+func propagateTrailer(opts []grpc.CallOption, trailer metadata.MD) {
+	for _, opt := range opts {
+		if t, ok := opt.(grpc.TrailerCallOption); ok && t.TrailerAddr != nil {
+			if trailer == nil {
+				*t.TrailerAddr = nil
+			} else {
+				*t.TrailerAddr = trailer.Copy()
+			}
+		}
+	}
 }
