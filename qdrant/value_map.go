@@ -121,17 +121,18 @@ func newValue(v any) (*Value, error) {
 	case uint32:
 		return NewValueInt(int64(v)), nil
 	case uint64:
-		if v > math.MaxInt64 {
-			return nil, fmt.Errorf("uint64 value %d overflows int64", v)
+		i, err := uint64ToInt64(v)
+		if err != nil {
+			return nil, err
 		}
-		return NewValueInt(int64(v)), nil
+		return NewValueInt(i), nil
 	case float32:
 		return NewValueDouble(float64(v)), nil
 	case float64:
 		return NewValueDouble(v), nil
 	case string:
-		if !utf8.ValidString(v) {
-			return nil, fmt.Errorf("invalid UTF-8 in string: %q", v)
+		if err := checkUTF8(v); err != nil {
+			return nil, err
 		}
 		return NewValueString(v), nil
 	case []byte:
@@ -204,6 +205,22 @@ func newValue(v any) (*Value, error) {
 	default:
 		return nil, fmt.Errorf("invalid type: %T", v)
 	}
+}
+
+// Returns an error if s is not valid UTF-8, which protobuf strings must be.
+func checkUTF8(s string) error {
+	if !utf8.ValidString(s) {
+		return fmt.Errorf("invalid UTF-8 in string: %q", s)
+	}
+	return nil
+}
+
+// Converts v to int64, the type of IntegerValue, returning an error if it does not fit.
+func uint64ToInt64(v uint64) (int64, error) {
+	if v > math.MaxInt64 {
+		return 0, fmt.Errorf("uint64 value %d overflows int64", v)
+	}
+	return int64(v), nil
 }
 
 // Returns an error if v contains a NaN or ±Inf double, which payloads stored as JSON cannot hold.
@@ -280,23 +297,17 @@ func newValueFromInts[T ~int | ~int8 | ~int16 | ~int32 | ~int64](items []T) (*Va
 // Constructs a list Value of integers from unsigned values, which must fit in int64.
 func newValueFromUints[T ~uint | ~uint16 | ~uint32 | ~uint64](items []T) (*Value, error) {
 	return newBatchedList(len(items), func(i int, kind *Value_IntegerValue) error {
-		v := uint64(items[i])
-		if v > math.MaxInt64 {
-			return fmt.Errorf("uint64 value %d overflows int64", v)
-		}
-		kind.IntegerValue = int64(v)
-		return nil
+		v, err := uint64ToInt64(uint64(items[i]))
+		kind.IntegerValue = v
+		return err
 	})
 }
 
 // Constructs a list Value of strings, which must be valid UTF-8.
 func newValueFromStrings(items []string) (*Value, error) {
 	return newBatchedList(len(items), func(i int, kind *Value_StringValue) error {
-		if !utf8.ValidString(items[i]) {
-			return fmt.Errorf("invalid UTF-8 in string: %q", items[i])
-		}
 		kind.StringValue = items[i]
-		return nil
+		return checkUTF8(items[i])
 	})
 }
 
@@ -312,8 +323,8 @@ func newValueFromBools(items []bool) (*Value, error) {
 func newValueFromMap[T any](m map[string]T) (*Value, error) {
 	fields := make(map[string]*Value, len(m))
 	for k, v := range m {
-		if !utf8.ValidString(k) {
-			return nil, fmt.Errorf("invalid UTF-8 in string: %q", k)
+		if err := checkUTF8(k); err != nil {
+			return nil, err
 		}
 		val, err := newValue(v)
 		if err != nil {
