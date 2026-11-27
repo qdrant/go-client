@@ -121,17 +121,18 @@ func newValue(v any) (*Value, error) {
 	case uint32:
 		return NewValueInt(int64(v)), nil
 	case uint64:
-		if v > math.MaxInt64 {
-			return nil, fmt.Errorf("uint64 value %d overflows int64", v)
+		i, err := uint64ToInt64(v)
+		if err != nil {
+			return nil, err
 		}
-		return NewValueInt(int64(v)), nil
+		return NewValueInt(i), nil
 	case float32:
 		return NewValueDouble(float64(v)), nil
 	case float64:
 		return NewValueDouble(v), nil
 	case string:
-		if !utf8.ValidString(v) {
-			return nil, fmt.Errorf("invalid UTF-8 in string: %q", v)
+		if err := checkUTF8(v); err != nil {
+			return nil, err
 		}
 		return NewValueString(v), nil
 	case []byte:
@@ -172,31 +173,31 @@ func newValue(v any) (*Value, error) {
 	case []interface{}:
 		return newValueFromSlice(v)
 	case []string:
-		return newValueFromSlice(v)
+		return newValueFromStrings(v)
 	case []bool:
-		return newValueFromSlice(v)
+		return newValueFromBools(v)
 	case []int:
-		return newValueFromSlice(v)
+		return newValueFromInts(v)
 	case []int8:
-		return newValueFromSlice(v)
+		return newValueFromInts(v)
 	case []int16:
-		return newValueFromSlice(v)
+		return newValueFromInts(v)
 	case []int32:
-		return newValueFromSlice(v)
+		return newValueFromInts(v)
 	case []int64:
-		return newValueFromSlice(v)
+		return newValueFromInts(v)
 	case []uint:
-		return newValueFromSlice(v)
+		return newValueFromUints(v)
 	case []uint16:
-		return newValueFromSlice(v)
+		return newValueFromUints(v)
 	case []uint32:
-		return newValueFromSlice(v)
+		return newValueFromUints(v)
 	case []uint64:
-		return newValueFromSlice(v)
+		return newValueFromUints(v)
 	case []float32:
-		return newValueFromSlice(v)
+		return newValueFromFloats(v)
 	case []float64:
-		return newValueFromSlice(v)
+		return newValueFromFloats(v)
 	case []*Value:
 		return newValueFromSlice(v)
 	case []map[string]interface{}:
@@ -204,6 +205,22 @@ func newValue(v any) (*Value, error) {
 	default:
 		return nil, fmt.Errorf("invalid type: %T", v)
 	}
+}
+
+// Returns an error if s is not valid UTF-8, which protobuf strings must be.
+func checkUTF8(s string) error {
+	if !utf8.ValidString(s) {
+		return fmt.Errorf("invalid UTF-8 in string: %q", s)
+	}
+	return nil
+}
+
+// Converts v to int64, the type of IntegerValue, returning an error if it does not fit.
+func uint64ToInt64(v uint64) (int64, error) {
+	if v > math.MaxInt64 {
+		return 0, fmt.Errorf("uint64 value %d overflows int64", v)
+	}
+	return int64(v), nil
 }
 
 // Returns an error if v contains a NaN or ±Inf double, which payloads stored as JSON cannot hold.
@@ -242,12 +259,72 @@ func newValueFromSlice[T any](items []T) (*Value, error) {
 	return NewValueFromList(list...), nil
 }
 
+// Constructs a list Value of n elements, allocating the elements and their kinds as one array each
+// instead of separately per element. Keeping any one element reachable keeps all n in memory.
+func newBatchedList[K any, PK interface {
+	*K
+	isValue_Kind
+}](n int, fill func(i int, kind *K) error) (*Value, error) {
+	list := make([]*Value, n)
+	values := make([]Value, n)
+	kinds := make([]K, n)
+	for i := range n {
+		if err := fill(i, &kinds[i]); err != nil {
+			return nil, err
+		}
+		values[i].Kind = PK(&kinds[i])
+		list[i] = &values[i]
+	}
+	return NewValueFromList(list...), nil
+}
+
+// Constructs a list Value of doubles.
+func newValueFromFloats[T ~float32 | ~float64](items []T) (*Value, error) {
+	return newBatchedList(len(items), func(i int, kind *Value_DoubleValue) error {
+		kind.DoubleValue = float64(items[i])
+		return nil
+	})
+}
+
+// Constructs a list Value of integers.
+func newValueFromInts[T ~int | ~int8 | ~int16 | ~int32 | ~int64](items []T) (*Value, error) {
+	return newBatchedList(len(items), func(i int, kind *Value_IntegerValue) error {
+		kind.IntegerValue = int64(items[i])
+		return nil
+	})
+}
+
+// Constructs a list Value of integers from unsigned values, which must fit in int64.
+func newValueFromUints[T ~uint | ~uint16 | ~uint32 | ~uint64](items []T) (*Value, error) {
+	return newBatchedList(len(items), func(i int, kind *Value_IntegerValue) error {
+		v, err := uint64ToInt64(uint64(items[i]))
+		kind.IntegerValue = v
+		return err
+	})
+}
+
+// Constructs a list Value of strings, which must be valid UTF-8.
+func newValueFromStrings(items []string) (*Value, error) {
+	return newBatchedList(len(items), func(i int, kind *Value_StringValue) error {
+		kind.StringValue = items[i]
+		return checkUTF8(items[i])
+	})
+}
+
+// Constructs a list Value of booleans.
+func newValueFromBools(items []bool) (*Value, error) {
+	return newBatchedList(len(items), func(i int, kind *Value_BoolValue) error {
+		kind.BoolValue = items[i]
+		return nil
+	})
+}
+
 // Constructs a struct Value by converting each map value with newValue.
 func newValueFromMap[T any](m map[string]T) (*Value, error) {
 	fields := make(map[string]*Value, len(m))
 	for k, v := range m {
-		if !utf8.ValidString(k) {
-			return nil, fmt.Errorf("invalid UTF-8 in string: %q", k)
+		if err := checkUTF8(k); err != nil {
+			return nil, err
 		}
 		val, err := newValue(v)
 		if err != nil {

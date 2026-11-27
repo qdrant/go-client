@@ -79,6 +79,8 @@ func TestNewValue(t *testing.T) {
 		{map[string]uint64{"k": 1}, field(one)},
 		{map[string]float32{"k": 1.5}, field(qdrant.NewValueDouble(1.5))},
 		{map[string]float64{"k": 1.5}, field(qdrant.NewValueDouble(1.5))},
+		{[]float64(nil), qdrant.NewValueFromList()},
+		{[]string{"a", "b"}, qdrant.NewValueFromList(qdrant.NewValueString("a"), qdrant.NewValueString("b"))},
 	}
 	for _, tt := range tests {
 		got, err := qdrant.NewValue(tt.input)
@@ -113,6 +115,8 @@ func TestNewValue_Errors(t *testing.T) {
 		string([]byte{0xff}),
 		uint64(math.MaxUint64),
 		[]uint64{math.MaxUint64},
+		[]uint{1, math.MaxUint},
+		[]string{"v", string([]byte{0xff})},
 		map[string]uint64{"k": math.MaxUint64},
 		map[string]*qdrant.Value{string([]byte{0xff}): nil},
 		math.NaN(),
@@ -148,6 +152,31 @@ func TestNewValue_Errors(t *testing.T) {
 	require.ErrorContains(t, err, `field "scores": item 1: float value -Inf is not a valid JSON number`)
 }
 
+func TestNewValue_CheckErrorMessages(t *testing.T) {
+	const (
+		invalidUTF8 = `invalid UTF-8 in string: "\xff"`
+		overflow    = "uint64 value 18446744073709551615 overflows int64"
+	)
+	invalid := string([]byte{0xff})
+	tests := []struct {
+		input any
+		want  string
+	}{
+		{invalid, invalidUTF8},
+		{[]string{"v", invalid}, invalidUTF8},
+		{map[string]*qdrant.Value{invalid: nil}, invalidUTF8},
+		{map[string]any{"k": invalid}, invalidUTF8},
+		{uint64(math.MaxUint64), overflow},
+		{[]uint64{1, math.MaxUint64}, overflow},
+		{[]uint{1, math.MaxUint}, overflow},
+		{map[string]uint64{"k": math.MaxUint64}, overflow},
+	}
+	for _, tt := range tests {
+		_, err := qdrant.NewValue(tt.input)
+		require.EqualError(t, err, tt.want, "%T", tt.input)
+	}
+}
+
 func TestNewValueMap_AllowsNonFiniteFloats(t *testing.T) {
 	var valueMap map[string]*qdrant.Value
 	require.NotPanics(t, func() {
@@ -155,4 +184,17 @@ func TestNewValueMap_AllowsNonFiniteFloats(t *testing.T) {
 	})
 	require.True(t, math.IsNaN(valueMap["nan"].GetDoubleValue()))
 	require.True(t, math.IsInf(valueMap["inf"].GetDoubleValue(), 1))
+}
+
+func BenchmarkNewValue_Float64Slice(b *testing.B) {
+	embedding := make([]float64, 1536)
+	for i := range embedding {
+		embedding[i] = float64(i) + 0.5
+	}
+	b.ReportAllocs()
+	for b.Loop() {
+		if _, err := qdrant.NewValue(embedding); err != nil {
+			b.Fatal(err)
+		}
+	}
 }
