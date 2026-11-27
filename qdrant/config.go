@@ -175,8 +175,8 @@ func (c *Config) getRateLimitInterceptor() grpc.DialOption {
 		invoker grpc.UnaryInvoker,
 		opts ...grpc.CallOption) error {
 		var md metadata.MD
-		opts = append(opts, grpc.Trailer(&md))
-		err := invoker(ctx, method, req, reply, cc, opts...)
+		callOpts := append([]grpc.CallOption{grpc.Trailer(&md)}, opts...)
+		err := invoker(ctx, method, req, reply, cc, callOpts...)
 		if err == nil {
 			return nil
 		}
