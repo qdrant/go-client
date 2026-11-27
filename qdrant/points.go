@@ -473,7 +473,7 @@ func (v *VectorOutput) GetDenseVector() *DenseVector {
 	}
 
 	// Check deprecated data field first
-	if data := v.GetData(); len(data) > 0 {
+	if data := v.GetData(); len(data) > 0 && v.GetIndices() == nil && v.GetVectorsCount() == 0 {
 		return &DenseVector{Data: data}
 	}
 
