@@ -30,3 +30,6 @@ jobs:
 
       - name: Run Tests
         run: go test -v ./...
+        env:
+          QDRANT_SERVERLESS_URL: ${{ secrets.QDRANT_SERVERLESS_URL }}
+          QDRANT_SERVERLESS_API_KEY: ${{ secrets.QDRANT_SERVERLESS_API_KEY }}
